@@ -1,10 +1,11 @@
+import os
 from flask import Flask, jsonify
 from flasgger import Swagger
 
 from app.routes.users import users_bp
 from app.routes.api_users import api_users_bp
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'templates'))
 
 # ------------------------------------------------------------------
 # Swagger / OpenAPI
