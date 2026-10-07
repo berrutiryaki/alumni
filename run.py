@@ -4,6 +4,8 @@ from flasgger import Swagger
 
 from app.routes.users import users_bp
 from app.routes.api_users import api_users_bp
+from app.routes.announcements import announcements_bp
+from app.routes.api_announcements import api_announcements_bp
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'templates'))
 
@@ -35,6 +37,7 @@ swagger_template = {
     "tags": [
         {"name": "Health", "description": "API status"},
         {"name": "Users", "description": "User CRUD via ApiUserController"},
+        {"name": "Announcements", "description": "Announcement CRUD via ApiAnnouncementController"},
     ],
 }
 
@@ -44,8 +47,10 @@ Swagger(app, config=swagger_config, template=swagger_template)
 # Blueprints
 # ------------------------------------------------------------------
 
-app.register_blueprint(users_bp)       # /users  — HTML (UserController)
-app.register_blueprint(api_users_bp)   # /api/users — JSON (ApiUserController)
+app.register_blueprint(users_bp)               # /users            — HTML
+app.register_blueprint(api_users_bp)           # /api/users        — JSON
+app.register_blueprint(announcements_bp)       # /announcements    — HTML
+app.register_blueprint(api_announcements_bp)   # /api/announcements — JSON
 
 # ------------------------------------------------------------------
 # General routes

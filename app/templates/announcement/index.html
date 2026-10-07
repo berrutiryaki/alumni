@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Announcements</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        h1 { margin-bottom: 20px; }
+        .actions { margin-bottom: 20px; }
+        .btn { padding: 8px 12px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; border: none; cursor: pointer; }
+        .btn-primary { background-color: #007bff; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; }
+        .card { border: 1px solid #ddd; border-radius: 6px; padding: 20px; margin-bottom: 16px; max-width: 750px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 18px; font-weight: bold; margin: 0; }
+        .card-meta { font-size: 13px; color: #666; margin-top: 6px; }
+        .card-body { margin-top: 12px; color: #444; }
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-active { background-color: #d4edda; color: #155724; }
+        .badge-inactive { background-color: #f8d7da; color: #721c24; }
+        .card-actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+        .empty { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>Announcements</h1>
+
+    <div class="actions">
+        <a href="/announcements/new" class="btn btn-primary">+ New Announcement</a>
+    </div>
+
+    {% for a in announcements %}
+    <div class="card">
+        <div class="card-header">
+            <p class="card-title">{{ a.title }}</p>
+            <span class="badge {% if a.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                {% if a.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+        <div class="card-meta">
+            {% if a.author %}By {{ a.author }} · {% endif %}{{ a.created_at }}
+        </div>
+        <div class="card-body">{{ a.content }}</div>
+        <div class="card-actions">
+            <a href="/announcements/{{ a.id }}/edit" class="btn btn-warning">Edit</a>
+            <form action="/announcements/{{ a.id }}/delete" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this announcement?')">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p class="empty">No announcements yet.</p>
+    {% endfor %}
+</body>
+</html>
