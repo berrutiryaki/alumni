@@ -99,20 +99,93 @@ docker compose logs -f
 
 ---
 
-## Project Structure
+## Architecture
+
+The project follows the **MVC (Model-View-Controller)** pattern adapted for a REST API context. In an API-first application there are no server-rendered views; the "View" layer is replaced by **Serializers / Response Schemas** that shape the JSON output returned to clients.
+
+```
+MVC Layer        REST API Equivalent       Responsibility
+-----------      ---------------------     ----------------------------------------
+Model            models/                   Data structure, database schema, ORM logic
+View             serializers/ + JSON       Shape and format the HTTP response body
+Controller       routes/ (Blueprints)      Handle requests, call services, return responses
+```
+
+### Directory Structure
 
 ```
 alumni/
-├── app/
-│   ├── __init__.py
-│   ├── routes/
-│   │   └── alumni.py
-│   └── models/
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
+│
+├── app/                          # Application package
+│   ├── __init__.py               # App factory — creates and configures the Flask instance
+│   │
+│   ├── models/                   # MODEL layer
+│   │   ├── __init__.py
+│   │   └── user.py               # User schema: fields, types, DB table definition
+│   │
+│   ├── routes/                   # CONTROLLER layer (Flask Blueprints)
+│   │   ├── __init__.py
+│   │   ├── users.py              # GET, POST, PUT, PATCH, DELETE /api/users
+│   │   └── health.py             # GET /api/health
+│   │
+│   ├── services/                 # Business logic (keeps controllers thin)
+│   │   ├── __init__.py
+│   │   └── user_service.py       # create_user(), get_user(), delete_user(), etc.
+│   │
+│   ├── serializers/              # VIEW layer — formats model data into JSON responses
+│   │   ├── __init__.py
+│   │   └── user_serializer.py    # Converts User model instances to dicts / JSON
+│   │
+│   └── config.py                 # Environment-based configuration (dev, prod, test)
+│
+├── app.py                        # Entry point — imports and runs the app factory
+├── requirements.txt              # Python dependencies
+├── Dockerfile                    # Container image definition for the Flask app
+├── docker-compose.yml            # Orchestrates Flask + PostgreSQL containers
 └── README.md
 ```
+
+### Layer Responsibilities
+
+**Model — `app/models/`**
+
+Defines the data structure and database schema using SQLAlchemy ORM. Each file maps to one database table. Models do not contain business logic — they are pure data definitions.
+
+```
+user.py
+  └── class User(db.Model)
+        ├── id              (Integer, primary key, auto-increment)
+        ├── name            (String)
+        ├── email           (String, unique)
+        ├── department      (String)
+        └── graduation_year (Integer)
+```
+
+**Controller — `app/routes/`**
+
+Flask Blueprints that map HTTP methods and URL paths to handler functions. Controllers are kept thin: they parse the request, delegate work to a service, and return the serialized response. No business logic lives here.
+
+```
+routes/users.py
+  ├── GET    /api/users          → get_users()
+  ├── POST   /api/users          → create_user()
+  ├── GET    /api/users/<id>     → get_user(id)
+  ├── PUT    /api/users/<id>     → update_user(id)
+  ├── PATCH  /api/users/<id>     → partial_update_user(id)
+  └── DELETE /api/users/<id>     → delete_user(id)
+```
+
+**Service — `app/services/`**
+
+Contains all business logic. Services are called by controllers and operate on models. This layer is the boundary between HTTP concerns and domain logic — it is easily unit-testable without a running server.
+
+**Serializer / View — `app/serializers/`**
+
+Converts model instances into plain dicts that `jsonify()` can render. Centralising this logic means response shapes can be changed without touching controllers or models.
+
+**Config — `app/config.py`**
+
+Holds environment-specific settings (database URL, secret key, debug flag) loaded from environment variables. The app factory in `__init__.py` selects the correct config class at startup.
 
 ---
 
