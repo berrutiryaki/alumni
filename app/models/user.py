@@ -10,12 +10,13 @@ class User:
     _store: list = []   # in-memory storage shared across all instances
     _next_id: int = 1   # auto-increment counter
 
-    def __init__(self, name: str, email: str, department: str = None, graduation_year: int = None):
+    def __init__(self, name: str, email: str, status: str = "student", department: str = None, graduation_year: int = None):
         self.id = None          # assigned by create()
         self.name = name
         self.email = email
+        self.status = status    # 'alumni' or 'student'
         self.department = department
-        self.graduation_year = graduation_year
+        self.graduation_year = graduation_year if status == "alumni" else None
 
     # ------------------------------------------------------------------
     # Serialization
@@ -27,6 +28,7 @@ class User:
             "id": self.id,
             "name": self.name,
             "email": self.email,
+            "status": self.status,
             "department": self.department,
             "graduation_year": self.graduation_year,
         }
@@ -44,6 +46,7 @@ class User:
         user = cls(
             name=data.get("name"),
             email=data.get("email"),
+            status=data.get("status", "student"),
             department=data.get("department"),
             graduation_year=data.get("graduation_year"),
         )
@@ -81,8 +84,9 @@ class User:
             return None
         user.name = data.get("name")
         user.email = data.get("email")
+        user.status = data.get("status", "student")
         user.department = data.get("department")
-        user.graduation_year = data.get("graduation_year")
+        user.graduation_year = data.get("graduation_year") if user.status == "alumni" else None
         return user
 
     # ------------------------------------------------------------------
@@ -102,9 +106,13 @@ class User:
             user.name = data["name"]
         if "email" in data:
             user.email = data["email"]
+        if "status" in data:
+            user.status = data["status"]
+            if user.status != "alumni":
+                user.graduation_year = None
         if "department" in data:
             user.department = data["department"]
-        if "graduation_year" in data:
+        if "graduation_year" in data and user.status == "alumni":
             user.graduation_year = data["graduation_year"]
         return user
 
