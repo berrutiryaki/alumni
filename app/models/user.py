@@ -50,9 +50,13 @@ class User(db.Model):
             department=data.get("department"),
             graduation_year=data.get("graduation_year"),
         )
-        db.session.add(user)
-        db.session.commit()
-        return user
+        try:
+            db.session.add(user)
+            db.session.commit()
+            return user
+        except Exception:
+            db.session.rollback()
+            raise
 
     @classmethod
     def get_all(cls) -> list:
@@ -72,8 +76,12 @@ class User(db.Model):
         user.status = data.get("status", "student")
         user.department = data.get("department")
         user.graduation_year = data.get("graduation_year") if user.status == "alumni" else None
-        db.session.commit()
-        return user
+        try:
+            db.session.commit()
+            return user
+        except Exception:
+            db.session.rollback()
+            raise
 
     @classmethod
     def partial_update(cls, user_id: int, data: dict) -> "User | None":
@@ -92,17 +100,25 @@ class User(db.Model):
             user.department = data["department"]
         if "graduation_year" in data and user.status == "alumni":
             user.graduation_year = data["graduation_year"]
-        db.session.commit()
-        return user
+        try:
+            db.session.commit()
+            return user
+        except Exception:
+            db.session.rollback()
+            raise
 
     @classmethod
     def delete(cls, user_id: int) -> bool:
         user = cls.get_by_id(user_id)
         if user is None:
             return False
-        db.session.delete(user)
-        db.session.commit()
-        return True
+        try:
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        except Exception:
+            db.session.rollback()
+            raise
 
     def __repr__(self) -> str:
         return f"<User id={self.id} name={self.name!r}>"

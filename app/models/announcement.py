@@ -49,9 +49,13 @@ class Announcement(db.Model):
             author=data.get("author"),
             is_active=data.get("is_active", True) not in [False, "false", "0", 0],
         )
-        db.session.add(a)
-        db.session.commit()
-        return a
+        try:
+            db.session.add(a)
+            db.session.commit()
+            return a
+        except Exception:
+            db.session.rollback()
+            raise
 
     @classmethod
     def get_all(cls) -> list:
@@ -70,8 +74,12 @@ class Announcement(db.Model):
         a.content = data.get("content")
         a.author = data.get("author")
         a.is_active = data.get("is_active", True) not in [False, "false", "0", 0]
-        db.session.commit()
-        return a
+        try:
+            db.session.commit()
+            return a
+        except Exception:
+            db.session.rollback()
+            raise
 
     @classmethod
     def partial_update(cls, announcement_id: int, data: dict) -> "Announcement | None":
@@ -86,17 +94,25 @@ class Announcement(db.Model):
             a.author = data["author"]
         if "is_active" in data:
             a.is_active = data["is_active"] not in [False, "false", "0", 0]
-        db.session.commit()
-        return a
+        try:
+            db.session.commit()
+            return a
+        except Exception:
+            db.session.rollback()
+            raise
 
     @classmethod
     def delete(cls, announcement_id: int) -> bool:
         a = cls.get_by_id(announcement_id)
         if a is None:
             return False
-        db.session.delete(a)
-        db.session.commit()
-        return True
+        try:
+            db.session.delete(a)
+            db.session.commit()
+            return True
+        except Exception:
+            db.session.rollback()
+            raise
 
     def __repr__(self) -> str:
         return f"<Announcement id={self.id} title={self.title!r}>"

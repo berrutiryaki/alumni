@@ -10,7 +10,8 @@ from app.controllers.user_controller import UserController
 users_bp = Blueprint("users", __name__, url_prefix="/users")
 
 
-@users_bp.route("/", methods=["GET"])
+@users_bp.route("/", methods=["GET"], strict_slashes=False)
+@users_bp.route("", methods=["GET"])
 def index():
     """List all users (HTML)."""
     result = UserController.index()
@@ -23,7 +24,8 @@ def new():
     return render_template("user/create.html", error=None)
 
 
-@users_bp.route("/", methods=["POST"])
+@users_bp.route("/", methods=["POST"], strict_slashes=False)
+@users_bp.route("", methods=["POST"])
 def create():
     """Process the form submission and create a new user."""
     data = request.form.to_dict()

@@ -10,7 +10,8 @@ from app.controllers.announcement_controller import AnnouncementController
 announcements_bp = Blueprint("announcements", __name__, url_prefix="/announcements")
 
 
-@announcements_bp.route("/", methods=["GET"])
+@announcements_bp.route("/", methods=["GET"], strict_slashes=False)
+@announcements_bp.route("", methods=["GET"])
 def index():
     result = AnnouncementController.index()
     return render_template("announcement/index.html", announcements=result["announcements"])
@@ -21,7 +22,8 @@ def new():
     return render_template("announcement/create.html", error=None)
 
 
-@announcements_bp.route("/", methods=["POST"])
+@announcements_bp.route("/", methods=["POST"], strict_slashes=False)
+@announcements_bp.route("", methods=["POST"])
 def create():
     data = request.form.to_dict()
     result = AnnouncementController.create(data)

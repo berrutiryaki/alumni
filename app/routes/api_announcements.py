@@ -10,7 +10,8 @@ from app.controllers.api_announcement_controller import ApiAnnouncementControlle
 api_announcements_bp = Blueprint("api_announcements", __name__, url_prefix="/api/announcements")
 
 
-@api_announcements_bp.route("/", methods=["GET"])
+@api_announcements_bp.route("/", methods=["GET"], strict_slashes=False)
+@api_announcements_bp.route("", methods=["GET"])
 def index():
     """
     Get all announcements.
@@ -47,7 +48,8 @@ def index():
     return ApiAnnouncementController.index()
 
 
-@api_announcements_bp.route("/", methods=["POST"])
+@api_announcements_bp.route("/", methods=["POST"], strict_slashes=False)
+@api_announcements_bp.route("", methods=["POST"])
 def create():
     """
     Create a new announcement.

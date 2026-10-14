@@ -10,7 +10,8 @@ from app.controllers.api_user_controller import ApiUserController
 api_users_bp = Blueprint("api_users", __name__, url_prefix="/api/users")
 
 
-@api_users_bp.route("/", methods=["GET"])
+@api_users_bp.route("/", methods=["GET"], strict_slashes=False)
+@api_users_bp.route("", methods=["GET"])
 def index():
     """
     Get all users.
@@ -45,7 +46,8 @@ def index():
     return ApiUserController.index()
 
 
-@api_users_bp.route("/", methods=["POST"])
+@api_users_bp.route("/", methods=["POST"], strict_slashes=False)
+@api_users_bp.route("", methods=["POST"])
 def create():
     """
     Create a new user.
