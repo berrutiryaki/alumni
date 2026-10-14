@@ -119,75 +119,83 @@ Controller       routes/ (Blueprints)      Handle requests, call services, retur
 alumni/
 │
 ├── app/                          # Application package
-│   ├── __init__.py               # App factory — creates and configures the Flask instance
+│   ├── database.py               # SQLAlchemy and Migrate instances
 │   │
-│   ├── models/                   # MODEL layer
+│   ├── models/                   # MODEL layer (SQLAlchemy db.Model)
 │   │   ├── __init__.py
-│   │   └── user.py               # User schema: fields, types, DB table definition
+│   │   ├── user.py               # User model & table
+│   │   └── announcement.py       # Announcement model & table
 │   │
-│   ├── routes/                   # CONTROLLER layer (Flask Blueprints)
-│   │   ├── __init__.py
-│   │   ├── users.py              # GET, POST, PUT, PATCH, DELETE /api/users
-│   │   └── health.py             # GET /api/health
+│   ├── controllers/              # Controller layer
+│   │   ├── user_controller.py
+│   │   ├── api_user_controller.py
+│   │   ├── announcement_controller.py
+│   │   └── api_announcement_controller.py
 │   │
-│   ├── services/                 # Business logic (keeps controllers thin)
-│   │   ├── __init__.py
-│   │   └── user_service.py       # create_user(), get_user(), delete_user(), etc.
+│   ├── routes/                   # Route Blueprints
+│   │   ├── users.py              # HTML routes (/users)
+│   │   ├── api_users.py          # REST API routes (/api/users)
+│   │   ├── announcements.py      # HTML routes (/announcements)
+│   │   └── api_announcements.py  # REST API routes (/api/announcements)
 │   │
-│   ├── serializers/              # VIEW layer — formats model data into JSON responses
-│   │   ├── __init__.py
-│   │   └── user_serializer.py    # Converts User model instances to dicts / JSON
+│   ├── templates/                # Jinja2 HTML views
+│   │   ├── user/
+│   │   └── announcement/
 │   │
-│   └── config.py                 # Environment-based configuration (dev, prod, test)
+│   ├── factories/                # Factory pattern data generators
+│   │   ├── user_factory.py       # UserFactory (build, create, create_batch)
+│   │   └── announcement_factory.py # AnnouncementFactory
+│   │
+│   └── seeds/                    # Database Seeders
+│       ├── database_seeder.py    # Main seeder orchestrator
+│       ├── user_seeder.py        # Seeds student & alumni records
+│       └── announcement_seeder.py # Seeds announcement records
 │
-├── app.py                        # Entry point — imports and runs the app factory
+├── migrations/                   # Alembic database migration versions
+├── run.py                        # Entry point — app config & server startup
+├── seed.py                       # CLI script to seed the database
 ├── requirements.txt              # Python dependencies
-├── Dockerfile                    # Container image definition for the Flask app
-├── docker-compose.yml            # Orchestrates Flask + PostgreSQL containers
+├── Dockerfile                    # Container image definition
+├── docker-compose.yml            # Multi-container orchestration (Web + PostgreSQL 16)
+├── example.env                   # Example environment variable template
 └── README.md
 ```
 
-### Layer Responsibilities
+### Database Migrations & Seeding
 
-**Model — `app/models/`**
+**Running Migrations:**
+```bash
+# Generate a new migration after model changes
+python -m flask --app run db migrate -m "Description of changes"
 
-Defines the data structure and database schema using SQLAlchemy ORM. Each file maps to one database table. Models do not contain business logic — they are pure data definitions.
-
-```
-user.py
-  └── class User(db.Model)
-        ├── id              (Integer, primary key, auto-increment)
-        ├── name            (String)
-        ├── email           (String, unique)
-        ├── department      (String)
-        └── graduation_year (Integer)
+# Apply pending migrations to the database
+python -m flask --app run db upgrade
 ```
 
-**Controller — `app/routes/`**
+**Seeding the Database with Mock Data:**
+```bash
+# Populate database using factories (UserFactory, AnnouncementFactory)
+python seed.py
 
-Flask Blueprints that map HTTP methods and URL paths to handler functions. Controllers are kept thin: they parse the request, delegate work to a service, and return the serialized response. No business logic lives here.
+# Or clear existing data first, then seed fresh records:
+python seed.py --clean
 
-```
-routes/users.py
-  ├── GET    /api/users          → get_users()
-  ├── POST   /api/users          → create_user()
-  ├── GET    /api/users/<id>     → get_user(id)
-  ├── PUT    /api/users/<id>     → update_user(id)
-  ├── PATCH  /api/users/<id>     → partial_update_user(id)
-  └── DELETE /api/users/<id>     → delete_user(id)
+# Alternatively via Flask CLI:
+python -m flask --app run seed
 ```
 
-**Service — `app/services/`**
+**Using Factories Programmatically:**
+```python
+from app.factories import UserFactory, AnnouncementFactory
 
-Contains all business logic. Services are called by controllers and operate on models. This layer is the boundary between HTTP concerns and domain logic — it is easily unit-testable without a running server.
+# Create single records
+student = UserFactory.create_student()
+alumni = UserFactory.create_alumni(graduation_year=2020)
 
-**Serializer / View — `app/serializers/`**
-
-Converts model instances into plain dicts that `jsonify()` can render. Centralising this logic means response shapes can be changed without touching controllers or models.
-
-**Config — `app/config.py`**
-
-Holds environment-specific settings (database URL, secret key, debug flag) loaded from environment variables. The app factory in `__init__.py` selects the correct config class at startup.
+# Create batch
+users = UserFactory.create_batch(10)
+announcements = AnnouncementFactory.create_batch(5)
+```
 
 ---
 

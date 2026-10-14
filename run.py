@@ -146,5 +146,17 @@ def health():
     return jsonify({"status": "ok", "message": "healthy"}), 200
 
 
+# ------------------------------------------------------------------
+# CLI Commands
+# ------------------------------------------------------------------
+
+
+@app.cli.command("seed")
+def seed_command():
+    """Seed the database with sample user and announcement records."""
+    from app.seeds.database_seeder import DatabaseSeeder
+    DatabaseSeeder.run()
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
