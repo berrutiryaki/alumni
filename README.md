@@ -14,9 +14,9 @@ Alumni Tracking & Networking Platform — universities, graduates, and students 
 
 Universities lose contact with graduates the moment they leave campus. Alumni solves this by providing a centralized, API-first platform for managing graduate profiles, career tracking, mentorship, and community engagement — keeping institutions and alumni connected long after graduation.
 
-> **Data Dictionary:** For field definitions, form mappings, and CRUD endpoint reference, see [ddd.md](ddd.md).
+> **Data Dictionary & Documentation Rule:** For field definitions, form mappings, and CRUD endpoint reference, see [ddd.md](ddd.md). **Rule:** Whenever any data model, field, type, form mapping, or CRUD endpoint is added, modified, or deleted, [ddd.md](ddd.md) **MUST** be updated immediately to maintain documentation integrity.
 
-> **Current Status:** Early-stage. Core API skeleton is live with health-check endpoints. Database models and authentication are in active development.
+> **Current Status:** Core API skeleton, database models (SQLAlchemy), migrations (Flask-Migrate), seeders, and full CRUD interfaces are live with Swagger documentation.
 
 ---
 
@@ -203,8 +203,9 @@ announcements = AnnouncementFactory.create_batch(5)
 
 1. Fork the repository
 2. Create a branch: `git checkout -b feature/your-feature`
-3. Commit using [Conventional Commits](https://www.conventionalcommits.org/): `git commit -m 'feat: add mentorship endpoint'`
-4. Open a Pull Request
+3. Update documentation: **`ddd.md` must be kept up-to-date with any changes to models, fields, or endpoints.**
+4. Commit using [Conventional Commits](https://www.conventionalcommits.org/): `git commit -m 'feat: add mentorship endpoint'`
+5. Open a Pull Request
 
 ---
 
