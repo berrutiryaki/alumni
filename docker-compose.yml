@@ -1,21 +1,33 @@
 services:
 
+  db:
+    image: postgres:16-alpine
+    container_name: alumni_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alumni_db
+      POSTGRES_USER: alumni_user
+      POSTGRES_PASSWORD: alumni_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   web:
     build: .
+    container_name: alumni_web
     ports:
       - "5000:5000"
     environment:
-      # Points the app to the mounted volume directory for JSON data files.
-      # When PostgreSQL is integrated this variable will point to the DB instead.
-      DATA_DIR: /app/data
+      DATABASE_URL: postgresql://alumni_user:alumni_password@db:5432/alumni_db
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+    depends_on:
+      - db
     volumes:
-      # Named volume — survives `docker compose down`.
-      # `docker compose down -v` would remove it (intentional full reset).
       - alumni_data:/app/data
     restart: unless-stopped
 
 volumes:
   alumni_data:
-    # Named volume managed by Docker.
-    # Data is preserved across: docker compose down / docker compose up.
-    # Data is removed only with: docker compose down -v
+  postgres_data:

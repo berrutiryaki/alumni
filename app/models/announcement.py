@@ -1,20 +1,22 @@
 """
-Announcement Model — JSON-backed persistence, no database connection.
-
-Stores all announcements in a JSON file via app.storage.
-Provides static CRUD methods that operate on that file.
+Announcement Model — SQLAlchemy database model with migration support.
 """
 
 from datetime import datetime
-from app.storage import load, save
-
-_FILE = "announcements.json"
+from app.database import db
 
 
-class Announcement:
+class Announcement(db.Model):
+    __tablename__ = "announcements"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(120), nullable=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.String(30), nullable=False, default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     def __init__(self, title: str, content: str, author: str = None, is_active: bool = True):
-        self.id = None
         self.title = title
         self.content = content
         self.author = author
@@ -35,89 +37,45 @@ class Announcement:
             "created_at": self.created_at,
         }
 
-    @classmethod
-    def _from_dict(cls, d: dict) -> "Announcement":
-        a = cls(
-            title=d["title"],
-            content=d["content"],
-            author=d.get("author"),
-            is_active=d.get("is_active", True),
-        )
-        a.id = d["id"]
-        a.created_at = d.get("created_at", a.created_at)
-        return a
-
     # ------------------------------------------------------------------
-    # Storage helpers
-    # ------------------------------------------------------------------
-
-    @classmethod
-    def _load(cls) -> list:
-        return [cls._from_dict(d) for d in load(_FILE)]
-
-    @classmethod
-    def _save(cls, announcements: list) -> None:
-        save(_FILE, [a.to_dict() for a in announcements])
-
-    @classmethod
-    def _next(cls, announcements: list) -> int:
-        return max((a.id for a in announcements), default=0) + 1
-
-    # ------------------------------------------------------------------
-    # CREATE
+    # CRUD helpers for seamless controller/route integration
     # ------------------------------------------------------------------
 
     @classmethod
     def create(cls, data: dict) -> "Announcement":
-        announcements = cls._load()
         a = cls(
             title=data.get("title"),
             content=data.get("content"),
             author=data.get("author"),
             is_active=data.get("is_active", True) not in [False, "false", "0", 0],
         )
-        a.id = cls._next(announcements)
-        announcements.append(a)
-        cls._save(announcements)
+        db.session.add(a)
+        db.session.commit()
         return a
-
-    # ------------------------------------------------------------------
-    # READ
-    # ------------------------------------------------------------------
 
     @classmethod
     def get_all(cls) -> list:
-        return [a.to_dict() for a in cls._load()]
+        return [a.to_dict() for a in cls.query.order_by(cls.id.asc()).all()]
 
     @classmethod
     def get_by_id(cls, announcement_id: int) -> "Announcement | None":
-        return next((a for a in cls._load() if a.id == announcement_id), None)
-
-    # ------------------------------------------------------------------
-    # UPDATE (full replace)
-    # ------------------------------------------------------------------
+        return db.session.get(cls, announcement_id)
 
     @classmethod
     def update(cls, announcement_id: int, data: dict) -> "Announcement | None":
-        announcements = cls._load()
-        a = next((a for a in announcements if a.id == announcement_id), None)
+        a = cls.get_by_id(announcement_id)
         if a is None:
             return None
         a.title = data.get("title")
         a.content = data.get("content")
         a.author = data.get("author")
         a.is_active = data.get("is_active", True) not in [False, "false", "0", 0]
-        cls._save(announcements)
+        db.session.commit()
         return a
-
-    # ------------------------------------------------------------------
-    # PARTIAL UPDATE
-    # ------------------------------------------------------------------
 
     @classmethod
     def partial_update(cls, announcement_id: int, data: dict) -> "Announcement | None":
-        announcements = cls._load()
-        a = next((a for a in announcements if a.id == announcement_id), None)
+        a = cls.get_by_id(announcement_id)
         if a is None:
             return None
         if "title" in data:
@@ -128,21 +86,16 @@ class Announcement:
             a.author = data["author"]
         if "is_active" in data:
             a.is_active = data["is_active"] not in [False, "false", "0", 0]
-        cls._save(announcements)
+        db.session.commit()
         return a
-
-    # ------------------------------------------------------------------
-    # DELETE
-    # ------------------------------------------------------------------
 
     @classmethod
     def delete(cls, announcement_id: int) -> bool:
-        announcements = cls._load()
-        a = next((a for a in announcements if a.id == announcement_id), None)
+        a = cls.get_by_id(announcement_id)
         if a is None:
             return False
-        announcements.remove(a)
-        cls._save(announcements)
+        db.session.delete(a)
+        db.session.commit()
         return True
 
     def __repr__(self) -> str:

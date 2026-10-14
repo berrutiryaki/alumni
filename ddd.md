@@ -9,7 +9,7 @@ This document describes the data models, field definitions, form mappings, and C
 ## User
 
 **Model file:** [`app/models/user.py`](app/models/user.py)  
-**Storage:** In-memory (no database — migration planned)  
+**Storage:** Database via SQLAlchemy & Flask-Migrate (PostgreSQL in Docker / SQLite fallback)  
 **Controllers:** `UserController` (HTML) · `ApiUserController` (JSON API)
 
 ### Field Definitions
@@ -106,7 +106,7 @@ This document describes the data models, field definitions, form mappings, and C
 ## Announcement
 
 **Model file:** [`app/models/announcement.py`](app/models/announcement.py)  
-**Storage:** In-memory (no database — migration planned)  
+**Storage:** Database via SQLAlchemy & Flask-Migrate (PostgreSQL in Docker / SQLite fallback)  
 **Controllers:** `AnnouncementController` (HTML) · `ApiAnnouncementController` (JSON API)
 
 ### Field Definitions

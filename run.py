@@ -1,13 +1,38 @@
 import os
 from flask import Flask, jsonify
 from flasgger import Swagger
+from dotenv import load_dotenv
 
+from app.database import db, migrate
+from app.models.user import User
+from app.models.announcement import Announcement
 from app.routes.users import users_bp
 from app.routes.api_users import api_users_bp
 from app.routes.announcements import announcements_bp
 from app.routes.api_announcements import api_announcements_bp
 
+load_dotenv()
+
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'templates'))
+
+# ------------------------------------------------------------------
+# Database Configuration & Migration
+# ------------------------------------------------------------------
+
+database_url = os.environ.get("DATABASE_URL")
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+if not database_url:
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+    os.makedirs(data_dir, exist_ok=True)
+    database_url = f"sqlite:///{os.path.join(data_dir, 'alumni.db')}"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
+migrate.init_app(app, db)
 
 # ------------------------------------------------------------------
 # Swagger / OpenAPI

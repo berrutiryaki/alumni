@@ -1,24 +1,25 @@
 """
-User Model — JSON-backed persistence, no database connection.
-
-Stores all users in a JSON file via app.storage.
-Provides static CRUD methods that operate on that file.
+User Model — SQLAlchemy database model with migration support.
 """
 
-from app.storage import load, save
-
-_FILE = "users.json"
+from app.database import db
 
 
-class User:
-    _next_id: int = 1
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default="student")  # 'alumni' or 'student'
+    department = db.Column(db.String(120), nullable=True)
+    graduation_year = db.Column(db.Integer, nullable=True)
 
     def __init__(self, name: str, email: str, status: str = "student",
                  department: str = None, graduation_year: int = None):
-        self.id = None
         self.name = name
         self.email = email
-        self.status = status        # 'alumni' or 'student'
+        self.status = status
         self.department = department
         self.graduation_year = graduation_year if status == "alumni" else None
 
@@ -36,42 +37,12 @@ class User:
             "graduation_year": self.graduation_year,
         }
 
-    @classmethod
-    def _from_dict(cls, d: dict) -> "User":
-        u = cls(
-            name=d["name"],
-            email=d["email"],
-            status=d.get("status", "student"),
-            department=d.get("department"),
-            graduation_year=d.get("graduation_year"),
-        )
-        u.id = d["id"]
-        u.graduation_year = d.get("graduation_year")   # preserve stored value
-        return u
-
     # ------------------------------------------------------------------
-    # Storage helpers
-    # ------------------------------------------------------------------
-
-    @classmethod
-    def _load(cls) -> list:
-        return [cls._from_dict(d) for d in load(_FILE)]
-
-    @classmethod
-    def _save(cls, users: list) -> None:
-        save(_FILE, [u.to_dict() for u in users])
-
-    @classmethod
-    def _next(cls, users: list) -> int:
-        return max((u.id for u in users), default=0) + 1
-
-    # ------------------------------------------------------------------
-    # CREATE
+    # CRUD helpers for seamless controller/route integration
     # ------------------------------------------------------------------
 
     @classmethod
     def create(cls, data: dict) -> "User":
-        users = cls._load()
         user = cls(
             name=data.get("name"),
             email=data.get("email"),
@@ -79,31 +50,21 @@ class User:
             department=data.get("department"),
             graduation_year=data.get("graduation_year"),
         )
-        user.id = cls._next(users)
-        users.append(user)
-        cls._save(users)
+        db.session.add(user)
+        db.session.commit()
         return user
-
-    # ------------------------------------------------------------------
-    # READ
-    # ------------------------------------------------------------------
 
     @classmethod
     def get_all(cls) -> list:
-        return [u.to_dict() for u in cls._load()]
+        return [u.to_dict() for u in cls.query.order_by(cls.id.asc()).all()]
 
     @classmethod
     def get_by_id(cls, user_id: int) -> "User | None":
-        return next((u for u in cls._load() if u.id == user_id), None)
-
-    # ------------------------------------------------------------------
-    # UPDATE (full replace)
-    # ------------------------------------------------------------------
+        return db.session.get(cls, user_id)
 
     @classmethod
     def update(cls, user_id: int, data: dict) -> "User | None":
-        users = cls._load()
-        user = next((u for u in users if u.id == user_id), None)
+        user = cls.get_by_id(user_id)
         if user is None:
             return None
         user.name = data.get("name")
@@ -111,17 +72,12 @@ class User:
         user.status = data.get("status", "student")
         user.department = data.get("department")
         user.graduation_year = data.get("graduation_year") if user.status == "alumni" else None
-        cls._save(users)
+        db.session.commit()
         return user
-
-    # ------------------------------------------------------------------
-    # PARTIAL UPDATE
-    # ------------------------------------------------------------------
 
     @classmethod
     def partial_update(cls, user_id: int, data: dict) -> "User | None":
-        users = cls._load()
-        user = next((u for u in users if u.id == user_id), None)
+        user = cls.get_by_id(user_id)
         if user is None:
             return None
         if "name" in data:
@@ -136,21 +92,16 @@ class User:
             user.department = data["department"]
         if "graduation_year" in data and user.status == "alumni":
             user.graduation_year = data["graduation_year"]
-        cls._save(users)
+        db.session.commit()
         return user
-
-    # ------------------------------------------------------------------
-    # DELETE
-    # ------------------------------------------------------------------
 
     @classmethod
     def delete(cls, user_id: int) -> bool:
-        users = cls._load()
-        user = next((u for u in users if u.id == user_id), None)
+        user = cls.get_by_id(user_id)
         if user is None:
             return False
-        users.remove(user)
-        cls._save(users)
+        db.session.delete(user)
+        db.session.commit()
         return True
 
     def __repr__(self) -> str:
