@@ -1,16 +1,17 @@
 """
-Announcement Model — in-memory, no database connection.
+Announcement Model — JSON-backed persistence, no database connection.
 
-Stores all announcements in a module-level list.
-Provides static CRUD methods that operate on that list.
+Stores all announcements in a JSON file via app.storage.
+Provides static CRUD methods that operate on that file.
 """
 
 from datetime import datetime
+from app.storage import load, save
+
+_FILE = "announcements.json"
 
 
 class Announcement:
-    _store: list = []
-    _next_id: int = 1
 
     def __init__(self, title: str, content: str, author: str = None, is_active: bool = True):
         self.id = None
@@ -34,22 +35,51 @@ class Announcement:
             "created_at": self.created_at,
         }
 
+    @classmethod
+    def _from_dict(cls, d: dict) -> "Announcement":
+        a = cls(
+            title=d["title"],
+            content=d["content"],
+            author=d.get("author"),
+            is_active=d.get("is_active", True),
+        )
+        a.id = d["id"]
+        a.created_at = d.get("created_at", a.created_at)
+        return a
+
+    # ------------------------------------------------------------------
+    # Storage helpers
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def _load(cls) -> list:
+        return [cls._from_dict(d) for d in load(_FILE)]
+
+    @classmethod
+    def _save(cls, announcements: list) -> None:
+        save(_FILE, [a.to_dict() for a in announcements])
+
+    @classmethod
+    def _next(cls, announcements: list) -> int:
+        return max((a.id for a in announcements), default=0) + 1
+
     # ------------------------------------------------------------------
     # CREATE
     # ------------------------------------------------------------------
 
     @classmethod
     def create(cls, data: dict) -> "Announcement":
-        announcement = cls(
+        announcements = cls._load()
+        a = cls(
             title=data.get("title"),
             content=data.get("content"),
             author=data.get("author"),
             is_active=data.get("is_active", True) not in [False, "false", "0", 0],
         )
-        announcement.id = cls._next_id
-        cls._next_id += 1
-        cls._store.append(announcement)
-        return announcement
+        a.id = cls._next(announcements)
+        announcements.append(a)
+        cls._save(announcements)
+        return a
 
     # ------------------------------------------------------------------
     # READ
@@ -57,11 +87,11 @@ class Announcement:
 
     @classmethod
     def get_all(cls) -> list:
-        return [a.to_dict() for a in cls._store]
+        return [a.to_dict() for a in cls._load()]
 
     @classmethod
     def get_by_id(cls, announcement_id: int) -> "Announcement | None":
-        return next((a for a in cls._store if a.id == announcement_id), None)
+        return next((a for a in cls._load() if a.id == announcement_id), None)
 
     # ------------------------------------------------------------------
     # UPDATE (full replace)
@@ -69,14 +99,16 @@ class Announcement:
 
     @classmethod
     def update(cls, announcement_id: int, data: dict) -> "Announcement | None":
-        announcement = cls.get_by_id(announcement_id)
-        if announcement is None:
+        announcements = cls._load()
+        a = next((a for a in announcements if a.id == announcement_id), None)
+        if a is None:
             return None
-        announcement.title = data.get("title")
-        announcement.content = data.get("content")
-        announcement.author = data.get("author")
-        announcement.is_active = data.get("is_active", True) not in [False, "false", "0", 0]
-        return announcement
+        a.title = data.get("title")
+        a.content = data.get("content")
+        a.author = data.get("author")
+        a.is_active = data.get("is_active", True) not in [False, "false", "0", 0]
+        cls._save(announcements)
+        return a
 
     # ------------------------------------------------------------------
     # PARTIAL UPDATE
@@ -84,18 +116,20 @@ class Announcement:
 
     @classmethod
     def partial_update(cls, announcement_id: int, data: dict) -> "Announcement | None":
-        announcement = cls.get_by_id(announcement_id)
-        if announcement is None:
+        announcements = cls._load()
+        a = next((a for a in announcements if a.id == announcement_id), None)
+        if a is None:
             return None
         if "title" in data:
-            announcement.title = data["title"]
+            a.title = data["title"]
         if "content" in data:
-            announcement.content = data["content"]
+            a.content = data["content"]
         if "author" in data:
-            announcement.author = data["author"]
+            a.author = data["author"]
         if "is_active" in data:
-            announcement.is_active = data["is_active"] not in [False, "false", "0", 0]
-        return announcement
+            a.is_active = data["is_active"] not in [False, "false", "0", 0]
+        cls._save(announcements)
+        return a
 
     # ------------------------------------------------------------------
     # DELETE
@@ -103,10 +137,12 @@ class Announcement:
 
     @classmethod
     def delete(cls, announcement_id: int) -> bool:
-        announcement = cls.get_by_id(announcement_id)
-        if announcement is None:
+        announcements = cls._load()
+        a = next((a for a in announcements if a.id == announcement_id), None)
+        if a is None:
             return False
-        cls._store.remove(announcement)
+        announcements.remove(a)
+        cls._save(announcements)
         return True
 
     def __repr__(self) -> str:

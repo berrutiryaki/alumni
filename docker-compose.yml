@@ -1,0 +1,21 @@
+services:
+
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      # Points the app to the mounted volume directory for JSON data files.
+      # When PostgreSQL is integrated this variable will point to the DB instead.
+      DATA_DIR: /app/data
+    volumes:
+      # Named volume — survives `docker compose down`.
+      # `docker compose down -v` would remove it (intentional full reset).
+      - alumni_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  alumni_data:
+    # Named volume managed by Docker.
+    # Data is preserved across: docker compose down / docker compose up.
+    # Data is removed only with: docker compose down -v
