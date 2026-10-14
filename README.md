@@ -14,6 +14,8 @@ Alumni Tracking & Networking Platform — universities, graduates, and students 
 
 Universities lose contact with graduates the moment they leave campus. Alumni solves this by providing a centralized, API-first platform for managing graduate profiles, career tracking, mentorship, and community engagement — keeping institutions and alumni connected long after graduation.
 
+> **Data Dictionary:** For field definitions, form mappings, and CRUD endpoint reference, see [ddd.md](ddd.md).
+
 > **Current Status:** Early-stage. Core API skeleton is live with health-check endpoints. Database models and authentication are in active development.
 
 ---
