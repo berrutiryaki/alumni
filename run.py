@@ -11,6 +11,8 @@ from app.routes.users import users_bp
 from app.routes.api_users import api_users_bp
 from app.routes.announcements import announcements_bp
 from app.routes.api_announcements import api_announcements_bp
+from app.routes.job_postings import job_postings_bp
+from app.routes.api_job_postings import api_job_postings_bp
 
 load_dotenv()
 
@@ -58,12 +60,14 @@ swagger_template = {
     "info": {
         "title": "Alumni API",
         "description": "Alumni Tracking & Networking Platform REST API",
-        "version": "1.1.0",
+        "version": "1.2.0",
     },
     "tags": [
         {"name": "Health", "description": "API status"},
         {"name": "Users", "description": "User CRUD via ApiUserController"},
         {"name": "Announcements", "description": "Announcement CRUD via ApiAnnouncementController"},
+        {"name": "Job Postings", "description": "Job Posting CRUD via ApiJobPostingController"},
+        {"name": "Users (Nested)", "description": "Nested user resources (announcements, job-postings)"},
     ],
 }
 
@@ -77,6 +81,8 @@ app.register_blueprint(users_bp)               # /users            — HTML
 app.register_blueprint(api_users_bp)           # /api/users        — JSON
 app.register_blueprint(announcements_bp)       # /announcements    — HTML
 app.register_blueprint(api_announcements_bp)   # /api/announcements — JSON
+app.register_blueprint(job_postings_bp)        # /job-postings     — HTML
+app.register_blueprint(api_job_postings_bp)    # /api/job-postings — JSON
 
 # ------------------------------------------------------------------
 # General routes
@@ -109,11 +115,13 @@ def index():
         <ul>
             <li><a href="/users">Users & Alumni Management (HTML)</a></li>
             <li><a href="/announcements">Announcements & Events Management (HTML)</a></li>
+            <li><a href="/job-postings">Job Postings & Opportunities (HTML)</a></li>
         </ul>
         <h3>REST API & Documentation</h3>
         <ul>
             <li><a href="/api/users">API Users (JSON)</a></li>
             <li><a href="/api/announcements">API Announcements (JSON)</a></li>
+            <li><a href="/api/job-postings">API Job Postings (JSON)</a></li>
             <li><a href="/api/health">API Health Check (JSON)</a></li>
             <li><a href="/api/swagger">Interactive Swagger / OpenAPI Docs</a></li>
         </ul>

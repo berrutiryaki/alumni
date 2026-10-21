@@ -6,6 +6,8 @@ Delegates to: ApiUserController
 
 from flask import Blueprint
 from app.controllers.api_user_controller import ApiUserController
+from app.controllers.api_announcement_controller import ApiAnnouncementController
+from app.controllers.api_job_posting_controller import ApiJobPostingController
 
 api_users_bp = Blueprint("api_users", __name__, url_prefix="/api/users")
 
@@ -202,3 +204,164 @@ def delete(user_id):
         description: User not found
     """
     return ApiUserController.delete(user_id)
+
+
+# ------------------------------------------------------------------
+# Nested Routes: User's Announcements & Job Postings
+# ------------------------------------------------------------------
+
+@api_users_bp.route("/<int:user_id>/announcements", methods=["GET"])
+def user_announcements(user_id):
+    """
+    Get all announcements authored by a specific user (nested route).
+    ---
+    tags:
+      - Users (Nested)
+      - Announcements
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the author user
+    responses:
+      200:
+        description: List of announcements for the user
+      404:
+        description: User not found
+    """
+    return ApiAnnouncementController.index_by_user(user_id)
+
+
+@api_users_bp.route("/<int:user_id>/announcements", methods=["POST"])
+def create_user_announcement(user_id):
+    """
+    Create an announcement directly under a user (nested route).
+    ---
+    tags:
+      - Users (Nested)
+      - Announcements
+    consumes:
+      - multipart/form-data
+      - application/json
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the author user
+      - name: title
+        in: formData
+        type: string
+        required: true
+      - name: content
+        in: formData
+        type: string
+        required: true
+      - name: author
+        in: formData
+        type: string
+      - name: is_active
+        in: formData
+        type: boolean
+    responses:
+      201:
+        description: Announcement created for user
+      400:
+        description: Missing required fields
+      404:
+        description: User not found
+    """
+    from app.models.user import User
+    from flask import jsonify
+    user = User.get_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User {user_id} not found"}), 404
+    return ApiAnnouncementController.create(extra_data={"user_id": user_id})
+
+
+@api_users_bp.route("/<int:user_id>/job-postings", methods=["GET"])
+def user_job_postings(user_id):
+    """
+    Get all job postings published by a specific user (nested route).
+    ---
+    tags:
+      - Users (Nested)
+      - Job Postings
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the publisher user
+    responses:
+      200:
+        description: List of job postings for the user
+      404:
+        description: User not found
+    """
+    return ApiJobPostingController.index_by_user(user_id)
+
+
+@api_users_bp.route("/<int:user_id>/job-postings", methods=["POST"])
+def create_user_job_posting(user_id):
+    """
+    Create a job posting directly under a user (nested route).
+    ---
+    tags:
+      - Users (Nested)
+      - Job Postings
+    consumes:
+      - multipart/form-data
+      - application/json
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the publisher user
+      - name: title
+        in: formData
+        type: string
+        required: true
+      - name: description
+        in: formData
+        type: string
+        required: true
+      - name: company
+        in: formData
+        type: string
+        required: true
+      - name: location
+        in: formData
+        type: string
+      - name: employment_type
+        in: formData
+        type: string
+      - name: salary_range
+        in: formData
+        type: string
+      - name: posted_by
+        in: formData
+        type: string
+      - name: is_active
+        in: formData
+        type: boolean
+      - name: expires_at
+        in: formData
+        type: string
+    responses:
+      201:
+        description: Job posting created for user
+      400:
+        description: Missing required fields
+      404:
+        description: User not found
+    """
+    from app.models.user import User
+    from flask import jsonify
+    user = User.get_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User {user_id} not found"}), 404
+    return ApiJobPostingController.create(extra_data={"user_id": user_id})
+

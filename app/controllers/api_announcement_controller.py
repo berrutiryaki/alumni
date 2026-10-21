@@ -33,8 +33,11 @@ class ApiAnnouncementController:
             return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500
 
     @staticmethod
-    def create():
+    def create(extra_data: dict = None):
         data = request.form.to_dict() if request.form else request.get_json() or {}
+        if extra_data:
+            data.update(extra_data)
+
         title = (data.get("title") or "").strip()
         content = (data.get("content") or "").strip()
 
@@ -47,6 +50,7 @@ class ApiAnnouncementController:
                 "content": content,
                 "author": (data.get("author") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
+                "user_id": data.get("user_id"),
             })
             return jsonify({"status": "success", "announcement": announcement.to_dict()}), 201
         except Exception as e:
@@ -92,5 +96,27 @@ class ApiAnnouncementController:
             if not deleted:
                 return jsonify({"status": "error", "message": f"Announcement {announcement_id} not found"}), 404
             return jsonify({"status": "success", "message": f"Announcement {announcement_id} deleted"}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500
+
+    # ------------------------------------------------------------------
+    # Nested: filter by user_id
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def index_by_user(user_id: int):
+        """Return all announcements authored by a specific user."""
+        try:
+            from app.models.user import User
+            user = User.get_by_id(user_id)
+            if user is None:
+                return jsonify({"status": "error", "message": f"User {user_id} not found"}), 404
+            announcements = Announcement.query.filter_by(user_id=user_id).order_by(Announcement.id.asc()).all()
+            return jsonify({
+                "status": "success",
+                "count": len(announcements),
+                "user_id": user_id,
+                "announcements": [a.to_dict() for a in announcements]
+            }), 200
         except Exception as e:
             return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500

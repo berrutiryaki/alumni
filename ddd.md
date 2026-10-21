@@ -62,6 +62,15 @@ This document describes the data models, field definitions, form mappings, and C
 | Partial update | `PATCH` | `/api/users/<id>` | `ApiUserController.partial_update(id)` | `200 OK` |
 | Delete user | `DELETE` | `/api/users/<id>` | `ApiUserController.delete(id)` | `200 OK` |
 
+#### Nested Endpoints (under User)
+
+| Operation | Method | URL | Description | Success Code |
+|---|---|---|---|---|
+| List user's announcements | `GET` | `/api/users/<user_id>/announcements` | Returns all announcements authored by this user | `200 OK` |
+| Create user's announcement | `POST` | `/api/users/<user_id>/announcements` | Creates an announcement associated with this user | `201 Created` |
+| List user's job postings | `GET` | `/api/users/<user_id>/job-postings` | Returns all job postings published by this user | `200 OK` |
+| Create user's job posting | `POST` | `/api/users/<user_id>/job-postings` | Creates a job posting associated with this user | `201 Created` |
+
 #### API Error Responses
 
 | Status Code | Condition |

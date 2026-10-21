@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Job Posting - Alumni Platform</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; }
+        .navbar { background-color: #212529; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .navbar a { color: #adb5bd; text-decoration: none; margin-right: 20px; font-weight: 500; font-size: 15px; }
+        .navbar a:hover, .navbar a.active { color: white; }
+        .navbar .brand { font-size: 18px; font-weight: bold; color: white; margin-right: 30px; }
+        .container { max-width: 650px; margin: 30px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #495057; }
+        input[type="text"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; font-family: inherit; }
+        textarea { height: 130px; resize: vertical; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #86b7fe; box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
+        button { padding: 10px 18px; background-color: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        button:hover { background-color: #0b5ed7; }
+        .back-link { margin-top: 20px; display: inline-block; color: #6c757d; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #0d6efd; }
+        .error-box { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div>
+            <span class="brand">Alumni Platform</span>
+            <a href="/users">Users</a>
+            <a href="/announcements">Announcements</a>
+            <a href="/job-postings" class="active">Job Postings</a>
+            <a href="/api/swagger" target="_blank">Swagger API</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-top: 0;">Publish Job Posting</h2>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form action="/job-postings" method="POST">
+            <div class="form-group">
+                <label for="title">Job Title *</label>
+                <input type="text" id="title" name="title" required placeholder="e.g. Backend Developer">
+            </div>
+
+            <div class="form-group">
+                <label for="company">Company / Organization *</label>
+                <input type="text" id="company" name="company" required placeholder="e.g. Google">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Job Description *</label>
+                <textarea id="description" name="description" required placeholder="Provide responsibilities, requirements, and tech stack..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" placeholder="e.g. Istanbul / Remote">
+            </div>
+
+            <div class="form-group">
+                <label for="employment_type">Employment Type</label>
+                <select id="employment_type" name="employment_type">
+                    <option value="full-time" selected>Full-time</option>
+                    <option value="part-time">Part-time</option>
+                    <option value="internship">Internship</option>
+                    <option value="contract">Contract</option>
+                    <option value="remote">Remote</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="salary_range">Salary Range</label>
+                <input type="text" id="salary_range" name="salary_range" placeholder="e.g. $80,000 - $100,000 / year">
+            </div>
+
+            <div class="form-group">
+                <label for="posted_by">Posted By</label>
+                <input type="text" id="posted_by" name="posted_by" placeholder="e.g. Jane Doe (HR)">
+            </div>
+
+            <div class="form-group">
+                <label for="expires_at">Expiration Date</label>
+                <input type="text" id="expires_at" name="expires_at" placeholder="YYYY-MM-DD">
+            </div>
+
+            <div class="form-group">
+                <label for="is_active">Status</label>
+                <select id="is_active" name="is_active">
+                    <option value="true" selected>Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+
+            <button type="submit">Create Job Posting</button>
+        </form>
+
+        <a href="/job-postings" class="back-link">← Back to Job Postings</a>
+    </div>
+</body>
+</html>
