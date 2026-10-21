@@ -10,13 +10,14 @@ from app.models.application import Application
 from app.seeds.user_seeder import UserSeeder
 from app.seeds.announcement_seeder import AnnouncementSeeder
 from app.seeds.job_posting_seeder import JobPostingSeeder
+from app.seeds.application_seeder import ApplicationSeeder
 
 
 class DatabaseSeeder:
 
     @classmethod
     def run(cls, clean: bool = False, student_count: int = 10, alumni_count: int = 10,
-            announcement_count: int = 4, job_posting_count: int = 4):
+            announcement_count: int = 4, job_posting_count: int = 4, application_count: int = 8):
         """
         Runs all seeders within the application database context.
 
@@ -41,6 +42,8 @@ class DatabaseSeeder:
         AnnouncementSeeder.run(extra_count=announcement_count)
         print("-" * 60)
         JobPostingSeeder.run(extra_count=job_posting_count)
+        print("-" * 60)
+        ApplicationSeeder.run(count=application_count)
 
         print("=" * 60)
         print("SEEDING COMPLETED SUCCESSFULLY!")
