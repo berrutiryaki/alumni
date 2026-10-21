@@ -2,103 +2,176 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Job Posting - Alumni Platform</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #212529; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .navbar a { color: #adb5bd; text-decoration: none; margin-right: 20px; font-weight: 500; font-size: 15px; }
-        .navbar a:hover, .navbar a.active { color: white; }
-        .navbar .brand { font-size: 18px; font-weight: bold; color: white; margin-right: 30px; }
-        .container { max-width: 650px; margin: 30px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #495057; }
-        input[type="text"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; font-family: inherit; }
-        textarea { height: 130px; resize: vertical; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #86b7fe; box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
-        button { padding: 10px 18px; background-color: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
-        button:hover { background-color: #e0a800; }
-        .back-link { margin-top: 20px; display: inline-block; color: #6c757d; text-decoration: none; font-size: 14px; }
-        .back-link:hover { color: #0d6efd; }
-        .error-box { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #1a1a2e; }
+
+        .navbar { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 0 32px; display: flex; justify-content: space-between; align-items: center; height: 58px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .nav-left { display: flex; align-items: center; gap: 6px; }
+        .navbar .brand { font-size: 17px; font-weight: 700; color: white; margin-right: 24px; display: flex; align-items: center; gap: 8px; }
+        .brand-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .navbar a { color: #94a3b8; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: 500; font-size: 14px; transition: all 0.15s; }
+        .navbar a:hover { color: white; background: rgba(255,255,255,0.08); }
+        .navbar a.active { color: white; background: rgba(255,255,255,0.12); }
+
+        .page-wrapper { max-width: 720px; margin: 36px auto; padding: 0 24px; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; margin-bottom: 20px; }
+        .breadcrumb a { color: #667eea; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb-sep { color: #cbd5e1; }
+
+        .form-card { background: white; border-radius: 14px; border: 1px solid #e8ecf0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+        .form-card-header { padding: 24px 28px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .form-card-header-left { display: flex; align-items: center; gap: 14px; }
+        .form-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #fef3c720, #fbbf2420); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid #fde68a; }
+        .form-title { font-size: 19px; font-weight: 700; color: #0f172a; margin: 0 0 3px; }
+        .form-subtitle { font-size: 13px; color: #64748b; margin: 0; }
+        .id-badge { background: #f1f5f9; color: #64748b; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; border: 1px solid #e2e8f0; }
+
+        .form-body { padding: 28px; }
+        .form-section { margin-bottom: 24px; }
+        .section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #374151; }
+        .label-hint { font-weight: 400; color: #9ca3af; font-size: 12px; }
+        .required { color: #ef4444; margin-left: 2px; }
+
+        input[type="text"], input[type="url"], textarea, select {
+            width: 100%; padding: 10px 12px; border: 1px solid #dde1e7; border-radius: 8px; font-size: 14px; font-family: inherit; color: #1e293b; background: #fafbfc; transition: all 0.15s;
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+        textarea { height: 140px; resize: vertical; line-height: 1.6; }
+
+        .form-footer { padding: 20px 28px; background: #fafbfc; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; align-items: center; }
+        .btn-submit { padding: 11px 22px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
+        .btn-cancel { padding: 11px 18px; background: white; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+        .btn-cancel:hover { background: #f8fafc; color: #374151; }
+
+        .error-box { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; display: flex; gap: 8px; align-items: flex-start; }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div>
-            <span class="brand">Alumni Platform</span>
+        <div class="nav-left">
+            <span class="brand">
+                <span class="brand-icon">🎓</span>
+                Alumni Platform
+            </span>
             <a href="/users">Users</a>
             <a href="/announcements">Announcements</a>
             <a href="/job-postings" class="active">Job Postings</a>
+            <a href="/applications">Applications</a>
             <a href="/api/swagger" target="_blank">Swagger API</a>
         </div>
     </nav>
 
-    <div class="container">
-        <h2 style="margin-top: 0;">Edit Job Posting #{{ job_posting.id }}</h2>
+    <div class="page-wrapper">
+        <div class="breadcrumb">
+            <a href="/job-postings">Job Postings</a>
+            <span class="breadcrumb-sep">›</span>
+            Edit #{{ job_posting.id }}
+        </div>
 
-        {% if error %}
-        <div class="error-box">{{ error }}</div>
-        {% endif %}
-
-        <form action="/job-postings/{{ job_posting.id }}/edit" method="POST">
-            <div class="form-group">
-                <label for="title">Job Title *</label>
-                <input type="text" id="title" name="title" required value="{{ job_posting.title }}">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-header-left">
+                    <div class="form-icon">✏️</div>
+                    <div>
+                        <div class="form-title">Edit Job Posting</div>
+                        <div class="form-subtitle">{{ job_posting.title }} @ {{ job_posting.company }}</div>
+                    </div>
+                </div>
+                <span class="id-badge">#{{ job_posting.id }}</span>
             </div>
 
-            <div class="form-group">
-                <label for="company">Company / Organization *</label>
-                <input type="text" id="company" name="company" required value="{{ job_posting.company }}">
-            </div>
+            <form action="/job-postings/{{ job_posting.id }}/edit" method="POST">
+                <div class="form-body">
 
-            <div class="form-group">
-                <label for="description">Job Description *</label>
-                <textarea id="description" name="description" required>{{ job_posting.description }}</textarea>
-            </div>
+                    {% if error %}
+                    <div class="error-box">⚠️ {{ error }}</div>
+                    {% endif %}
 
-            <div class="form-group">
-                <label for="location">Location</label>
-                <input type="text" id="location" name="location" value="{{ job_posting.location or '' }}">
-            </div>
+                    <!-- Basic Info -->
+                    <div class="form-section">
+                        <div class="section-title">Basic Information</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">Job Title <span class="required">*</span></label>
+                                <input type="text" id="title" name="title" required value="{{ job_posting.title }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="company">Company / Organization <span class="required">*</span></label>
+                                <input type="text" id="company" name="company" required value="{{ job_posting.company }}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Job Description <span class="required">*</span></label>
+                            <textarea id="description" name="description" required>{{ job_posting.description }}</textarea>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label for="employment_type">Employment Type</label>
-                <select id="employment_type" name="employment_type">
-                    <option value="full-time" {% if job_posting.employment_type == 'full-time' %}selected{% endif %}>Full-time</option>
-                    <option value="part-time" {% if job_posting.employment_type == 'part-time' %}selected{% endif %}>Part-time</option>
-                    <option value="internship" {% if job_posting.employment_type == 'internship' %}selected{% endif %}>Internship</option>
-                    <option value="contract" {% if job_posting.employment_type == 'contract' %}selected{% endif %}>Contract</option>
-                    <option value="remote" {% if job_posting.employment_type == 'remote' %}selected{% endif %}>Remote</option>
-                </select>
-            </div>
+                    <!-- Details -->
+                    <div class="form-section">
+                        <div class="section-title">Position Details</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location">Location <span class="label-hint">(optional)</span></label>
+                                <input type="text" id="location" name="location" value="{{ job_posting.location or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="employment_type">Employment Type</label>
+                                <select id="employment_type" name="employment_type">
+                                    <option value="full-time" {% if job_posting.employment_type == 'full-time' %}selected{% endif %}>Full-time</option>
+                                    <option value="part-time" {% if job_posting.employment_type == 'part-time' %}selected{% endif %}>Part-time</option>
+                                    <option value="internship" {% if job_posting.employment_type == 'internship' %}selected{% endif %}>Internship</option>
+                                    <option value="contract" {% if job_posting.employment_type == 'contract' %}selected{% endif %}>Contract</option>
+                                    <option value="remote" {% if job_posting.employment_type == 'remote' %}selected{% endif %}>Remote</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="salary_range">Salary Range <span class="label-hint">(optional)</span></label>
+                                <input type="text" id="salary_range" name="salary_range" value="{{ job_posting.salary_range or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="posted_by">Posted By <span class="label-hint">(optional)</span></label>
+                                <input type="text" id="posted_by" name="posted_by" value="{{ job_posting.posted_by or '' }}">
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label for="salary_range">Salary Range</label>
-                <input type="text" id="salary_range" name="salary_range" value="{{ job_posting.salary_range or '' }}">
-            </div>
+                    <!-- Settings -->
+                    <div class="form-section">
+                        <div class="section-title">Listing Settings</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expires_at">Expiration Date <span class="label-hint">(optional)</span></label>
+                                <input type="text" id="expires_at" name="expires_at" value="{{ job_posting.expires_at or '' }}" placeholder="YYYY-MM-DD">
+                            </div>
+                            <div class="form-group">
+                                <label for="is_active">Listing Status</label>
+                                <select id="is_active" name="is_active">
+                                    <option value="true" {% if job_posting.is_active %}selected{% endif %}>✅ Active — Accepting Applications</option>
+                                    <option value="false" {% if not job_posting.is_active %}selected{% endif %}>🔒 Inactive — Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label for="posted_by">Posted By</label>
-                <input type="text" id="posted_by" name="posted_by" value="{{ job_posting.posted_by or '' }}">
-            </div>
+                </div>
 
-            <div class="form-group">
-                <label for="expires_at">Expiration Date</label>
-                <input type="text" id="expires_at" name="expires_at" value="{{ job_posting.expires_at or '' }}">
-            </div>
-
-            <div class="form-group">
-                <label for="is_active">Status</label>
-                <select id="is_active" name="is_active">
-                    <option value="true" {% if job_posting.is_active %}selected{% endif %}>Active</option>
-                    <option value="false" {% if not job_posting.is_active %}selected{% endif %}>Inactive</option>
-                </select>
-            </div>
-
-            <button type="submit">Update Job Posting</button>
-        </form>
-
-        <a href="/job-postings" class="back-link">← Back to Job Postings</a>
+                <div class="form-footer">
+                    <button type="submit" class="btn-submit">💾 Save Changes</button>
+                    <a href="/job-postings" class="btn-cancel">← Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>

@@ -5,7 +5,6 @@ JobPostingFactory — generates realistic mock JobPosting records for developmen
 import random
 from faker import Faker
 from app.models.job_posting import JobPosting
-from app.models.user import User
 
 fake = Faker(["tr_TR", "en_US"])
 

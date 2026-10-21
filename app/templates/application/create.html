@@ -2,30 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Submit Job Application - Alumni Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Application - Alumni Platform</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #212529; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .navbar a { color: #adb5bd; text-decoration: none; margin-right: 20px; font-weight: 500; font-size: 15px; }
-        .navbar a:hover, .navbar a.active { color: white; }
-        .navbar .brand { font-size: 18px; font-weight: bold; color: white; margin-right: 30px; }
-        .container { max-width: 650px; margin: 30px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #495057; }
-        input[type="text"], input[type="url"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; font-family: inherit; }
-        textarea { height: 130px; resize: vertical; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #86b7fe; box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
-        button { padding: 10px 18px; background-color: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
-        button:hover { background-color: #0b5ed7; }
-        .back-link { margin-top: 20px; display: inline-block; color: #6c757d; text-decoration: none; font-size: 14px; }
-        .back-link:hover { color: #0d6efd; }
-        .error-box { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #1a1a2e; }
+
+        .navbar { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 0 32px; display: flex; justify-content: space-between; align-items: center; height: 58px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .nav-left { display: flex; align-items: center; gap: 6px; }
+        .navbar .brand { font-size: 17px; font-weight: 700; color: white; margin-right: 24px; display: flex; align-items: center; gap: 8px; }
+        .brand-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .navbar a { color: #94a3b8; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: 500; font-size: 14px; transition: all 0.15s; }
+        .navbar a:hover { color: white; background: rgba(255,255,255,0.08); }
+        .navbar a.active { color: white; background: rgba(255,255,255,0.12); }
+
+        .page-wrapper { max-width: 720px; margin: 36px auto; padding: 0 24px; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; margin-bottom: 20px; }
+        .breadcrumb a { color: #667eea; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb-sep { color: #cbd5e1; }
+
+        .form-card { background: white; border-radius: 14px; border: 1px solid #e8ecf0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+        .form-card-header { padding: 24px 28px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 14px; }
+        .form-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #667eea20, #764ba220); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .form-title { font-size: 19px; font-weight: 700; color: #0f172a; margin: 0 0 3px; }
+        .form-subtitle { font-size: 13px; color: #64748b; margin: 0; }
+
+        /* Pre-selected job banner */
+        .job-highlight { margin: 16px 28px 0; padding: 12px 16px; background: linear-gradient(135deg, #667eea10, #764ba210); border: 1px solid #667eea30; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #374151; }
+        .job-highlight strong { color: #667eea; }
+
+        .form-body { padding: 28px; }
+        .form-section { margin-bottom: 24px; }
+        .section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
+
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #374151; }
+        .label-hint { font-weight: 400; color: #9ca3af; font-size: 12px; }
+        .required { color: #ef4444; margin-left: 2px; }
+
+        input[type="text"], input[type="url"], textarea, select {
+            width: 100%; padding: 10px 12px; border: 1px solid #dde1e7; border-radius: 8px; font-size: 14px; font-family: inherit; color: #1e293b; background: #fafbfc; transition: all 0.15s;
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+        textarea { height: 150px; resize: vertical; line-height: 1.6; }
+
+        /* Status selector with visual options */
+        .status-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .status-option { display: none; }
+        .status-label { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; color: #64748b; transition: all 0.15s; text-align: center; }
+        .status-option:checked + .status-label { border-color: currentColor; }
+        .status-option[value="pending"]:checked + .status-label { border-color: #d97706; background: #fffbeb; color: #d97706; }
+        .status-option[value="reviewed"]:checked + .status-label { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
+        .status-option[value="accepted"]:checked + .status-label { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+        .status-option[value="rejected"]:checked + .status-label { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+        .status-label-icon { font-size: 18px; }
+
+        .form-footer { padding: 20px 28px; background: #fafbfc; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; align-items: center; }
+        .btn-submit { padding: 11px 22px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.45); }
+        .btn-cancel { padding: 11px 18px; background: white; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+        .btn-cancel:hover { background: #f8fafc; color: #374151; }
+
+        .error-box { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div>
-            <span class="brand">Alumni Platform</span>
+        <div class="nav-left">
+            <span class="brand">
+                <span class="brand-icon">🎓</span>
+                Alumni Platform
+            </span>
             <a href="/users">Users</a>
             <a href="/announcements">Announcements</a>
             <a href="/job-postings">Job Postings</a>
@@ -34,58 +82,115 @@
         </div>
     </nav>
 
-    <div class="container">
-        <h2 style="margin-top: 0;">Submit Job Application</h2>
+    <div class="page-wrapper">
+        <div class="breadcrumb">
+            <a href="/applications">Applications</a>
+            <span class="breadcrumb-sep">›</span>
+            Submit Application
+        </div>
 
-        {% if error %}
-        <div class="error-box">{{ error }}</div>
-        {% endif %}
-
-        <form action="/applications" method="POST">
-            <div class="form-group">
-                <label for="user_id">Applicant (User) *</label>
-                <select id="user_id" name="user_id" required>
-                    <option value="">-- Select Candidate --</option>
-                    {% for u in users %}
-                    <option value="{{ u.id }}">{{ u.name }} ({{ u.email }}) [{{ u.status }}]</option>
-                    {% endfor %}
-                </select>
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-icon">✉️</div>
+                <div>
+                    <div class="form-title">Submit Job Application</div>
+                    <div class="form-subtitle">Connect a candidate with a job opportunity.</div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="job_posting_id">Target Job Position *</label>
-                <select id="job_posting_id" name="job_posting_id" required>
-                    <option value="">-- Select Job Posting --</option>
-                    {% for j in job_postings %}
-                    <option value="{{ j.id }}">{{ j.title }} — {{ j.company }} ({{ j.employment_type }})</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <form action="/applications" method="POST">
+                <div class="form-body">
 
-            <div class="form-group">
-                <label for="resume_url">Resume / CV Link</label>
-                <input type="url" id="resume_url" name="resume_url" placeholder="https://linkedin.com/in/... or drive link">
-            </div>
+                    {% if error %}
+                    <div class="error-box">⚠️ {{ error }}</div>
+                    {% endif %}
 
-            <div class="form-group">
-                <label for="cover_letter">Cover Letter / Note</label>
-                <textarea id="cover_letter" name="cover_letter" placeholder="Why are you a good fit for this role?"></textarea>
-            </div>
+                    <!-- Candidate & Position -->
+                    <div class="form-section">
+                        <div class="section-title">Candidate & Position</div>
+                        <div class="form-group">
+                            <label for="user_id">Applicant <span class="required">*</span></label>
+                            <select id="user_id" name="user_id" required>
+                                <option value="">— Select Candidate —</option>
+                                {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.name }} · {{ u.email }} [{{ u.status }}]</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="job_posting_id">Target Position <span class="required">*</span></label>
+                            <select id="job_posting_id" name="job_posting_id" required>
+                                <option value="">— Select Job Posting —</option>
+                                {% for j in job_postings %}
+                                <option value="{{ j.id }}">{{ j.title }} — {{ j.company }} ({{ j.employment_type }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
 
-            <div class="form-group">
-                <label for="status">Initial Status</label>
-                <select id="status" name="status">
-                    <option value="pending" selected>Pending</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-            </div>
+                    <!-- Application Details -->
+                    <div class="form-section">
+                        <div class="section-title">Application Materials</div>
+                        <div class="form-group">
+                            <label for="resume_url">Resume / CV Link <span class="label-hint">(optional)</span></label>
+                            <input type="url" id="resume_url" name="resume_url" placeholder="https://linkedin.com/in/... or drive link">
+                        </div>
+                        <div class="form-group">
+                            <label for="cover_letter">Cover Letter <span class="label-hint">(optional)</span></label>
+                            <textarea id="cover_letter" name="cover_letter" placeholder="Why is this candidate a great fit? What makes them stand out for this role?"></textarea>
+                        </div>
+                    </div>
 
-            <button type="submit">Submit Application</button>
-        </form>
+                    <!-- Status -->
+                    <div class="form-section">
+                        <div class="section-title">Initial Status</div>
+                        <div class="form-group">
+                            <div class="status-selector">
+                                <input type="radio" class="status-option" name="status" id="s-pending" value="pending" checked>
+                                <label class="status-label" for="s-pending">
+                                    <span class="status-label-icon">⏳</span>
+                                    Pending
+                                </label>
 
-        <a href="/applications" class="back-link">← Back to Applications</a>
+                                <input type="radio" class="status-option" name="status" id="s-reviewed" value="reviewed">
+                                <label class="status-label" for="s-reviewed">
+                                    <span class="status-label-icon">🔍</span>
+                                    Reviewed
+                                </label>
+
+                                <input type="radio" class="status-option" name="status" id="s-accepted" value="accepted">
+                                <label class="status-label" for="s-accepted">
+                                    <span class="status-label-icon">✅</span>
+                                    Accepted
+                                </label>
+
+                                <input type="radio" class="status-option" name="status" id="s-rejected" value="rejected">
+                                <label class="status-label" for="s-rejected">
+                                    <span class="status-label-icon">❌</span>
+                                    Rejected
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="btn-submit">✉ Submit Application</button>
+                    <a href="/applications" class="btn-cancel">← Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <script>
+        // Pre-select job if coming from Apply Now button
+        const params = new URLSearchParams(window.location.search);
+        const preJobId = params.get('job_posting_id');
+        if (preJobId) {
+            const sel = document.getElementById('job_posting_id');
+            if (sel) sel.value = preJobId;
+        }
+    </script>
 </body>
 </html>
