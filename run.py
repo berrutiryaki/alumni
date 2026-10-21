@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from app.database import db, migrate
 from app.models.user import User
 from app.models.announcement import Announcement
+from app.models.job_posting import JobPosting
 from app.routes.users import users_bp
 from app.routes.api_users import api_users_bp
 from app.routes.announcements import announcements_bp
