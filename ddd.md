@@ -6,6 +6,120 @@ This document describes the data models, field definitions, form mappings, and C
 
 ---
 
+## Database Schema & Entity Relationships
+
+This section provides a bird's-eye view of all tables in the Alumni Platform, their primary keys, foreign keys, and cardinalities.
+
+### Entity-Relationship Diagram
+
+```
+┌──────────────────────────────────────┐
+│                users                 │
+├──────────────────────────────────────┤
+│ PK  id               Integer         │
+│     name             String(120)     │
+│ UQ  email            String(120)     │
+│     status           String(20)      │
+│     department       String(120)     │
+│     graduation_year  Integer         │
+└──────────────────────────────────────┘
+         │ 1                   │ 1                  │ 1
+         │                     │                    │
+         │ N (user_id)         │ N (user_id)        │ N (user_id)
+         ▼                     ▼                    ▼
+┌──────────────────┐  ┌──────────────────┐  ┌───────────────────────────────┐
+│  announcements   │  │   job_postings   │  │         applications          │
+├──────────────────┤  ├──────────────────┤  ├───────────────────────────────┤
+│ PK id  Integer   │  │ PK id  Integer   │  │ PK id              Integer    │
+│ FK user_id (opt) │  │ FK user_id (opt) │  │ FK user_id (req)   Integer    │
+│    title         │  │    title         │  │ FK job_posting_id  Integer    │◀─┐
+│    content       │  │    company       │  │    resume_url      String(255)│  │
+│    author        │  │    description   │  │    cover_letter    Text       │  │
+│    is_active     │  │    location      │  │    status          String(50) │  │ 1 (job_posting_id)
+│    created_at    │  │    salary_range  │  │    applied_at      String(30) │  │
+└──────────────────┘  │    employment_typ│  └───────────────────────────────┘  │
+                      │    is_active     │                 ▲                   │
+                      │    created_at    │                 └───────────────────┘
+                      │    expires_at    │                      N
+                      └──────────────────┘
+```
+
+```mermaid
+erDiagram
+    users ||--o{ announcements : "authors (1:N)"
+    users ||--o{ job_postings : "posts (1:N)"
+    users ||--o{ applications : "submits (1:N)"
+    job_postings ||--o{ applications : "receives (1:N)"
+
+    users {
+        int id PK
+        string name
+        string email UK
+        string status
+        string department
+        int graduation_year
+    }
+
+    announcements {
+        int id PK
+        int user_id FK
+        string title
+        text content
+        string author
+        boolean is_active
+        string created_at
+    }
+
+    job_postings {
+        int id PK
+        int user_id FK
+        string title
+        string company
+        text description
+        string location
+        string employment_type
+        string salary_range
+        string posted_by
+        boolean is_active
+        string created_at
+        string expires_at
+    }
+
+    applications {
+        int id PK
+        int user_id FK
+        int job_posting_id FK
+        string resume_url
+        text cover_letter
+        string status
+        string applied_at
+    }
+```
+
+### Master Relationship Matrix
+
+| # | Kaynak Tablo (Source) | Kaynak Kolon (FK) | Hedef Tablo (Target) | Hedef Kolon (PK) | İlişki Türü (Cardinality) | İş Mantığı / Açıklama |
+|---|---|---|---|---|---|---|
+| 1 | `announcements` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Bir duyuruyu bir kullanıcı (yazar) yayınlar. Opsiyoneldir (`nullable=True`). |
+| 2 | `job_postings` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Bir iş ilanını bir mezun veya işveren kullanıcı yayınlar. Opsiyoneldir (`nullable=True`). |
+| 3 | `applications` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Her iş başvurusunu kayıtlı bir kullanıcı (öğrenci/mezun) yapar. Zorunludur (`nullable=False`). |
+| 4 | `applications` | `job_posting_id` | `job_postings` | `id` | Many-to-One (`N:1`) | Her iş başvurusu belirli bir iş ilanına yöneliktir. Zorunludur (`nullable=False`). |
+| 5 | `users` | `id` | `announcements` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının yayınladığı birden fazla duyuru bulunabilir (`user.announcements`). |
+| 6 | `users` | `id` | `job_postings` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının oluşturduğu birden fazla iş ilanı bulunabilir (`user.job_postings`). |
+| 7 | `users` | `id` | `applications` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının yaptığı birden fazla iş başvurusu bulunabilir (`user.applications`). |
+| 8 | `job_postings` | `id` | `applications` | `job_posting_id` | One-to-Many (`1:N`) | Bir iş ilanına birden fazla başvuru gelebilir (`job_posting.applications`). |
+
+### Tables Summary
+
+| Tablo Adı | Model Sınıfı | Dosya | Primary Key | Foreign Keys | Toplam Alan | Açıklama |
+|---|---|---|---|---|---|---|
+| `users` | `User` | `app/models/user.py` | `id` | — | 6 | Mezun ve öğrenci kullanıcı profilleri |
+| `announcements` | `Announcement` | `app/models/announcement.py` | `id` | `user_id → users.id` | 7 | Etkinlik ve genel duyurular |
+| `job_postings` | `JobPosting` | `app/models/job_posting.py` | `id` | `user_id → users.id` | 11 | İş ve staj fırsat ilanları |
+| `applications` | `Application` | `app/models/application.py` | `id` | `user_id → users.id`<br>`job_posting_id → job_postings.id` | 7 | İş ilanlarına yapılan aday başvuruları |
+
+---
+
 ## User
 
 **Model file:** [`app/models/user.py`](app/models/user.py)  
