@@ -7,12 +7,15 @@ from app.database import db, migrate
 from app.models.user import User
 from app.models.announcement import Announcement
 from app.models.job_posting import JobPosting
+from app.models.application import Application
 from app.routes.users import users_bp
 from app.routes.api_users import api_users_bp
 from app.routes.announcements import announcements_bp
 from app.routes.api_announcements import api_announcements_bp
 from app.routes.job_postings import job_postings_bp
 from app.routes.api_job_postings import api_job_postings_bp
+from app.routes.applications import applications_bp
+from app.routes.api_applications import api_applications_bp
 
 load_dotenv()
 
@@ -60,14 +63,16 @@ swagger_template = {
     "info": {
         "title": "Alumni API",
         "description": "Alumni Tracking & Networking Platform REST API",
-        "version": "1.2.0",
+        "version": "1.3.0",
     },
     "tags": [
         {"name": "Health", "description": "API status"},
         {"name": "Users", "description": "User CRUD via ApiUserController"},
         {"name": "Announcements", "description": "Announcement CRUD via ApiAnnouncementController"},
         {"name": "Job Postings", "description": "Job Posting CRUD via ApiJobPostingController"},
-        {"name": "Users (Nested)", "description": "Nested user resources (announcements, job-postings)"},
+        {"name": "Applications", "description": "Job Application CRUD via ApiApplicationController"},
+        {"name": "Users (Nested)", "description": "Nested user resources (announcements, job-postings, applications)"},
+        {"name": "Job Postings (Nested)", "description": "Nested job posting resources (applications)"},
     ],
 }
 
@@ -83,6 +88,8 @@ app.register_blueprint(announcements_bp)       # /announcements    — HTML
 app.register_blueprint(api_announcements_bp)   # /api/announcements — JSON
 app.register_blueprint(job_postings_bp)        # /job-postings     — HTML
 app.register_blueprint(api_job_postings_bp)    # /api/job-postings — JSON
+app.register_blueprint(applications_bp)        # /applications     — HTML
+app.register_blueprint(api_applications_bp)    # /api/applications — JSON
 
 # ------------------------------------------------------------------
 # General routes
@@ -116,12 +123,14 @@ def index():
             <li><a href="/users">Users & Alumni Management (HTML)</a></li>
             <li><a href="/announcements">Announcements & Events Management (HTML)</a></li>
             <li><a href="/job-postings">Job Postings & Opportunities (HTML)</a></li>
+            <li><a href="/applications">Job Applications Management (HTML)</a></li>
         </ul>
         <h3>REST API & Documentation</h3>
         <ul>
             <li><a href="/api/users">API Users (JSON)</a></li>
             <li><a href="/api/announcements">API Announcements (JSON)</a></li>
             <li><a href="/api/job-postings">API Job Postings (JSON)</a></li>
+            <li><a href="/api/applications">API Applications (JSON)</a></li>
             <li><a href="/api/health">API Health Check (JSON)</a></li>
             <li><a href="/api/swagger">Interactive Swagger / OpenAPI Docs</a></li>
         </ul>

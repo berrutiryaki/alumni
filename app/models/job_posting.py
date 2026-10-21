@@ -26,6 +26,7 @@ class JobPosting(db.Model):
     # ------------------------------------------------------------------
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     user = db.relationship("User", back_populates="job_postings")
+    applications = db.relationship("Application", back_populates="job_posting", lazy="dynamic")
 
     def __init__(self, title: str, description: str, company: str,
                  location: str = None, employment_type: str = "full-time",

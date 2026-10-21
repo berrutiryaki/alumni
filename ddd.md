@@ -29,6 +29,7 @@ This document describes the data models, field definitions, form mappings, and C
 |---|---|---|---|---|
 | `announcements` | One-to-Many | `Announcement` | `announcements.user_id → users.id` | A user can author many announcements |
 | `job_postings` | One-to-Many | `JobPosting` | `job_postings.user_id → users.id` | A user can post many job listings |
+| `applications` | One-to-Many | `Application` | `applications.user_id → users.id` | A user can submit many job applications |
 
 ### Business Rules
 
@@ -70,6 +71,8 @@ This document describes the data models, field definitions, form mappings, and C
 | Create user's announcement | `POST` | `/api/users/<user_id>/announcements` | Creates an announcement associated with this user | `201 Created` |
 | List user's job postings | `GET` | `/api/users/<user_id>/job-postings` | Returns all job postings published by this user | `200 OK` |
 | Create user's job posting | `POST` | `/api/users/<user_id>/job-postings` | Creates a job posting associated with this user | `201 Created` |
+| List user's applications | `GET` | `/api/users/<user_id>/applications` | Returns all job applications submitted by this user | `200 OK` |
+| Create user's application | `POST` | `/api/users/<user_id>/applications` | Submits a new job application as this user | `201 Created` |
 
 #### API Error Responses
 
@@ -231,6 +234,7 @@ This document describes the data models, field definitions, form mappings, and C
 | Relationship | Type | Target Model | Foreign Key | Notes |
 |---|---|---|---|---|
 | `user` | Many-to-One | `User` | `job_postings.user_id → users.id` | The user who posted this job listing |
+| `applications` | One-to-Many | `Application` | `applications.job_posting_id → job_postings.id` | Applications received for this job |
 
 ### Business Rules
 
@@ -266,6 +270,13 @@ This document describes the data models, field definitions, form mappings, and C
 | Full update | `PUT` | `/api/job-postings/<id>` | `ApiJobPostingController.update(id)` | `200 OK` |
 | Partial update | `PATCH` | `/api/job-postings/<id>` | `ApiJobPostingController.partial_update(id)` | `200 OK` |
 | Delete | `DELETE` | `/api/job-postings/<id>` | `ApiJobPostingController.delete(id)` | `200 OK` |
+
+#### Nested Endpoints (under JobPosting)
+
+| Operation | Method | URL | Description | Success Code |
+|---|---|---|---|---|
+| List job's applications | `GET` | `/api/job-postings/<job_id>/applications` | Returns all applications submitted for this job | `200 OK` |
+| Apply to job posting | `POST` | `/api/job-postings/<job_id>/applications` | Submits an application for this specific job | `201 Created` |
 
 #### API Error Responses
 
@@ -325,6 +336,104 @@ This document describes the data models, field definitions, form mappings, and C
 
 ---
 
+## Application
+
+**Model file:** [`app/models/application.py`](app/models/application.py)  
+**Storage:** Database via SQLAlchemy & Flask-Migrate (PostgreSQL in Docker / SQLite fallback)  
+**Controllers:** `ApplicationController` (HTML) · `ApiApplicationController` (JSON API)
+
+### Field Definitions
+
+| Field | Python Type | DB Type | Form Field (`name=`) | Required | Default | Notes |
+|---|---|---|---|---|---|---|
+| `id` | `int` | `Integer` PK | — | — | Auto-increment | Assigned by the model on create; not sent in form |
+| `user_id` | `int` | `Integer` FK | `user_id` | Yes | — | FK → `users.id`; links application to the applicant user |
+| `job_posting_id` | `int` | `Integer` FK | `job_posting_id` | Yes | — | FK → `job_postings.id`; links application to the job posting |
+| `resume_url` | `str` | `String(255)` | `resume_url` | No | `None` | Link to CV, LinkedIn, or portfolio |
+| `cover_letter` | `str` | `Text` | `cover_letter` | No | `None` | Candidate's message / statement of interest |
+| `status` | `str` | `String(50)` | `status` | No | `"pending"` | Accepted: `pending`, `reviewed`, `accepted`, `rejected` |
+| `applied_at` | `str` | `String(30)` | — | — | `datetime.now()` | Set automatically on application creation; not editable |
+
+### Relationships
+
+| Relationship | Type | Target Model | Foreign Key | Notes |
+|---|---|---|---|---|
+| `user` | Many-to-One | `User` | `applications.user_id → users.id` | The applicant user |
+| `job_posting` | Many-to-One | `JobPosting` | `applications.job_posting_id → job_postings.id` | The target job posting |
+
+### Business Rules
+
+- `user_id` and `job_posting_id` are required on both `POST` (create) and `PUT` (full update).
+- Both `user_id` and `job_posting_id` must refer to existing records in the database.
+- `status` defaults to `"pending"` if not provided; valid values: `pending`, `reviewed`, `accepted`, `rejected`.
+- `applied_at` is set once at creation time and never modified.
+- `id` is never accepted from the client; it is always assigned server-side.
+
+---
+
+### CRUD Operations
+
+#### Web Interface (HTML)
+
+| Operation | Method | URL | Controller Method | View Template |
+|---|---|---|---|---|
+| List all | `GET` | `/applications/` | `ApplicationController.index()` | `application/index.html` |
+| Show create form | `GET` | `/applications/new` | — | `application/create.html` |
+| Create | `POST` | `/applications/` | `ApplicationController.create(data)` | Redirects to list on success |
+| Show edit form | `GET` | `/applications/<id>/edit` | `ApplicationController.show(id)` | `application/edit.html` |
+| Update | `POST` | `/applications/<id>/edit` | `ApplicationController.update(id, data)` | Redirects to list on success |
+| Delete | `POST` | `/applications/<id>/delete` | `ApplicationController.delete(id)` | Redirects to list on success |
+
+#### REST API (JSON)
+
+| Operation | Method | URL | Controller Method | Success Code |
+|---|---|---|---|---|
+| List all | `GET` | `/api/applications/` | `ApiApplicationController.index()` | `200 OK` |
+| Get by ID | `GET` | `/api/applications/<id>` | `ApiApplicationController.show(id)` | `200 OK` |
+| Create | `POST` | `/api/applications/` | `ApiApplicationController.create()` | `201 Created` |
+| Full update | `PUT` | `/api/applications/<id>` | `ApiApplicationController.update(id)` | `200 OK` |
+| Partial update | `PATCH` | `/api/applications/<id>` | `ApiApplicationController.partial_update(id)` | `200 OK` |
+| Delete | `DELETE` | `/api/applications/<id>` | `ApiApplicationController.delete(id)` | `200 OK` |
+
+#### API Error Responses
+
+| Status Code | Condition |
+|---|---|
+| `400 Bad Request` | Missing `user_id` or `job_posting_id` |
+| `404 Not Found` | No application found with the given `id`, or referenced `user`/`job_posting` not found |
+
+---
+
+### Postman — Form-Data Examples
+
+**POST /api/applications/** — Submit a new job application
+
+| Key | Value |
+|---|---|
+| `user_id` | 1 |
+| `job_posting_id` | 1 |
+| `resume_url` | https://linkedin.com/in/example |
+| `cover_letter` | I have strong experience in Python and Flask backend architectures. |
+| `status` | pending |
+
+**PATCH /api/applications/1** — Update application status
+
+| Key | Value |
+|---|---|
+| `status` | reviewed |
+
+**PUT /api/applications/1** — Full replace
+
+| Key | Value |
+|---|---|
+| `user_id` | 1 |
+| `job_posting_id` | 1 |
+| `resume_url` | https://github.com/example/cv.pdf |
+| `cover_letter` | Updated cover letter with additional project details. |
+| `status` | accepted |
+
+---
+
 ## Swagger / OpenAPI
 
 Interactive API documentation is available at:
@@ -333,4 +442,4 @@ Interactive API documentation is available at:
 http://localhost:5000/api/swagger
 ```
 
-All `/api/users`, `/api/announcements`, and `/api/job-postings` endpoints are documented there with request parameters and response schemas.
+All `/api/users`, `/api/announcements`, `/api/job-postings`, and `/api/applications` endpoints are documented there with request parameters and response schemas.

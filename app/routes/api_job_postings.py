@@ -6,6 +6,7 @@ Delegates to: ApiJobPostingController
 
 from flask import Blueprint
 from app.controllers.api_job_posting_controller import ApiJobPostingController
+from app.controllers.api_application_controller import ApiApplicationController
 
 api_job_postings_bp = Blueprint("api_job_postings", __name__, url_prefix="/api/job-postings")
 
@@ -281,3 +282,81 @@ def delete(job_posting_id):
         description: Job posting not found
     """
     return ApiJobPostingController.delete(job_posting_id)
+
+
+# ------------------------------------------------------------------
+# Nested Routes: Job Posting Applications
+# ------------------------------------------------------------------
+
+@api_job_postings_bp.route("/<int:job_posting_id>/applications", methods=["GET"])
+def job_posting_applications(job_posting_id):
+    """
+    Get all applications received for a specific job posting (nested route).
+    ---
+    tags:
+      - Job Postings (Nested)
+      - Applications
+    parameters:
+      - name: job_posting_id
+        in: path
+        type: integer
+        required: true
+        description: Targeted Job Posting ID
+    responses:
+      200:
+        description: List of applications for the job posting
+      404:
+        description: Job posting not found
+    """
+    return ApiApplicationController.index_by_job_posting(job_posting_id)
+
+
+@api_job_postings_bp.route("/<int:job_posting_id>/applications", methods=["POST"])
+def apply_to_job_posting(job_posting_id):
+    """
+    Submit an application directly to this job posting (nested route).
+    ---
+    tags:
+      - Job Postings (Nested)
+      - Applications
+    consumes:
+      - multipart/form-data
+      - application/json
+    parameters:
+      - name: job_posting_id
+        in: path
+        type: integer
+        required: true
+        description: Targeted Job Posting ID
+      - name: user_id
+        in: formData
+        type: integer
+        required: true
+        description: Applicant user ID
+      - name: resume_url
+        in: formData
+        type: string
+        description: CV / LinkedIn link
+      - name: cover_letter
+        in: formData
+        type: string
+        description: Motivation note
+      - name: status
+        in: formData
+        type: string
+        description: Initial status (default pending)
+    responses:
+      201:
+        description: Application submitted for job posting
+      400:
+        description: Missing required fields
+      404:
+        description: Job Posting or User not found
+    """
+    from app.models.job_posting import JobPosting
+    from flask import jsonify
+    job = JobPosting.get_by_id(job_posting_id)
+    if not job:
+        return jsonify({"status": "error", "message": f"Job posting {job_posting_id} not found"}), 404
+    return ApiApplicationController.create(extra_data={"job_posting_id": job_posting_id})
+

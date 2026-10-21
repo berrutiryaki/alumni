@@ -8,6 +8,7 @@ from flask import Blueprint
 from app.controllers.api_user_controller import ApiUserController
 from app.controllers.api_announcement_controller import ApiAnnouncementController
 from app.controllers.api_job_posting_controller import ApiJobPostingController
+from app.controllers.api_application_controller import ApiApplicationController
 
 api_users_bp = Blueprint("api_users", __name__, url_prefix="/api/users")
 
@@ -364,4 +365,78 @@ def create_user_job_posting(user_id):
     if not user:
         return jsonify({"status": "error", "message": f"User {user_id} not found"}), 404
     return ApiJobPostingController.create(extra_data={"user_id": user_id})
+
+
+@api_users_bp.route("/<int:user_id>/applications", methods=["GET"])
+def user_applications(user_id):
+    """
+    Get all job applications submitted by a specific user (nested route).
+    ---
+    tags:
+      - Users (Nested)
+      - Applications
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the applicant user
+    responses:
+      200:
+        description: List of applications submitted by user
+      404:
+        description: User not found
+    """
+    return ApiApplicationController.index_by_user(user_id)
+
+
+@api_users_bp.route("/<int:user_id>/applications", methods=["POST"])
+def create_user_application(user_id):
+    """
+    Submit a job application directly as this user (nested route).
+    ---
+    tags:
+      - Users (Nested)
+      - Applications
+    consumes:
+      - multipart/form-data
+      - application/json
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the applicant user
+      - name: job_posting_id
+        in: formData
+        type: integer
+        required: true
+        description: ID of the targeted job posting
+      - name: resume_url
+        in: formData
+        type: string
+        description: CV / LinkedIn / portfolio link
+      - name: cover_letter
+        in: formData
+        type: string
+        description: Cover letter message
+      - name: status
+        in: formData
+        type: string
+        description: Application status (default pending)
+    responses:
+      201:
+        description: Application submitted by user
+      400:
+        description: Missing job_posting_id or invalid input
+      404:
+        description: User or Job Posting not found
+    """
+    from app.models.user import User
+    from flask import jsonify
+    user = User.get_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": f"User {user_id} not found"}), 404
+    return ApiApplicationController.create(extra_data={"user_id": user_id})
+
 
