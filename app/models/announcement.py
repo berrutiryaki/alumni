@@ -16,11 +16,19 @@ class Announcement(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.String(30), nullable=False, default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M"))
 
-    def __init__(self, title: str, content: str, author: str = None, is_active: bool = True):
+    # ------------------------------------------------------------------
+    # Foreign Keys & Relationships
+    # ------------------------------------------------------------------
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    user = db.relationship("User", back_populates="announcements")
+
+    def __init__(self, title: str, content: str, author: str = None,
+                 is_active: bool = True, user_id: int = None):
         self.title = title
         self.content = content
         self.author = author
         self.is_active = is_active
+        self.user_id = user_id
         self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # ------------------------------------------------------------------
@@ -35,6 +43,7 @@ class Announcement(db.Model):
             "author": self.author,
             "is_active": self.is_active,
             "created_at": self.created_at,
+            "user_id": self.user_id,
         }
 
     # ------------------------------------------------------------------
@@ -43,11 +52,18 @@ class Announcement(db.Model):
 
     @classmethod
     def create(cls, data: dict) -> "Announcement":
+        user_id = data.get("user_id")
+        if user_id is not None:
+            try:
+                user_id = int(user_id)
+            except (ValueError, TypeError):
+                user_id = None
         a = cls(
             title=data.get("title"),
             content=data.get("content"),
             author=data.get("author"),
             is_active=data.get("is_active", True) not in [False, "false", "0", 0],
+            user_id=user_id,
         )
         try:
             db.session.add(a)
@@ -74,6 +90,12 @@ class Announcement(db.Model):
         a.content = data.get("content")
         a.author = data.get("author")
         a.is_active = data.get("is_active", True) not in [False, "false", "0", 0]
+        if "user_id" in data:
+            user_id = data["user_id"]
+            try:
+                a.user_id = int(user_id) if user_id else None
+            except (ValueError, TypeError):
+                a.user_id = None
         try:
             db.session.commit()
             return a
@@ -94,6 +116,12 @@ class Announcement(db.Model):
             a.author = data["author"]
         if "is_active" in data:
             a.is_active = data["is_active"] not in [False, "false", "0", 0]
+        if "user_id" in data:
+            user_id = data["user_id"]
+            try:
+                a.user_id = int(user_id) if user_id else None
+            except (ValueError, TypeError):
+                a.user_id = None
         try:
             db.session.commit()
             return a
@@ -116,3 +144,4 @@ class Announcement(db.Model):
 
     def __repr__(self) -> str:
         return f"<Announcement id={self.id} title={self.title!r}>"
+

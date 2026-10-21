@@ -23,6 +23,13 @@ This document describes the data models, field definitions, form mappings, and C
 | `department` | `str` | `department` | No | `None` | Academic department (e.g. Computer Engineering) |
 | `graduation_year` | `int` | `graduation_year` | No | `None` | Only stored when `status = alumni`; ignored for students |
 
+### Relationships
+
+| Relationship | Type | Target Model | Foreign Key | Notes |
+|---|---|---|---|---|
+| `announcements` | One-to-Many | `Announcement` | `announcements.user_id → users.id` | A user can author many announcements |
+| `job_postings` | One-to-Many | `JobPosting` | `job_postings.user_id → users.id` | A user can post many job listings |
+
 ### Business Rules
 
 - `graduation_year` is automatically set to `None` if `status` is `"student"` — even if a value is submitted.
@@ -119,6 +126,13 @@ This document describes the data models, field definitions, form mappings, and C
 | `author` | `str` | `author` | No | `None` | Display name of the person posting |
 | `is_active` | `bool` | `is_active` | No | `True` | Accepted form values: `true` / `false` |
 | `created_at` | `str` | — | — | `datetime.now()` | Set automatically on creation; not editable |
+| `user_id` | `int` | `user_id` | No | `None` | FK → `users.id`; links announcement to the author user |
+
+### Relationships
+
+| Relationship | Type | Target Model | Foreign Key | Notes |
+|---|---|---|---|---|
+| `user` | Many-to-One | `User` | `announcements.user_id → users.id` | The user who created this announcement |
 
 ### Business Rules
 
@@ -201,6 +215,13 @@ This document describes the data models, field definitions, form mappings, and C
 | `is_active` | `bool` | `Boolean` | `is_active` | No | `True` | Accepted form values: `true` / `false` |
 | `created_at` | `str` | `DateTime` | — | — | `datetime.now()` | Set automatically on creation; not editable |
 | `expires_at` | `str` | `String(50)` | `expires_at` | No | `None` | Expiration date (e.g. "2025-12-31"); informational only |
+| `user_id` | `int` | `Integer` FK | `user_id` | No | `None` | FK → `users.id`; links job posting to the user who posted it |
+
+### Relationships
+
+| Relationship | Type | Target Model | Foreign Key | Notes |
+|---|---|---|---|---|
+| `user` | Many-to-One | `User` | `job_postings.user_id → users.id` | The user who posted this job listing |
 
 ### Business Rules
 

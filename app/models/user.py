@@ -15,6 +15,12 @@ class User(db.Model):
     department = db.Column(db.String(120), nullable=True)
     graduation_year = db.Column(db.Integer, nullable=True)
 
+    # ------------------------------------------------------------------
+    # Relationships
+    # ------------------------------------------------------------------
+    announcements = db.relationship("Announcement", back_populates="user", lazy="dynamic")
+    job_postings = db.relationship("JobPosting", back_populates="user", lazy="dynamic")
+
     def __init__(self, name: str, email: str, status: str = "student",
                  department: str = None, graduation_year: int = None):
         self.name = name
