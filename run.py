@@ -71,7 +71,7 @@ swagger_template = {
         {"name": "Announcements", "description": "Announcement CRUD via ApiAnnouncementController"},
         {"name": "Job Postings", "description": "Job Posting CRUD via ApiJobPostingController"},
         {"name": "Applications", "description": "Job Application CRUD via ApiApplicationController"},
-        {"name": "Users (Nested)", "description": "Nested user resources (announcements, job-postings, applications)"},
+        {"name": "Users (Nested)", "description": "Nested user resources (announcements, applications)"},
         {"name": "Job Postings (Nested)", "description": "Nested job posting resources (applications)"},
     ],
 }

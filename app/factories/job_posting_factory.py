@@ -81,15 +81,6 @@ class JobPostingFactory:
         """Builds raw job posting dictionary data without persisting to the database."""
         template = random.choice(SAMPLE_JOB_POSTINGS)
 
-        # Pick an existing user if available
-        user_id = overrides.get("user_id")
-        if user_id is None:
-            user_count = User.query.count()
-            if user_count > 0:
-                random_user = User.query.order_by(User.id.asc()).offset(random.randint(0, user_count - 1)).first()
-                if random_user:
-                    user_id = random_user.id
-
         employment_types = ["full-time", "part-time", "internship", "contract", "remote"]
 
         tech_roles = [
@@ -109,7 +100,6 @@ class JobPostingFactory:
             "posted_by": template.get("posted_by") if random.random() < 0.7 else fake.company_email(),
             "is_active": overrides.get("is_active", True if random.random() > 0.1 else False),
             "expires_at": template.get("expires_at", "2026-12-31"),
-            "user_id": user_id,
         }
         data.update(overrides)
         return data

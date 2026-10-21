@@ -47,7 +47,6 @@ class JobPostingController:
                 "posted_by": (data.get("posted_by") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
                 "expires_at": (data.get("expires_at") or "").strip() or None,
-                "user_id": data.get("user_id"),
             })
             return {"success": True, "job_posting": jp.to_dict(), "error": None}
         except Exception as e:
@@ -73,7 +72,6 @@ class JobPostingController:
                 "posted_by": (data.get("posted_by") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
                 "expires_at": (data.get("expires_at") or "").strip() or None,
-                "user_id": data.get("user_id"),
             })
             if jp is None:
                 return {"success": False, "job_posting": None, "error": f"Job posting {job_posting_id} not found"}

@@ -10,44 +10,42 @@ This document describes the data models, field definitions, form mappings, and C
 
 This section provides a bird's-eye view of all tables in the Alumni Platform, their primary keys, foreign keys, and cardinalities.
 
+> **Architecture Note:** `users` ve `job_postings` tabloları arasında **doğrudan yabancı anahtar (FK) bağlantısı yoktur**. `applications` tablosu, aday (`users`) ile iş ilanı (`job_postings`) arasındaki **Eylem Tablosu (Action / Junction Table)** olarak görev yapar ve Çoktan-Çoğa (Many-to-Many) ilişkiyi kurar.
+
 ### Entity-Relationship Diagram
 
 ```
-┌──────────────────────────────────────┐
-│                users                 │
-├──────────────────────────────────────┤
-│ PK  id               Integer         │
-│     name             String(120)     │
-│ UQ  email            String(120)     │
-│     status           String(20)      │
-│     department       String(120)     │
-│     graduation_year  Integer         │
-└──────────────────────────────────────┘
-         │ 1                   │ 1                  │ 1
-         │                     │                    │
-         │ N (user_id)         │ N (user_id)        │ N (user_id)
-         ▼                     ▼                    ▼
-┌──────────────────┐  ┌──────────────────┐  ┌───────────────────────────────┐
-│  announcements   │  │   job_postings   │  │         applications          │
-├──────────────────┤  ├──────────────────┤  ├───────────────────────────────┤
-│ PK id  Integer   │  │ PK id  Integer   │  │ PK id              Integer    │
-│ FK user_id (opt) │  │ FK user_id (opt) │  │ FK user_id (req)   Integer    │
-│    title         │  │    title         │  │ FK job_posting_id  Integer    │◀─┐
-│    content       │  │    company       │  │    resume_url      String(255)│  │
-│    author        │  │    description   │  │    cover_letter    Text       │  │
-│    is_active     │  │    location      │  │    status          String(50) │  │ 1 (job_posting_id)
-│    created_at    │  │    salary_range  │  │    applied_at      String(30) │  │
-└──────────────────┘  │    employment_typ│  └───────────────────────────────┘  │
-                      │    is_active     │                 ▲                   │
-                      │    created_at    │                 └───────────────────┘
-                      │    expires_at    │                      N
-                      └──────────────────┘
+┌──────────────────────────────────────┐             ┌──────────────────────────────────┐
+│                users                 │             │           job_postings           │
+├──────────────────────────────────────┤             ├──────────────────────────────────┤
+│ PK  id               Integer         │             │ PK  id               Integer     │
+│     name             String(120)     │             │     title            String(200) │
+│ UQ  email            String(120)     │             │     company          String(150) │
+│     status           String(20)      │             │     description      Text        │
+│     department       String(120)     │             │     location         String(150) │
+│     graduation_year  Integer         │             │     employment_type  String(50)  │
+└──────────────────────────────────────┘             │     salary_range     String(100) │
+         │ 1                     │ 1                 │     posted_by        String(100) │
+         │                       │                   │     is_active        Boolean     │
+         │ N (user_id)           │ N (user_id)       │     created_at       String(30)  │
+         ▼                       ▼                   │     expires_at       String(50)  │
+┌──────────────────┐    ┌──────────────────────────────────┐ └──────────────────────────────────┘
+│  announcements   │    │          applications            │                   │ 1
+├──────────────────┤    │          (Action Table)          │                   │
+│ PK id  Integer   │    ├──────────────────────────────────┤                   │ N (job_posting_id)
+│ FK user_id (opt) │    │ PK id              Integer       │◀──────────────────┘
+│    title         │    │ FK user_id (req)   Integer (FK)  │
+│    content       │    │ FK job_posting_id  Integer (FK)  │
+│    author        │    │    resume_url      String(255)   │
+│    is_active     │    │    cover_letter    Text          │
+│    created_at    │    │    status          String(50)    │
+└──────────────────┘    │    applied_at      String(30)    │
+                        └──────────────────────────────────┘
 ```
 
 ```mermaid
 erDiagram
     users ||--o{ announcements : "authors (1:N)"
-    users ||--o{ job_postings : "posts (1:N)"
     users ||--o{ applications : "submits (1:N)"
     job_postings ||--o{ applications : "receives (1:N)"
 
@@ -72,7 +70,6 @@ erDiagram
 
     job_postings {
         int id PK
-        int user_id FK
         string title
         string company
         text description
@@ -101,13 +98,12 @@ erDiagram
 | # | Kaynak Tablo (Source) | Kaynak Kolon (FK) | Hedef Tablo (Target) | Hedef Kolon (PK) | İlişki Türü (Cardinality) | İş Mantığı / Açıklama |
 |---|---|---|---|---|---|---|
 | 1 | `announcements` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Bir duyuruyu bir kullanıcı (yazar) yayınlar. Opsiyoneldir (`nullable=True`). |
-| 2 | `job_postings` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Bir iş ilanını bir mezun veya işveren kullanıcı yayınlar. Opsiyoneldir (`nullable=True`). |
-| 3 | `applications` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Her iş başvurusunu kayıtlı bir kullanıcı (öğrenci/mezun) yapar. Zorunludur (`nullable=False`). |
-| 4 | `applications` | `job_posting_id` | `job_postings` | `id` | Many-to-One (`N:1`) | Her iş başvurusu belirli bir iş ilanına yöneliktir. Zorunludur (`nullable=False`). |
-| 5 | `users` | `id` | `announcements` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının yayınladığı birden fazla duyuru bulunabilir (`user.announcements`). |
-| 6 | `users` | `id` | `job_postings` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının oluşturduğu birden fazla iş ilanı bulunabilir (`user.job_postings`). |
-| 7 | `users` | `id` | `applications` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının yaptığı birden fazla iş başvurusu bulunabilir (`user.applications`). |
-| 8 | `job_postings` | `id` | `applications` | `job_posting_id` | One-to-Many (`1:N`) | Bir iş ilanına birden fazla başvuru gelebilir (`job_posting.applications`). |
+| 2 | `applications` | `user_id` | `users` | `id` | Many-to-One (`N:1`) | Her iş başvurusunu kayıtlı bir kullanıcı (öğrenci/mezun) yapar. Zorunludur (`nullable=False`). |
+| 3 | `applications` | `job_posting_id` | `job_postings` | `id` | Many-to-One (`N:1`) | Her iş başvurusu belirli bir iş ilanına yöneliktir. Zorunludur (`nullable=False`). |
+| 4 | `users` | `id` | `announcements` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının yayınladığı birden fazla duyuru bulunabilir (`user.announcements`). |
+| 5 | `users` | `id` | `applications` | `user_id` | One-to-Many (`1:N`) | Bir kullanıcının yaptığı birden fazla iş başvurusu bulunabilir (`user.applications`). |
+| 6 | `job_postings` | `id` | `applications` | `job_posting_id` | One-to-Many (`1:N`) | Bir iş ilanına birden fazla başvuru gelebilir (`job_posting.applications`). |
+| **Action** | `applications` | `(user_id, job_posting_id)` | `users` & `job_postings` | `id` | **Action / Junction Table** | `users` ile `job_postings` arasında doğrudan FK yoktur. `applications` tablosu aralarındaki bağlantıyı sağlayan eylem tablosudur. |
 
 ### Tables Summary
 
@@ -115,8 +111,8 @@ erDiagram
 |---|---|---|---|---|---|---|
 | `users` | `User` | `app/models/user.py` | `id` | — | 6 | Mezun ve öğrenci kullanıcı profilleri |
 | `announcements` | `Announcement` | `app/models/announcement.py` | `id` | `user_id → users.id` | 7 | Etkinlik ve genel duyurular |
-| `job_postings` | `JobPosting` | `app/models/job_posting.py` | `id` | `user_id → users.id` | 11 | İş ve staj fırsat ilanları |
-| `applications` | `Application` | `app/models/application.py` | `id` | `user_id → users.id`<br>`job_posting_id → job_postings.id` | 7 | İş ilanlarına yapılan aday başvuruları |
+| `job_postings` | `JobPosting` | `app/models/job_posting.py` | `id` | — | 10 | İş ve staj fırsat ilanları (bağımsız) |
+| `applications` | `Application` | `app/models/application.py` | `id` | `user_id → users.id`<br>`job_posting_id → job_postings.id` | 7 | Eylem tablosu: Kullanıcıların iş ilanlarına başvuruları |
 
 ---
 
@@ -142,8 +138,7 @@ erDiagram
 | Relationship | Type | Target Model | Foreign Key | Notes |
 |---|---|---|---|---|
 | `announcements` | One-to-Many | `Announcement` | `announcements.user_id → users.id` | A user can author many announcements |
-| `job_postings` | One-to-Many | `JobPosting` | `job_postings.user_id → users.id` | A user can post many job listings |
-| `applications` | One-to-Many | `Application` | `applications.user_id → users.id` | A user can submit many job applications |
+| `applications` | One-to-Many | `Application` | `applications.user_id → users.id` | A user can submit many job applications (Action Table) |
 
 ### Business Rules
 
@@ -183,8 +178,6 @@ erDiagram
 |---|---|---|---|---|
 | List user's announcements | `GET` | `/api/users/<user_id>/announcements` | Returns all announcements authored by this user | `200 OK` |
 | Create user's announcement | `POST` | `/api/users/<user_id>/announcements` | Creates an announcement associated with this user | `201 Created` |
-| List user's job postings | `GET` | `/api/users/<user_id>/job-postings` | Returns all job postings published by this user | `200 OK` |
-| Create user's job posting | `POST` | `/api/users/<user_id>/job-postings` | Creates a job posting associated with this user | `201 Created` |
 | List user's applications | `GET` | `/api/users/<user_id>/applications` | Returns all job applications submitted by this user | `200 OK` |
 | Create user's application | `POST` | `/api/users/<user_id>/applications` | Submits a new job application as this user | `201 Created` |
 
@@ -341,14 +334,12 @@ erDiagram
 | `is_active` | `bool` | `Boolean` | `is_active` | No | `True` | Accepted form values: `true` / `false` |
 | `created_at` | `str` | `DateTime` | — | — | `datetime.now()` | Set automatically on creation; not editable |
 | `expires_at` | `str` | `String(50)` | `expires_at` | No | `None` | Expiration date (e.g. "2025-12-31"); informational only |
-| `user_id` | `int` | `Integer` FK | `user_id` | No | `None` | FK → `users.id`; links job posting to the user who posted it |
 
 ### Relationships
 
 | Relationship | Type | Target Model | Foreign Key | Notes |
 |---|---|---|---|---|
-| `user` | Many-to-One | `User` | `job_postings.user_id → users.id` | The user who posted this job listing |
-| `applications` | One-to-Many | `Application` | `applications.job_posting_id → job_postings.id` | Applications received for this job |
+| `applications` | One-to-Many | `Application` | `applications.job_posting_id → job_postings.id` | Candidates who applied to this job posting (Action Table) |
 
 ### Business Rules
 
@@ -455,6 +446,8 @@ erDiagram
 **Model file:** [`app/models/application.py`](app/models/application.py)  
 **Storage:** Database via SQLAlchemy & Flask-Migrate (PostgreSQL in Docker / SQLite fallback)  
 **Controllers:** `ApplicationController` (HTML) · `ApiApplicationController` (JSON API)
+
+> **Action Table Role:** `Application` tablosu `User` ve `JobPosting` modelleri arasındaki **Eylem Tablosudur (Action / Junction Table)**. `users` ile `job_postings` arasında doğrudan FK ilişkisi bulunmaz; kullanıcıların ilanlarla etkileşimi (başvuru yapma) bu tablo üzerinden yürütülür.
 
 ### Field Definitions
 

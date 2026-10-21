@@ -58,8 +58,6 @@ def index():
                     type: string
                   expires_at:
                     type: string
-                  user_id:
-                    type: integer
     """
     return ApiJobPostingController.index()
 
@@ -115,10 +113,6 @@ def create():
         in: formData
         type: string
         description: Expiration date (YYYY-MM-DD)
-      - name: user_id
-        in: formData
-        type: integer
-        description: ID of user who published the post
     responses:
       201:
         description: Job posting created
@@ -195,9 +189,6 @@ def update(job_posting_id):
       - name: expires_at
         in: formData
         type: string
-      - name: user_id
-        in: formData
-        type: integer
     responses:
       200:
         description: Job posting updated
@@ -251,9 +242,6 @@ def partial_update(job_posting_id):
       - name: expires_at
         in: formData
         type: string
-      - name: user_id
-        in: formData
-        type: integer
     responses:
       200:
         description: Job posting partially updated

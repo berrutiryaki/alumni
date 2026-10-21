@@ -19,7 +19,6 @@ class User(db.Model):
     # Relationships
     # ------------------------------------------------------------------
     announcements = db.relationship("Announcement", back_populates="user", lazy="dynamic")
-    job_postings = db.relationship("JobPosting", back_populates="user", lazy="dynamic")
     applications = db.relationship("Application", back_populates="user", lazy="dynamic")
 
     def __init__(self, name: str, email: str, status: str = "student",

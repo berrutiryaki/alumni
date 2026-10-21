@@ -33,10 +33,8 @@ class ApiJobPostingController:
             return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500
 
     @staticmethod
-    def create(extra_data: dict = None):
+    def create():
         data = request.form.to_dict() if request.form else request.get_json() or {}
-        if extra_data:
-            data.update(extra_data)
 
         title = (data.get("title") or "").strip()
         description = (data.get("description") or "").strip()
@@ -56,7 +54,6 @@ class ApiJobPostingController:
                 "posted_by": (data.get("posted_by") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
                 "expires_at": (data.get("expires_at") or "").strip() or None,
-                "user_id": data.get("user_id"),
             })
             return jsonify({"status": "success", "job_posting": jp.to_dict()}), 201
         except Exception as e:
@@ -83,7 +80,6 @@ class ApiJobPostingController:
                 "posted_by": (data.get("posted_by") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
                 "expires_at": (data.get("expires_at") or "").strip() or None,
-                "user_id": data.get("user_id"),
             })
             if jp is None:
                 return jsonify({"status": "error", "message": f"Job posting {job_posting_id} not found"}), 404
@@ -109,27 +105,5 @@ class ApiJobPostingController:
             if not deleted:
                 return jsonify({"status": "error", "message": f"Job posting {job_posting_id} not found"}), 404
             return jsonify({"status": "success", "message": f"Job posting {job_posting_id} deleted"}), 200
-        except Exception as e:
-            return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500
-
-    # ------------------------------------------------------------------
-    # Nested: filter by user_id
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def index_by_user(user_id: int):
-        """Return all job postings belonging to a specific user."""
-        try:
-            from app.models.user import User
-            user = User.get_by_id(user_id)
-            if user is None:
-                return jsonify({"status": "error", "message": f"User {user_id} not found"}), 404
-            job_postings = JobPosting.query.filter_by(user_id=user_id).order_by(JobPosting.id.asc()).all()
-            return jsonify({
-                "status": "success",
-                "count": len(job_postings),
-                "user_id": user_id,
-                "job_postings": [jp.to_dict() for jp in job_postings]
-            }), 200
         except Exception as e:
             return jsonify({"status": "error", "message": f"Database error: {str(e)}"}), 500

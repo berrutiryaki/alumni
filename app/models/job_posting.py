@@ -1,5 +1,6 @@
 """
 JobPosting Model — SQLAlchemy database model with migration support.
+Independent model representing job opportunities, linked to applicants via Application action table.
 """
 
 from datetime import datetime
@@ -22,17 +23,14 @@ class JobPosting(db.Model):
     expires_at = db.Column(db.String(50), nullable=True)
 
     # ------------------------------------------------------------------
-    # Foreign Keys & Relationships
+    # Action Table Relationships (Many-to-Many via Application)
     # ------------------------------------------------------------------
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
-    user = db.relationship("User", back_populates="job_postings")
     applications = db.relationship("Application", back_populates="job_posting", lazy="dynamic")
 
     def __init__(self, title: str, description: str, company: str,
                  location: str = None, employment_type: str = "full-time",
                  salary_range: str = None, posted_by: str = None,
-                 is_active: bool = True, expires_at: str = None,
-                 user_id: int = None):
+                 is_active: bool = True, expires_at: str = None):
         self.title = title
         self.description = description
         self.company = company
@@ -43,7 +41,6 @@ class JobPosting(db.Model):
         self.is_active = is_active
         self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
         self.expires_at = expires_at
-        self.user_id = user_id
 
     # ------------------------------------------------------------------
     # Serialization
@@ -62,7 +59,6 @@ class JobPosting(db.Model):
             "is_active": self.is_active,
             "created_at": self.created_at,
             "expires_at": self.expires_at,
-            "user_id": self.user_id,
         }
 
     # ------------------------------------------------------------------
@@ -71,12 +67,6 @@ class JobPosting(db.Model):
 
     @classmethod
     def create(cls, data: dict) -> "JobPosting":
-        user_id = data.get("user_id")
-        if user_id is not None:
-            try:
-                user_id = int(user_id)
-            except (ValueError, TypeError):
-                user_id = None
         jp = cls(
             title=data.get("title"),
             description=data.get("description"),
@@ -87,7 +77,6 @@ class JobPosting(db.Model):
             posted_by=data.get("posted_by"),
             is_active=data.get("is_active", True) not in [False, "false", "0", 0],
             expires_at=data.get("expires_at"),
-            user_id=user_id,
         )
         try:
             db.session.add(jp)
@@ -119,12 +108,6 @@ class JobPosting(db.Model):
         jp.posted_by = data.get("posted_by")
         jp.is_active = data.get("is_active", True) not in [False, "false", "0", 0]
         jp.expires_at = data.get("expires_at")
-        if "user_id" in data:
-            user_id = data["user_id"]
-            try:
-                jp.user_id = int(user_id) if user_id else None
-            except (ValueError, TypeError):
-                jp.user_id = None
         try:
             db.session.commit()
             return jp
@@ -155,12 +138,6 @@ class JobPosting(db.Model):
             jp.is_active = data["is_active"] not in [False, "false", "0", 0]
         if "expires_at" in data:
             jp.expires_at = data["expires_at"]
-        if "user_id" in data:
-            user_id = data["user_id"]
-            try:
-                jp.user_id = int(user_id) if user_id else None
-            except (ValueError, TypeError):
-                jp.user_id = None
         try:
             db.session.commit()
             return jp
