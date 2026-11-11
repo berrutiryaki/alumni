@@ -4,7 +4,7 @@ Blueprint prefix: /users
 Delegates to: UserController
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.user_controller import UserController
 
 users_bp = Blueprint("users", __name__, url_prefix="/users")
@@ -44,7 +44,7 @@ def edit(user_id):
     """Show the form to edit an existing user."""
     result = UserController.show(user_id)
     if not result["success"]:
-        return f"<h2>404 — {result['error']}</h2>", 404
+        abort(404, description=result["error"])
     return render_template("user/edit.html", user=result["user"], error=None)
 
 
@@ -61,7 +61,7 @@ def update(user_id):
             user_result = UserController.show(user_id)
             user_data = user_result["user"] if user_result["success"] else data
             return render_template("user/edit.html", user=user_data, error=result["error"]), 400
-        return f"<h2>{status} — {result['error']}</h2>", status
+        abort(404, description=result["error"])
         
     return redirect(url_for("users.index"))
 
@@ -71,5 +71,5 @@ def delete(user_id):
     """Process the delete form submission."""
     result = UserController.delete(user_id)
     if not result["success"]:
-        return f"<h2>404 — {result['message']}</h2>", 404
+        abort(404, description=result["message"])
     return redirect(url_for("users.index"))

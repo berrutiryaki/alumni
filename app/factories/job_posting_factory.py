@@ -90,12 +90,12 @@ class JobPostingFactory:
         ]
 
         data = {
-            "title": template["title"] if random.random() < 0.6 else random.choice(tech_roles),
-            "company": template["company"] if random.random() < 0.7 else fake.company(),
+            "title": (template["title"] if random.random() < 0.6 else random.choice(tech_roles))[:120],
+            "company": (template["company"] if random.random() < 0.7 else fake.company())[:120],
+            "city": (template["location"] if random.random() < 0.7 else f"{fake.city()} / Remote")[:120],
             "description": template["description"] if random.random() < 0.6 else fake.paragraph(nb_sentences=4),
-            "location": template["location"] if random.random() < 0.7 else f"{fake.city()} / Remote",
             "employment_type": overrides.get("employment_type", template.get("employment_type", random.choice(employment_types))),
-            "salary_range": template.get("salary_range", "Competitive"),
+            "salary_range": template.get("salary_range", "50.000 - 75.000 TL"),
             "posted_by": template.get("posted_by") if random.random() < 0.7 else fake.company_email(),
             "is_active": overrides.get("is_active", True if random.random() > 0.1 else False),
             "expires_at": template.get("expires_at", "2026-12-31"),

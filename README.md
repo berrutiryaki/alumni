@@ -26,8 +26,18 @@ Universities lose contact with graduates the moment they leave campus. Alumni so
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | Root health-check |
-| `/alumni` | GET | Alumni resource health-check |
+| `/` | `GET` | Root portal & quick navigation |
+| `/users` | `GET, POST` | Users & Alumni web CRUD interface (HTML) |
+| `/announcements` | `GET, POST` | Announcements web CRUD interface (HTML) |
+| `/job-postings` | `GET, POST` | Job Postings web CRUD interface (HTML) |
+| `/applications` | `GET, POST` | Job Applications (Action Table) web CRUD interface (HTML) |
+| `/404` | `GET` | Generic 404 Not Found page (invalid web requests redirect here) |
+| `/api/users` | `GET, POST, PUT, PATCH, DELETE` | Users REST API + nested `/announcements` & `/applications` |
+| `/api/announcements` | `GET, POST, PUT, PATCH, DELETE` | Announcements REST API |
+| `/api/job-postings` | `GET, POST, PUT, PATCH, DELETE` | Job Postings REST API + nested `/applications` |
+| `/api/applications` | `GET, POST, PUT, PATCH, DELETE` | Applications REST API |
+| `/api/health` | `GET` | API health check |
+| `/api/swagger` | `GET` | Interactive Swagger / OpenAPI documentation |
 
 ### Roadmap
 
@@ -121,45 +131,89 @@ alumni/
 ├── app/                          # Application package
 │   ├── database.py               # SQLAlchemy and Migrate instances
 │   │
+│   ├── middleware/               # Request logging & error guardian middlewares
+│   │   ├── __init__.py
+│   │   ├── logger.py             # Terminal request logger (time, method, route, status, duration)
+│   │   ├── not_found_guardian.py # 404 Guardian (JSON reason for API, redirect to /404 for web)
+│   │   ├── server_error_guardian.py # 5xx Guardian (catches 5xx & unhandled exceptions with reason)
+│   │   └── error_log.py          # File logger appending 404 & 5xx errors to logs/error.logs
+│   │
 │   ├── models/                   # MODEL layer (SQLAlchemy db.Model)
 │   │   ├── __init__.py
 │   │   ├── user.py               # User model & table
-│   │   └── announcement.py       # Announcement model & table
+│   │   ├── announcement.py       # Announcement model & table (FK -> users)
+│   │   ├── job_posting.py        # JobPosting model & table (independent)
+│   │   └── application.py        # Application Action Table (FK -> users, job_postings)
 │   │
-│   ├── controllers/              # Controller layer
+│   ├── controllers/              # Controller layer (HTML & JSON API)
 │   │   ├── user_controller.py
 │   │   ├── api_user_controller.py
 │   │   ├── announcement_controller.py
-│   │   └── api_announcement_controller.py
+│   │   ├── api_announcement_controller.py
+│   │   ├── job_posting_controller.py
+│   │   ├── api_job_posting_controller.py
+│   │   ├── application_controller.py
+│   │   └── api_application_controller.py
 │   │
 │   ├── routes/                   # Route Blueprints
 │   │   ├── users.py              # HTML routes (/users)
-│   │   ├── api_users.py          # REST API routes (/api/users)
+│   │   ├── api_users.py          # REST API routes (/api/users + nested routes)
 │   │   ├── announcements.py      # HTML routes (/announcements)
-│   │   └── api_announcements.py  # REST API routes (/api/announcements)
+│   │   ├── api_announcements.py  # REST API routes (/api/announcements)
+│   │   ├── job_postings.py       # HTML routes (/job-postings)
+│   │   ├── api_job_postings.py   # REST API routes (/api/job-postings + nested routes)
+│   │   ├── applications.py       # HTML routes (/applications)
+│   │   └── api_applications.py   # REST API routes (/api/applications)
 │   │
 │   ├── templates/                # Jinja2 HTML views
+│   │   ├── 404.html              # Generic 404 Not Found page
 │   │   ├── user/
-│   │   └── announcement/
+│   │   ├── announcement/
+│   │   ├── job_posting/
+│   │   └── application/
 │   │
 │   ├── factories/                # Factory pattern data generators
 │   │   ├── user_factory.py       # UserFactory (build, create, create_batch)
-│   │   └── announcement_factory.py # AnnouncementFactory
+│   │   ├── announcement_factory.py # AnnouncementFactory
+│   │   ├── job_posting_factory.py # JobPostingFactory
+│   │   └── application_factory.py # ApplicationFactory
 │   │
 │   └── seeds/                    # Database Seeders
 │       ├── database_seeder.py    # Main seeder orchestrator
 │       ├── user_seeder.py        # Seeds student & alumni records
-│       └── announcement_seeder.py # Seeds announcement records
+│       ├── announcement_seeder.py # Seeds announcement records
+│       ├── job_posting_seeder.py # Seeds job posting records
+│       └── application_seeder.py # Seeds multi-user job applications
 │
+├── logs/                         # Error log directory (error.logs)
 ├── migrations/                   # Alembic database migration versions
-├── run.py                        # Entry point — app config & server startup
+├── run.py                        # Entry point — app config, middlewares & server startup
 ├── seed.py                       # CLI script to seed the database
+├── ddd.md                        # Data Dictionary & Relationship Matrix
 ├── requirements.txt              # Python dependencies
 ├── Dockerfile                    # Container image definition
 ├── docker-compose.yml            # Multi-container orchestration (Web + PostgreSQL 16)
 ├── example.env                   # Example environment variable template
 └── README.md
 ```
+
+### Middleware & Error Handling
+
+1. **Terminal Request Logger (`app/middleware/logger.py`)**
+   Logs every incoming HTTP request to the terminal in a tabular format:
+   ```text
+   time        method   route                           status  duration
+   10:20:30    POST     /api/users                      201     18ms
+   ```
+2. **404 Guardian & Generic `/404` Redirect (`app/middleware/not_found_guardian.py`)**
+   - Catches all `404 Not Found` errors and records them in `logs/error.logs`.
+   - For `/api/*` routes: returns a structured `404` JSON payload containing `reason`, `path`, and close-match `suggestions`.
+   - For web routes: redirects (`302`) invalid URLs or non-existent resource requests to the generic `/404` page (`app/templates/404.html`), displaying the reason and route suggestions.
+3. **5xx Guardian (`app/middleware/server_error_guardian.py`)**
+   - Catches `500–504` HTTP errors and any unhandled runtime exceptions.
+   - Returns structured JSON (for `/api/*`) or an HTML error card (for web routes) with `reason` and `error_type`, while printing the full traceback to the terminal and appending it to `logs/error.logs`.
+4. **Error File Logger (`app/middleware/error_log.py`)**
+   - Persists all `404` and `5xx` errors to `logs/error.logs` with automatic log rotation (`RotatingFileHandler`).
 
 ### Database Migrations & Seeding
 
@@ -174,7 +228,7 @@ python -m flask --app run db upgrade
 
 **Seeding the Database with Mock Data:**
 ```bash
-# Populate database using factories (UserFactory, AnnouncementFactory)
+# Populate database using factories (Users, Announcements, Job Postings, Applications)
 python seed.py
 
 # Or clear existing data first, then seed fresh records:
@@ -186,7 +240,12 @@ python -m flask --app run seed
 
 **Using Factories Programmatically:**
 ```python
-from app.factories import UserFactory, AnnouncementFactory
+from app.factories import (
+    UserFactory,
+    AnnouncementFactory,
+    JobPostingFactory,
+    ApplicationFactory,
+)
 
 # Create single records
 student = UserFactory.create_student()
@@ -195,6 +254,8 @@ alumni = UserFactory.create_alumni(graduation_year=2020)
 # Create batch
 users = UserFactory.create_batch(10)
 announcements = AnnouncementFactory.create_batch(5)
+jobs = JobPostingFactory.create_batch(5)
+applications = ApplicationFactory.create_batch(8)
 ```
 
 ---

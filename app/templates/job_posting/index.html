@@ -163,12 +163,14 @@
                 <div class="company-name">{{ jp.company }}</div>
 
                 <div class="card-meta-row">
-                    {% if jp.location %}<span class="meta-item">📍 {{ jp.location }}</span>{% endif %}
+                    {% if jp.city or jp.location %}<span class="meta-item">📍 {{ jp.city or jp.location }}</span>{% endif %}
                     {% if jp.salary_range %}<span class="meta-item">💰 {{ jp.salary_range }}</span>{% endif %}
                     {% if jp.posted_by %}<span class="meta-item">👤 {{ jp.posted_by }}</span>{% endif %}
                 </div>
 
+                {% if jp.description %}
                 <div class="description">{{ jp.description }}</div>
+                {% endif %}
 
                 {% if jp.expires_at %}
                 <div class="expires-bar">⏰ Expires: {{ jp.expires_at }}</div>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Page Not Found - Alumni Platform</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 58px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .nav-left { display: flex; align-items: center; gap: 6px; }
+        .navbar .brand {
+            font-size: 17px;
+            font-weight: 700;
+            color: white;
+            margin-right: 24px;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .navbar a.nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        .navbar a.nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+
+        /* Main Error Card */
+        .error-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .error-card {
+            background: white;
+            border: 1px solid #e8ecf0;
+            border-radius: 16px;
+            padding: 44px 40px;
+            max-width: 580px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+        .error-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 800;
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 14px;
+            padding: 10px 24px;
+            margin-bottom: 18px;
+            letter-spacing: -1px;
+        }
+        h1 {
+            margin: 0 0 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .subtitle {
+            margin: 0 0 22px;
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .reason-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #dc2626;
+            border-radius: 8px;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+        .reason-box strong { color: #0f172a; }
+        .path-chip {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #1e293b;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 13px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+        .suggestions {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #3730a3;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .suggestions a {
+            color: #4f46e5;
+            font-weight: 600;
+            text-decoration: none;
+            margin-right: 8px;
+        }
+        .suggestions a:hover { text-decoration: underline; }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 2px 6px rgba(102,126,234,0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.5);
+        }
+        .btn-secondary {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-secondary:hover { background: #f1f5f9; color: #0f172a; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="brand">
+                <span class="brand-icon">🎓</span>
+                Alumni Platform
+            </a>
+            <a href="/users" class="nav-link">Users</a>
+            <a href="/announcements" class="nav-link">Announcements</a>
+            <a href="/job-postings" class="nav-link">Job Postings</a>
+            <a href="/applications" class="nav-link">Applications</a>
+            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
+        </div>
+    </nav>
+
+    <div class="error-wrapper">
+        <div class="error-card">
+            <div class="error-badge">404</div>
+            <h1>Page Not Found</h1>
+            <p class="subtitle">The page or resource you requested could not be found.</p>
+
+            <div class="reason-box">
+                <div><strong>Reason:</strong> {{ reason }}</div>
+                {% if requested_path %}
+                <div><strong>Requested URL:</strong> <span class="path-chip">{{ requested_path }}</span></div>
+                {% endif %}
+            </div>
+
+            {% if suggestions %}
+            <div class="suggestions">
+                <strong>Did you mean:</strong>
+                {% for s in suggestions %}
+                    <a href="{{ s }}">{{ s }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="actions">
+                <a href="/" class="btn btn-primary">🏠 Back to Home</a>
+                <a href="/users" class="btn btn-secondary">Users</a>
+                <a href="/announcements" class="btn btn-secondary">Announcements</a>
+                <a href="/job-postings" class="btn btn-secondary">Job Postings</a>
+                <a href="/applications" class="btn btn-secondary">Applications</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

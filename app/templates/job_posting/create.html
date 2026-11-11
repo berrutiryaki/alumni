@@ -100,17 +100,17 @@
                         <div class="section-title">Basic Information</div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="title">Job Title <span class="required">*</span></label>
-                                <input type="text" id="title" name="title" required placeholder="e.g. Backend Developer">
+                                <label for="title">Job Title <span class="required">*</span> <span class="label-hint">(max 120 chars)</span></label>
+                                <input type="text" id="title" name="title" maxlength="120" required placeholder="e.g. Backend Developer">
                             </div>
                             <div class="form-group">
-                                <label for="company">Company / Organization <span class="required">*</span></label>
-                                <input type="text" id="company" name="company" required placeholder="e.g. Trendyol">
+                                <label for="company">Company / Organization <span class="required">*</span> <span class="label-hint">(max 120 chars)</span></label>
+                                <input type="text" id="company" name="company" maxlength="120" required placeholder="e.g. Trendyol">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="description">Job Description <span class="required">*</span></label>
-                            <textarea id="description" name="description" required placeholder="Responsibilities, requirements, tech stack, and any other relevant details..."></textarea>
+                            <label for="description">Job Description <span class="label-hint">(optional)</span></label>
+                            <textarea id="description" name="description" placeholder="Responsibilities, requirements, tech stack, and any other relevant details..."></textarea>
                         </div>
                     </div>
 
@@ -119,12 +119,12 @@
                         <div class="section-title">Position Details</div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="location">Location <span class="label-hint">(optional)</span></label>
-                                <input type="text" id="location" name="location" placeholder="e.g. Istanbul / Remote">
+                                <label for="city">City <span class="label-hint">(optional)</span></label>
+                                <input type="text" id="city" name="city" maxlength="120" placeholder="e.g. Istanbul / Remote">
                             </div>
                             <div class="form-group">
-                                <label for="employment_type">Employment Type</label>
-                                <select id="employment_type" name="employment_type">
+                                <label for="employment_type">Employment Type <span class="required">*</span></label>
+                                <select id="employment_type" name="employment_type" required>
                                     <option value="full-time">Full-time</option>
                                     <option value="part-time">Part-time</option>
                                     <option value="internship">Internship</option>
@@ -135,8 +135,8 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="salary_range">Salary Range <span class="label-hint">(optional)</span></label>
-                                <input type="text" id="salary_range" name="salary_range" placeholder="e.g. ₺40,000 – ₺60,000 / mo">
+                                <label for="salary_range">Salary Range <span class="required">*</span></label>
+                                <input type="text" id="salary_range" name="salary_range" required placeholder="e.g. ₺40,000 – ₺60,000 / mo">
                             </div>
                             <div class="form-group">
                                 <label for="posted_by">Posted By <span class="label-hint">(optional)</span></label>

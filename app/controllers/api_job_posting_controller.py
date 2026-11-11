@@ -37,20 +37,32 @@ class ApiJobPostingController:
         data = request.form.to_dict() if request.form else request.get_json() or {}
 
         title = (data.get("title") or "").strip()
-        description = (data.get("description") or "").strip()
         company = (data.get("company") or "").strip()
+        employment_type = (data.get("employment_type") or "").strip()
+        salary_range = (data.get("salary_range") or "").strip()
+        city = (data.get("city") or data.get("location") or "").strip() or None
+        description = (data.get("description") or "").strip() or None
 
-        if not title or not description or not company:
-            return jsonify({"status": "error", "message": "title, description, and company are required"}), 400
+        if not title or not company or not employment_type or not salary_range:
+            return jsonify({
+                "status": "error",
+                "message": "title, company, employment_type, and salary_range are required"
+            }), 400
+
+        if len(title) > 120 or len(company) > 120 or (city and len(city) > 120):
+            return jsonify({
+                "status": "error",
+                "message": "title, company, and city must not exceed 120 characters"
+            }), 400
 
         try:
             jp = JobPosting.create({
                 "title": title,
-                "description": description,
                 "company": company,
-                "location": (data.get("location") or "").strip() or None,
-                "employment_type": (data.get("employment_type") or "").strip() or "full-time",
-                "salary_range": (data.get("salary_range") or "").strip() or None,
+                "city": city,
+                "description": description,
+                "employment_type": employment_type,
+                "salary_range": salary_range,
                 "posted_by": (data.get("posted_by") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
                 "expires_at": (data.get("expires_at") or "").strip() or None,
@@ -63,20 +75,32 @@ class ApiJobPostingController:
     def update(job_posting_id: int):
         data = request.form.to_dict() if request.form else request.get_json() or {}
         title = (data.get("title") or "").strip()
-        description = (data.get("description") or "").strip()
         company = (data.get("company") or "").strip()
+        employment_type = (data.get("employment_type") or "").strip()
+        salary_range = (data.get("salary_range") or "").strip()
+        city = (data.get("city") or data.get("location") or "").strip() or None
+        description = (data.get("description") or "").strip() or None
 
-        if not title or not description or not company:
-            return jsonify({"status": "error", "message": "title, description, and company are required"}), 400
+        if not title or not company or not employment_type or not salary_range:
+            return jsonify({
+                "status": "error",
+                "message": "title, company, employment_type, and salary_range are required"
+            }), 400
+
+        if len(title) > 120 or len(company) > 120 or (city and len(city) > 120):
+            return jsonify({
+                "status": "error",
+                "message": "title, company, and city must not exceed 120 characters"
+            }), 400
 
         try:
             jp = JobPosting.update(job_posting_id, {
                 "title": title,
-                "description": description,
                 "company": company,
-                "location": (data.get("location") or "").strip() or None,
-                "employment_type": (data.get("employment_type") or "").strip() or "full-time",
-                "salary_range": (data.get("salary_range") or "").strip() or None,
+                "city": city,
+                "description": description,
+                "employment_type": employment_type,
+                "salary_range": salary_range,
                 "posted_by": (data.get("posted_by") or "").strip() or None,
                 "is_active": data.get("is_active", True) not in [False, "false", "0", 0],
                 "expires_at": (data.get("expires_at") or "").strip() or None,

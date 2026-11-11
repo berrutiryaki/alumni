@@ -4,7 +4,7 @@ Blueprint prefix: /applications
 Delegates to: ApplicationController
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.application_controller import ApplicationController
 from app.models.user import User
 from app.models.job_posting import JobPosting
@@ -42,7 +42,7 @@ def create():
 def edit(application_id):
     result = ApplicationController.show(application_id)
     if not result["success"]:
-        return f"<h2>404 — {result['error']}</h2>", 404
+        abort(404, description=result["error"])
     users = User.query.order_by(User.name.asc()).all()
     job_postings = JobPosting.query.order_by(JobPosting.title.asc()).all()
     return render_template("application/edit.html", application=result["application"], users=users, job_postings=job_postings, error=None)
@@ -60,7 +60,7 @@ def update(application_id):
             users = User.query.order_by(User.name.asc()).all()
             job_postings = JobPosting.query.order_by(JobPosting.title.asc()).all()
             return render_template("application/edit.html", application=app_data, users=users, job_postings=job_postings, error=result["error"]), 400
-        return f"<h2>{status} — {result['error']}</h2>", status
+        abort(404, description=result["error"])
     return redirect(url_for("applications.index"))
 
 
@@ -68,5 +68,5 @@ def update(application_id):
 def delete(application_id):
     result = ApplicationController.delete(application_id)
     if not result["success"]:
-        return f"<h2>404 — {result['message']}</h2>", 404
+        abort(404, description=result["message"])
     return redirect(url_for("applications.index"))

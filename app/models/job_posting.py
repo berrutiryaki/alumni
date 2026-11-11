@@ -11,12 +11,12 @@ class JobPosting(db.Model):
     __tablename__ = "job_postings"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    company = db.Column(db.String(150), nullable=False)
-    location = db.Column(db.String(150), nullable=True)
+    title = db.Column(db.String(120), nullable=False)
+    company = db.Column(db.String(120), nullable=False)
+    city = db.Column(db.String(120), nullable=True)
+    description = db.Column(db.Text, nullable=True)
     employment_type = db.Column(db.String(50), nullable=False, default="full-time")
-    salary_range = db.Column(db.String(100), nullable=True)
+    salary_range = db.Column(db.String(100), nullable=False, default="Competitive")
     posted_by = db.Column(db.String(100), nullable=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.String(30), nullable=False, default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M"))
@@ -27,14 +27,14 @@ class JobPosting(db.Model):
     # ------------------------------------------------------------------
     applications = db.relationship("Application", back_populates="job_posting", lazy="dynamic")
 
-    def __init__(self, title: str, description: str, company: str,
-                 location: str = None, employment_type: str = "full-time",
-                 salary_range: str = None, posted_by: str = None,
-                 is_active: bool = True, expires_at: str = None):
+    def __init__(self, title: str, company: str, employment_type: str = "full-time",
+                 salary_range: str = None, city: str = None, description: str = None,
+                 posted_by: str = None, is_active: bool = True, expires_at: str = None,
+                 location: str = None):
         self.title = title
-        self.description = description
         self.company = company
-        self.location = location
+        self.city = city if city is not None else location
+        self.description = description
         self.employment_type = employment_type or "full-time"
         self.salary_range = salary_range
         self.posted_by = posted_by
@@ -50,9 +50,10 @@ class JobPosting(db.Model):
         return {
             "id": self.id,
             "title": self.title,
-            "description": self.description,
             "company": self.company,
-            "location": self.location,
+            "city": self.city,
+            "location": self.city,
+            "description": self.description,
             "employment_type": self.employment_type,
             "salary_range": self.salary_range,
             "posted_by": self.posted_by,
@@ -69,9 +70,9 @@ class JobPosting(db.Model):
     def create(cls, data: dict) -> "JobPosting":
         jp = cls(
             title=data.get("title"),
-            description=data.get("description"),
             company=data.get("company"),
-            location=data.get("location"),
+            city=data.get("city") or data.get("location"),
+            description=data.get("description"),
             employment_type=data.get("employment_type", "full-time"),
             salary_range=data.get("salary_range"),
             posted_by=data.get("posted_by"),
@@ -100,9 +101,9 @@ class JobPosting(db.Model):
         if jp is None:
             return None
         jp.title = data.get("title")
-        jp.description = data.get("description")
         jp.company = data.get("company")
-        jp.location = data.get("location")
+        jp.city = data.get("city") if "city" in data else data.get("location")
+        jp.description = data.get("description")
         jp.employment_type = data.get("employment_type", "full-time")
         jp.salary_range = data.get("salary_range")
         jp.posted_by = data.get("posted_by")
@@ -122,12 +123,14 @@ class JobPosting(db.Model):
             return None
         if "title" in data:
             jp.title = data["title"]
-        if "description" in data:
-            jp.description = data["description"]
         if "company" in data:
             jp.company = data["company"]
-        if "location" in data:
-            jp.location = data["location"]
+        if "city" in data:
+            jp.city = data["city"]
+        elif "location" in data:
+            jp.city = data["location"]
+        if "description" in data:
+            jp.description = data["description"]
         if "employment_type" in data:
             jp.employment_type = data["employment_type"]
         if "salary_range" in data:

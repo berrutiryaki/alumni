@@ -101,17 +101,17 @@
                         <div class="section-title">Basic Information</div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="title">Job Title <span class="required">*</span></label>
-                                <input type="text" id="title" name="title" required value="{{ job_posting.title }}">
+                                <label for="title">Job Title <span class="required">*</span> <span class="label-hint">(max 120 chars)</span></label>
+                                <input type="text" id="title" name="title" maxlength="120" required value="{{ job_posting.title }}">
                             </div>
                             <div class="form-group">
-                                <label for="company">Company / Organization <span class="required">*</span></label>
-                                <input type="text" id="company" name="company" required value="{{ job_posting.company }}">
+                                <label for="company">Company / Organization <span class="required">*</span> <span class="label-hint">(max 120 chars)</span></label>
+                                <input type="text" id="company" name="company" maxlength="120" required value="{{ job_posting.company }}">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="description">Job Description <span class="required">*</span></label>
-                            <textarea id="description" name="description" required>{{ job_posting.description }}</textarea>
+                            <label for="description">Job Description <span class="label-hint">(optional)</span></label>
+                            <textarea id="description" name="description">{{ job_posting.description or '' }}</textarea>
                         </div>
                     </div>
 
@@ -120,12 +120,12 @@
                         <div class="section-title">Position Details</div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="location">Location <span class="label-hint">(optional)</span></label>
-                                <input type="text" id="location" name="location" value="{{ job_posting.location or '' }}">
+                                <label for="city">City <span class="label-hint">(optional)</span></label>
+                                <input type="text" id="city" name="city" maxlength="120" value="{{ job_posting.city or job_posting.location or '' }}">
                             </div>
                             <div class="form-group">
-                                <label for="employment_type">Employment Type</label>
-                                <select id="employment_type" name="employment_type">
+                                <label for="employment_type">Employment Type <span class="required">*</span></label>
+                                <select id="employment_type" name="employment_type" required>
                                     <option value="full-time" {% if job_posting.employment_type == 'full-time' %}selected{% endif %}>Full-time</option>
                                     <option value="part-time" {% if job_posting.employment_type == 'part-time' %}selected{% endif %}>Part-time</option>
                                     <option value="internship" {% if job_posting.employment_type == 'internship' %}selected{% endif %}>Internship</option>
@@ -136,8 +136,8 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="salary_range">Salary Range <span class="label-hint">(optional)</span></label>
-                                <input type="text" id="salary_range" name="salary_range" value="{{ job_posting.salary_range or '' }}">
+                                <label for="salary_range">Salary Range <span class="required">*</span></label>
+                                <input type="text" id="salary_range" name="salary_range" required value="{{ job_posting.salary_range or '' }}">
                             </div>
                             <div class="form-group">
                                 <label for="posted_by">Posted By <span class="label-hint">(optional)</span></label>

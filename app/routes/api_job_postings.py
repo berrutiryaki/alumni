@@ -78,29 +78,35 @@ def create():
         in: formData
         type: string
         required: true
-        description: Job title
-      - name: description
-        in: formData
-        type: string
-        required: true
-        description: Detailed job description
+        maxLength: 120
+        description: Job title (max 120 characters)
       - name: company
         in: formData
         type: string
         required: true
-        description: Hiring company name
-      - name: location
+        maxLength: 120
+        description: Hiring company name (max 120 characters)
+      - name: city
         in: formData
         type: string
-        description: Job location (e.g. Remote, Istanbul)
+        required: false
+        maxLength: 120
+        description: Job city / location (optional, e.g. Remote, Istanbul)
+      - name: description
+        in: formData
+        type: string
+        required: false
+        description: Detailed job description (optional)
       - name: employment_type
         in: formData
         type: string
-        description: "Employment type: full-time, part-time, internship, contract, remote"
+        required: true
+        description: "Employment type (required): full-time, part-time, internship, contract, remote"
       - name: salary_range
         in: formData
         type: string
-        description: Salary information
+        required: true
+        description: Salary information (required)
       - name: posted_by
         in: formData
         type: string
@@ -117,7 +123,7 @@ def create():
       201:
         description: Job posting created
       400:
-        description: Missing required fields (title, description, company)
+        description: Missing required fields (title, company, employment_type, salary_range) or exceeding max 120 chars
     """
     return ApiJobPostingController.create()
 
@@ -163,23 +169,29 @@ def update(job_posting_id):
         in: formData
         type: string
         required: true
-      - name: description
-        in: formData
-        type: string
-        required: true
+        maxLength: 120
       - name: company
         in: formData
         type: string
         required: true
-      - name: location
+        maxLength: 120
+      - name: city
         in: formData
         type: string
+        required: false
+        maxLength: 120
+      - name: description
+        in: formData
+        type: string
+        required: false
       - name: employment_type
         in: formData
         type: string
+        required: true
       - name: salary_range
         in: formData
         type: string
+        required: true
       - name: posted_by
         in: formData
         type: string
@@ -193,7 +205,7 @@ def update(job_posting_id):
       200:
         description: Job posting updated
       400:
-        description: Missing required fields
+        description: Missing required fields (title, company, employment_type, salary_range) or exceeding max 120 chars
       404:
         description: Job posting not found
     """

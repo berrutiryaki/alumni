@@ -4,7 +4,7 @@ Blueprint prefix: /announcements
 Delegates to: AnnouncementController
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.announcement_controller import AnnouncementController
 
 announcements_bp = Blueprint("announcements", __name__, url_prefix="/announcements")
@@ -36,7 +36,7 @@ def create():
 def edit(announcement_id):
     result = AnnouncementController.show(announcement_id)
     if not result["success"]:
-        return f"<h2>404 — {result['error']}</h2>", 404
+        abort(404, description=result["error"])
     return render_template("announcement/edit.html", announcement=result["announcement"], error=None)
 
 
@@ -50,7 +50,7 @@ def update(announcement_id):
             ann_result = AnnouncementController.show(announcement_id)
             ann_data = ann_result["announcement"] if ann_result["success"] else data
             return render_template("announcement/edit.html", announcement=ann_data, error=result["error"]), 400
-        return f"<h2>{status} — {result['error']}</h2>", status
+        abort(404, description=result["error"])
     return redirect(url_for("announcements.index"))
 
 
@@ -58,5 +58,5 @@ def update(announcement_id):
 def delete(announcement_id):
     result = AnnouncementController.delete(announcement_id)
     if not result["success"]:
-        return f"<h2>404 — {result['message']}</h2>", 404
+        abort(404, description=result["message"])
     return redirect(url_for("announcements.index"))

@@ -19,10 +19,10 @@ This section provides a bird's-eye view of all tables in the Alumni Platform, th
 │                users                 │             │           job_postings           │
 ├──────────────────────────────────────┤             ├──────────────────────────────────┤
 │ PK  id               Integer         │             │ PK  id               Integer     │
-│     name             String(120)     │             │     title            String(200) │
-│ UQ  email            String(120)     │             │     company          String(150) │
-│     status           String(20)      │             │     description      Text        │
-│     department       String(120)     │             │     location         String(150) │
+│     name             String(120)     │             │     title            String(120) │
+│ UQ  email            String(120)     │             │     company          String(120) │
+│     status           String(20)      │             │     city             String(120) │
+│     department       String(120)     │             │     description      Text        │
 │     graduation_year  Integer         │             │     employment_type  String(50)  │
 └──────────────────────────────────────┘             │     salary_range     String(100) │
          │ 1                     │ 1                 │     posted_by        String(100) │
@@ -72,8 +72,8 @@ erDiagram
         int id PK
         string title
         string company
+        string city
         text description
-        string location
         string employment_type
         string salary_range
         string posted_by
@@ -324,12 +324,12 @@ erDiagram
 | Field | Python Type | DB Type | Form Field (`name=`) | Required | Default | Notes |
 |---|---|---|---|---|---|---|
 | `id` | `int` | `Integer` PK | — | — | Auto-increment | Assigned by the model on create; not sent in form |
-| `title` | `str` | `String(200)` | `title` | Yes | — | Job position title (e.g. "Backend Developer") |
-| `description` | `str` | `Text` | `description` | Yes | — | Full job description, responsibilities, requirements |
-| `company` | `str` | `String(150)` | `company` | Yes | — | Hiring company / organization name |
-| `location` | `str` | `String(150)` | `location` | No | `None` | Work location (e.g. "Istanbul", "Remote") |
-| `employment_type` | `str` | `String(50)` | `employment_type` | No | `"full-time"` | Accepted: `full-time`, `part-time`, `internship`, `contract`, `remote` |
-| `salary_range` | `str` | `String(100)` | `salary_range` | No | `None` | Free-text salary info (e.g. "15.000-25.000 TL") |
+| `title` | `str` | `String(120)` | `title` | Yes | — | Job position title (max 120 characters) |
+| `company` | `str` | `String(120)` | `company` | Yes | — | Hiring company / organization name (max 120 characters) |
+| `city` | `str` | `String(120)` | `city` | No | `None` | Work city / location (optional, max 120 characters; e.g. "Istanbul", "Remote") |
+| `description` | `str` | `Text` | `description` | No | `None` | Full job description, responsibilities, requirements (optional) |
+| `employment_type` | `str` | `String(50)` | `employment_type` | Yes | `"full-time"` | Required. Accepted: `full-time`, `part-time`, `internship`, `contract`, `remote` |
+| `salary_range` | `str` | `String(100)` | `salary_range` | Yes | — | Required salary info (e.g. "15.000-25.000 TL") |
 | `posted_by` | `str` | `String(100)` | `posted_by` | No | `None` | Name or email of the person who posted the job |
 | `is_active` | `bool` | `Boolean` | `is_active` | No | `True` | Accepted form values: `true` / `false` |
 | `created_at` | `str` | `DateTime` | — | — | `datetime.now()` | Set automatically on creation; not editable |
@@ -343,8 +343,10 @@ erDiagram
 
 ### Business Rules
 
-- `title`, `description`, and `company` are required on both `POST` (create) and `PUT` (full update).
-- `employment_type` defaults to `"full-time"` if not provided.
+- `title` is required and has a maximum length of 120 characters (`String(120)`).
+- `company` is required and has a maximum length of 120 characters (`String(120)`).
+- `employment_type` and `salary_range` are required on both `POST` (create) and `PUT` (full update).
+- `city` and `description` are optional (`nullable=True`).
 - `is_active` accepts the string values `"true"` / `"false"` from form-data; these are converted to `bool` internally.
 - `created_at` is set once at creation time and never modified.
 - `expires_at` is informational; no automatic deactivation is performed when the date passes.
@@ -387,7 +389,7 @@ erDiagram
 
 | Status Code | Condition |
 |---|---|
-| `400 Bad Request` | Missing `title`, `description`, or `company` |
+| `400 Bad Request` | Missing required fields (`title`, `company`, `employment_type`, or `salary_range`) or `title` exceeding 120 characters |
 | `404 Not Found` | No job posting found with the given `id` |
 
 ---
@@ -399,9 +401,9 @@ erDiagram
 | Key | Value |
 |---|---|
 | `title` | Backend Developer |
-| `description` | We are looking for a Python/Flask backend developer with 2+ years of experience. |
 | `company` | TechCorp Istanbul |
-| `location` | Istanbul |
+| `city` | Istanbul |
+| `description` | We are looking for a Python/Flask backend developer with 2+ years of experience. |
 | `employment_type` | full-time |
 | `salary_range` | 25.000-40.000 TL |
 | `posted_by` | hr@techcorp.com |
@@ -413,10 +415,11 @@ erDiagram
 | Key | Value |
 |---|---|
 | `title` | Summer Internship — Data Analyst |
-| `description` | 3-month summer internship for students in their 3rd or 4th year. |
 | `company` | DataWorks |
-| `location` | Remote |
+| `city` | Remote |
+| `description` | 3-month summer internship for students in their 3rd or 4th year. |
 | `employment_type` | internship |
+| `salary_range` | 15.000-20.000 TL |
 | `posted_by` | careers@dataworks.com |
 
 **PATCH /api/job-postings/1** — Deactivate a job posting
@@ -430,9 +433,9 @@ erDiagram
 | Key | Value |
 |---|---|
 | `title` | Senior Backend Developer |
-| `description` | Updated: Now seeking a senior-level developer with 5+ years of experience. |
 | `company` | TechCorp Istanbul |
-| `location` | Istanbul / Hybrid |
+| `city` | Istanbul / Hybrid |
+| `description` | Updated: Now seeking a senior-level developer with 5+ years of experience. |
 | `employment_type` | full-time |
 | `salary_range` | 40.000-60.000 TL |
 | `posted_by` | hr@techcorp.com |
@@ -538,6 +541,42 @@ erDiagram
 | `resume_url` | https://github.com/example/cv.pdf |
 | `cover_letter` | Updated cover letter with additional project details. |
 | `status` | accepted |
+
+---
+
+## Middleware & Error Handling
+
+### 1. Terminal Request Logger (`app/middleware/logger.py`)
+Prints a single summary line per HTTP request to stdout:
+
+```text
+time        method   route                           status  duration
+10:20:30    POST     /api/users                      201     18ms
+```
+
+### 2. 404 Guardian & Generic `/404` Page (`app/middleware/not_found_guardian.py`)
+Catches all `404 Not Found` errors across the application:
+
+| Request Target | Behavior | Response |
+|---|---|---|
+| `/api/*` | Returns JSON with `reason` and close-match route `suggestions` | `404 Not Found` (`application/json`) |
+| Web / HTML routes | Redirects (`302`) to `/404?path=<path>&reason=<reason>` | `302 Found` → `GET /404` (`404 Not Found` HTML via `templates/404.html`) |
+
+### 3. 5xx Server Error Guardian (`app/middleware/server_error_guardian.py`)
+Catches `500–504` HTTP errors and any unhandled runtime exceptions:
+
+| Request Target | Behavior | Response |
+|---|---|---|
+| `/api/*` | Returns JSON with `code`, `reason`, `error_type`, `method`, and `path` | `500 Internal Server Error` (`application/json`) |
+| Web / HTML routes | Renders an HTML error page displaying `code`, `reason`, and `error_type` | `500 Internal Server Error` (`text/html`) |
+
+### 4. Error File Logger (`app/middleware/error_log.py`)
+Appends all `404` and `5xx` errors (including full stack traces for `5xx`) to `logs/error.logs`:
+
+```text
+2026-11-11 10:38:48 | 404 | GET    | /api/job-postingz | No route matches '/api/job-postingz'. The URL does not exist on this server.
+2026-11-11 10:38:48 | 500 | GET    | /api/debug/500 | RuntimeError: Intentional test error triggered from /debug/500
+```
 
 ---
 

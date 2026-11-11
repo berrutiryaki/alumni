@@ -4,7 +4,7 @@ Blueprint prefix: /job-postings
 Delegates to: JobPostingController
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.job_posting_controller import JobPostingController
 
 job_postings_bp = Blueprint("job_postings", __name__, url_prefix="/job-postings")
@@ -36,7 +36,7 @@ def create():
 def edit(job_posting_id):
     result = JobPostingController.show(job_posting_id)
     if not result["success"]:
-        return f"<h2>404 — {result['error']}</h2>", 404
+        abort(404, description=result["error"])
     return render_template("job_posting/edit.html", job_posting=result["job_posting"], error=None)
 
 
@@ -50,7 +50,7 @@ def update(job_posting_id):
             jp_result = JobPostingController.show(job_posting_id)
             jp_data = jp_result["job_posting"] if jp_result["success"] else data
             return render_template("job_posting/edit.html", job_posting=jp_data, error=result["error"]), 400
-        return f"<h2>{status} — {result['error']}</h2>", status
+        abort(404, description=result["error"])
     return redirect(url_for("job_postings.index"))
 
 
@@ -58,5 +58,5 @@ def update(job_posting_id):
 def delete(job_posting_id):
     result = JobPostingController.delete(job_posting_id)
     if not result["success"]:
-        return f"<h2>404 — {result['message']}</h2>", 404
+        abort(404, description=result["message"])
     return redirect(url_for("job_postings.index"))

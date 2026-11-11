@@ -4,6 +4,9 @@ from flasgger import Swagger
 from dotenv import load_dotenv
 
 from app.database import db, migrate
+from app.middleware.logger import init_logger
+from app.middleware.not_found_guardian import init_not_found_guardian
+from app.middleware.server_error_guardian import init_server_error_guardian
 from app.models.user import User
 from app.models.announcement import Announcement
 from app.models.job_posting import JobPosting
@@ -39,6 +42,15 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 migrate.init_app(app, db)
+
+# Request logger middleware (time, method, route, status, duration)
+init_logger(app)
+
+# 404 guardian middleware (returns 404 errors with a reason)
+init_not_found_guardian(app)
+
+# 5xx guardian middleware (returns server errors with a reason)
+init_server_error_guardian(app)
 
 # ------------------------------------------------------------------
 # Swagger / OpenAPI
@@ -189,6 +201,16 @@ def health():
               example: healthy
     """
     return jsonify({"status": "ok", "message": "healthy"}), 200
+
+
+# Demo route to trigger a 5xx on purpose (only available in debug mode).
+@app.route("/debug/500")
+@app.route("/api/debug/500")
+def debug_trigger_500():
+    if not app.debug:
+        from flask import abort
+        abort(404, "Debug routes are disabled outside debug mode")
+    raise RuntimeError("Intentional test error triggered from /debug/500")
 
 
 # ------------------------------------------------------------------
