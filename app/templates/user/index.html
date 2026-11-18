@@ -2,39 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Users - Alumni Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users & Alumni — Alumni Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #212529; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .navbar a { color: #adb5bd; text-decoration: none; margin-right: 20px; font-weight: 500; font-size: 15px; }
-        .navbar a:hover, .navbar a.active { color: white; }
-        .navbar .brand { font-size: 18px; font-weight: bold; color: white; margin-right: 30px; }
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .db-badge { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 4px 10px; border-radius: 20px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-        .db-dot { width: 8px; height: 8px; background-color: #2e7d32; border-radius: 50%; display: inline-block; }
-        table { border-collapse: collapse; width: 100%; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #f1f3f5; font-weight: 600; color: #495057; font-size: 14px; }
-        tr:hover { background-color: #fafbfc; }
-        .btn { padding: 8px 14px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; display: inline-block; }
-        .btn-primary { background-color: #0d6efd; color: white; }
-        .btn-warning { background-color: #ffc107; color: #000; padding: 5px 10px; }
-        .btn-danger { background-color: #dc3545; color: white; padding: 5px 10px; }
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
-        .badge-student { background-color: #cfe2ff; color: #084298; }
-        .badge-alumni { background-color: #d1e7dd; color: #0f5132; }
+        :root {
+            --color-primary: #1B4332;
+            --color-primary-hover: #143325;
+            --color-accent: #C2410C;
+            --color-bg: #FAF8F5;
+            --color-surface: #FFFFFF;
+            --color-text: #1C1917;
+            --color-muted: #57534E;
+            --color-border: #E7E5E4;
+            --color-error: #B91C1C;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+        h1, h2, h3, .brand {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--color-text);
+        }
+        .navbar {
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 68px;
+        }
+        .nav-left { display: flex; align-items: center; gap: 8px; }
+        .navbar .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-right: 28px;
+            text-decoration: none;
+        }
+        .navbar a.nav-link {
+            color: var(--color-muted);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
+        .navbar a.nav-link.active { color: var(--color-primary); background-color: #E8F0EC; font-weight: 600; }
+        .db-badge {
+            background-color: #E8F0EC;
+            color: var(--color-primary);
+            border: 1px solid #C5D9CE;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .db-dot { width: 8px; height: 8px; background-color: var(--color-primary); border-radius: 50%; }
+
+        .container { max-width: 1080px; margin: 36px auto 60px; padding: 0 24px; }
+        .header-section {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 24px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .header-section h1 { margin: 0 0 4px; font-size: 28px; }
+        .header-section small { color: var(--color-muted); font-size: 13px; }
+
+        .table-card {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table { border-collapse: collapse; width: 100%; }
+        th, td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+        th {
+            background-color: var(--color-bg);
+            font-weight: 600;
+            color: var(--color-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: #FDFCFB; }
+
+        .btn {
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            display: inline-block;
+            font-family: inherit;
+        }
+        .btn-primary { background-color: var(--color-primary); color: var(--color-surface); }
+        .btn-primary:hover { background-color: var(--color-primary-hover); }
+        .btn-edit {
+            background-color: var(--color-surface);
+            color: var(--color-text);
+            border-color: var(--color-border);
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .btn-edit:hover { border-color: var(--color-primary); color: var(--color-primary); }
+        .btn-danger {
+            background-color: #FEF2F2;
+            color: var(--color-error);
+            border-color: #FECACA;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .btn-danger:hover { background-color: #FEE2E2; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-alumni { background-color: #E8F0EC; color: var(--color-primary); }
+        .badge-student { background-color: #FFF7ED; color: var(--color-accent); }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div>
-            <span class="brand">Alumni Platform</span>
-            <a href="/users" class="active">Users</a>
-            <a href="/announcements">Announcements</a>
-            <a href="/job-postings">Job Postings</a>
-            <a href="/applications">Applications</a>
-            <a href="/api/swagger" target="_blank">Swagger API</a>
+        <div class="nav-left">
+            <a href="/" class="brand">Alumni Platform</a>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/users" class="nav-link active">Users</a>
+            <a href="/announcements" class="nav-link">Announcements</a>
+            <a href="/job-postings" class="nav-link">Job Postings</a>
+            <a href="/applications" class="nav-link">Applications</a>
+            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
         </div>
         <div class="db-badge">
             <span class="db-dot"></span> Database Connected
@@ -44,53 +170,55 @@
     <div class="container">
         <div class="header-section">
             <div>
-                <h1 style="margin: 0 0 6px 0;">Alumni & Student Registry</h1>
-                <small style="color: #6c757d;">Total Records in Database: <b>{{ users|length }}</b></small>
+                <h1>Alumni & Student Registry</h1>
+                <small>Total Records in Database: <b>{{ users|length }}</b></small>
             </div>
             <a href="/users/new" class="btn btn-primary">+ Create New User</a>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 50px;">ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Department</th>
-                    <th>Graduation Year</th>
-                    <th style="width: 140px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.id }}</td>
-                    <td><b>{{ user.name }}</b></td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        <span class="badge {% if user.status == 'alumni' %}badge-alumni{% else %}badge-student{% endif %}">
-                            {{ user.status | capitalize }}
-                        </span>
-                    </td>
-                    <td>{{ user.department or '-' }}</td>
-                    <td>{{ user.graduation_year or '-' }}</td>
-                    <td>
-                        <a href="/users/{{ user.id }}/edit" class="btn btn-warning">Edit</a>
-                        <form action="/users/{{ user.id }}/delete" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user from the database?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 30px; color: #888;">
-                        No user records found in the database. Use "+ Create New User" or run <code>python seed.py</code> to populate.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Department</th>
+                        <th>Graduation Year</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>#{{ user.id }}</td>
+                        <td><b>{{ user.name }}</b></td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge {% if user.status == 'alumni' %}badge-alumni{% else %}badge-student{% endif %}">
+                                {{ user.status | capitalize }}
+                            </span>
+                        </td>
+                        <td>{{ user.department or '—' }}</td>
+                        <td>{{ user.graduation_year or '—' }}</td>
+                        <td>
+                            <a href="/users/{{ user.id }}/edit" class="btn btn-edit">Edit</a>
+                            <form action="/users/{{ user.id }}/delete" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 36px; color: var(--color-muted);">
+                            No user records found. Click "+ Create New User" or run <code>python seed.py</code>.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>

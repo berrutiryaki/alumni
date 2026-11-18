@@ -16,6 +16,8 @@ Universities lose contact with graduates the moment they leave campus. Alumni so
 
 > **Data Dictionary & Documentation Rule:** For field definitions, form mappings, and CRUD endpoint reference, see [ddd.md](ddd.md). **Rule:** Whenever any data model, field, type, form mapping, or CRUD endpoint is added, modified, or deleted, [ddd.md](ddd.md) **MUST** be updated immediately to maintain documentation integrity.
 
+> **Brand & Design System:** For the color palette, typography (`Playfair Display` & `Plus Jakarta Sans`), and a short summary of UI component styling, see [brand.md](brand.md). For the full style reference (tokens, spacing, component specs, do's and don'ts), see [design.md](design.md). **Rule:** Any UI change must follow these two documents; update them if the design changes.
+
 > **Current Status:** Core API skeleton, database models (SQLAlchemy), migrations (Flask-Migrate), seeders, and full CRUD interfaces are live with Swagger documentation.
 
 ---
@@ -166,6 +168,7 @@ alumni/
 │   │   └── api_applications.py   # REST API routes (/api/applications)
 │   │
 │   ├── templates/                # Jinja2 HTML views
+│   │   ├── index.html            # Homepage (live stats, latest jobs & announcements)
 │   │   ├── 404.html              # Generic 404 Not Found page
 │   │   ├── user/
 │   │   ├── announcement/
@@ -190,6 +193,8 @@ alumni/
 ├── run.py                        # Entry point — app config, middlewares & server startup
 ├── seed.py                       # CLI script to seed the database
 ├── ddd.md                        # Data Dictionary & Relationship Matrix
+├── brand.md                      # Brand summary: palette, typography, component style
+├── design.md                     # Full style reference: tokens, components, do's and don'ts
 ├── requirements.txt              # Python dependencies
 ├── Dockerfile                    # Container image definition
 ├── docker-compose.yml            # Multi-container orchestration (Web + PostgreSQL 16)

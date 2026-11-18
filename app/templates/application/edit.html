@@ -3,109 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Application - Alumni Platform</title>
+    <title>Edit Application — Alumni Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-primary: #1B4332;
+            --color-primary-hover: #143325;
+            --color-accent: #C2410C;
+            --color-bg: #FAF8F5;
+            --color-surface: #FFFFFF;
+            --color-text: #1C1917;
+            --color-muted: #57534E;
+            --color-border: #E7E5E4;
+            --color-error: #B91C1C;
+        }
         *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #1a1a2e; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+        h1, h2, h3, .brand, .form-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: var(--color-text);
+        }
+        .navbar {
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 68px;
+        }
+        .nav-left { display: flex; align-items: center; gap: 8px; }
+        .navbar .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-right: 28px;
+            text-decoration: none;
+        }
+        .navbar a.nav-link {
+            color: var(--color-muted);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
+        .navbar a.nav-link.active { color: var(--color-primary); background-color: #E8F0EC; font-weight: 600; }
 
-        .navbar { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 0 32px; display: flex; justify-content: space-between; align-items: center; height: 58px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        .nav-left { display: flex; align-items: center; gap: 6px; }
-        .navbar .brand { font-size: 17px; font-weight: 700; color: white; margin-right: 24px; display: flex; align-items: center; gap: 8px; }
-        .brand-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .navbar a { color: #94a3b8; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: 500; font-size: 14px; transition: all 0.15s; }
-        .navbar a:hover { color: white; background: rgba(255,255,255,0.08); }
-        .navbar a.active { color: white; background: rgba(255,255,255,0.12); }
-
-        .page-wrapper { max-width: 720px; margin: 36px auto; padding: 0 24px; }
-        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; margin-bottom: 20px; }
-        .breadcrumb a { color: #667eea; text-decoration: none; }
+        .page-wrapper { max-width: 720px; margin: 36px auto 60px; padding: 0 24px; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-muted); margin-bottom: 18px; }
+        .breadcrumb a { color: var(--color-accent); text-decoration: none; font-weight: 600; }
         .breadcrumb a:hover { text-decoration: underline; }
-        .breadcrumb-sep { color: #cbd5e1; }
 
-        .form-card { background: white; border-radius: 14px; border: 1px solid #e8ecf0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
-        .form-card-header { padding: 24px 28px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
-        .form-card-header-left { display: flex; align-items: center; gap: 14px; }
-        .form-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #fef3c720, #fbbf2420); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid #fde68a; }
-        .form-title { font-size: 19px; font-weight: 700; color: #0f172a; margin: 0 0 3px; }
-        .form-subtitle { font-size: 13px; color: #64748b; margin: 0; }
-        .id-badge { background: #f1f5f9; color: #64748b; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; border: 1px solid #e2e8f0; }
+        .form-card {
+            background: var(--color-surface);
+            border-radius: 10px;
+            border: 1px solid var(--color-border);
+            overflow: hidden;
+        }
+        .form-card-header {
+            padding: 24px 28px 20px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-title { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+        .form-subtitle { font-size: 13px; color: var(--color-muted); margin: 0; }
+        .id-badge {
+            background: var(--color-bg);
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
 
         .form-body { padding: 28px; }
         .form-section { margin-bottom: 24px; }
-        .section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--color-border);
+        }
 
         .form-group { margin-bottom: 14px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #374151; }
-        .label-hint { font-weight: 400; color: #9ca3af; font-size: 12px; }
-        .required { color: #ef4444; margin-left: 2px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--color-text); }
+        .label-hint { font-weight: 400; color: var(--color-muted); font-size: 12px; }
+        .required { color: var(--color-error); margin-left: 2px; }
 
         input[type="text"], input[type="url"], textarea, select {
-            width: 100%; padding: 10px 12px; border: 1px solid #dde1e7; border-radius: 8px; font-size: 14px; font-family: inherit; color: #1e293b; background: #fafbfc; transition: all 0.15s;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--color-text);
+            background: var(--color-surface);
         }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
-        textarea { height: 150px; resize: vertical; line-height: 1.6; }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(27,67,50,0.12);
+        }
+        textarea { height: 140px; resize: vertical; line-height: 1.6; }
 
-        /* Status selector */
-        .status-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .status-option { display: none; }
-        .status-label { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; color: #64748b; transition: all 0.15s; text-align: center; }
-        .status-option[value="pending"]:checked + .status-label { border-color: #d97706; background: #fffbeb; color: #d97706; }
-        .status-option[value="reviewed"]:checked + .status-label { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
-        .status-option[value="accepted"]:checked + .status-label { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
-        .status-option[value="rejected"]:checked + .status-label { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
-        .status-label-icon { font-size: 18px; }
+        .form-footer {
+            padding: 20px 28px;
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-submit {
+            padding: 11px 22px;
+            background: var(--color-primary);
+            color: var(--color-surface);
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-submit:hover { background: var(--color-primary-hover); }
+        .btn-cancel {
+            padding: 11px 18px;
+            background: var(--color-surface);
+            color: var(--color-muted);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .btn-cancel:hover { color: var(--color-text); border-color: var(--color-text); }
 
-        .form-footer { padding: 20px 28px; background: #fafbfc; border-top: 1px solid #f1f5f9; display: flex; gap: 10px; align-items: center; }
-        .btn-submit { padding: 11px 22px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
-        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
-        .btn-cancel { padding: 11px 18px; background: white; color: #64748b; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
-        .btn-cancel:hover { background: #f8fafc; color: #374151; }
-
-        .error-box { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .error-box {
+            background: #FEF2F2;
+            color: var(--color-error);
+            border: 1px solid #FECACA;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-left">
-            <span class="brand">
-                <span class="brand-icon">🎓</span>
-                Alumni Platform
-            </span>
-            <a href="/users">Users</a>
-            <a href="/announcements">Announcements</a>
-            <a href="/job-postings">Job Postings</a>
-            <a href="/applications" class="active">Applications</a>
-            <a href="/api/swagger" target="_blank">Swagger API</a>
+            <a href="/" class="brand">Alumni Platform</a>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/users" class="nav-link">Users</a>
+            <a href="/announcements" class="nav-link">Announcements</a>
+            <a href="/job-postings" class="nav-link">Job Postings</a>
+            <a href="/applications" class="nav-link active">Applications</a>
+            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
         </div>
     </nav>
 
     <div class="page-wrapper">
         <div class="breadcrumb">
             <a href="/applications">Applications</a>
-            <span class="breadcrumb-sep">›</span>
-            Edit #{{ application.id }}
+            <span>›</span>
+            <span>Edit #{{ application.id }}</span>
         </div>
 
         <div class="form-card">
             <div class="form-card-header">
-                <div class="form-card-header-left">
-                    <div class="form-icon">✏️</div>
-                    <div>
-                        <div class="form-title">Edit Application</div>
-                        <div class="form-subtitle">Update candidate and position details.</div>
-                    </div>
+                <div>
+                    <div class="form-title">Edit Application</div>
+                    <div class="form-subtitle">Update candidate and position details.</div>
                 </div>
                 <span class="id-badge">#{{ application.id }}</span>
             </div>
 
             <form action="/applications/{{ application.id }}/edit" method="POST">
                 <div class="form-body">
-
                     {% if error %}
-                    <div class="error-box">⚠️ {{ error }}</div>
+                    <div class="error-box">{{ error }}</div>
                     {% endif %}
 
-                    <!-- Candidate & Position -->
                     <div class="form-section">
                         <div class="section-title">Candidate & Position</div>
                         <div class="form-group">
@@ -130,7 +226,6 @@
                         </div>
                     </div>
 
-                    <!-- Application Materials -->
                     <div class="form-section">
                         <div class="section-title">Application Materials</div>
                         <div class="form-group">
@@ -143,42 +238,22 @@
                         </div>
                     </div>
 
-                    <!-- Status -->
                     <div class="form-section">
                         <div class="section-title">Application Status</div>
                         <div class="form-group">
-                            <div class="status-selector">
-                                <input type="radio" class="status-option" name="status" id="s-pending" value="pending" {% if application.status == 'pending' %}checked{% endif %}>
-                                <label class="status-label" for="s-pending">
-                                    <span class="status-label-icon">⏳</span>
-                                    Pending
-                                </label>
-
-                                <input type="radio" class="status-option" name="status" id="s-reviewed" value="reviewed" {% if application.status == 'reviewed' %}checked{% endif %}>
-                                <label class="status-label" for="s-reviewed">
-                                    <span class="status-label-icon">🔍</span>
-                                    Reviewed
-                                </label>
-
-                                <input type="radio" class="status-option" name="status" id="s-accepted" value="accepted" {% if application.status == 'accepted' %}checked{% endif %}>
-                                <label class="status-label" for="s-accepted">
-                                    <span class="status-label-icon">✅</span>
-                                    Accepted
-                                </label>
-
-                                <input type="radio" class="status-option" name="status" id="s-rejected" value="rejected" {% if application.status == 'rejected' %}checked{% endif %}>
-                                <label class="status-label" for="s-rejected">
-                                    <span class="status-label-icon">❌</span>
-                                    Rejected
-                                </label>
-                            </div>
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="pending" {% if application.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="reviewed" {% if application.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                                <option value="accepted" {% if application.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                                <option value="rejected" {% if application.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="form-footer">
-                    <button type="submit" class="btn-submit">💾 Save Changes</button>
+                    <button type="submit" class="btn-submit">Save Changes</button>
                     <a href="/applications" class="btn-cancel">← Cancel</a>
                 </div>
             </form>

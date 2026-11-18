@@ -55,9 +55,10 @@ def init_server_error_guardian(app: Flask) -> None:
 
         html = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><title>{code} Server Error</title>
-<style>body{{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#f0f2f5;color:#1a1a2e;display:flex;justify-content:center;padding-top:80px}}
-.card{{background:#fff;padding:32px 40px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-width:560px}}
-h1{{margin-top:0;color:#dc2626}}a{{color:#667eea}}code{{background:#f1f5f9;padding:2px 6px;border-radius:4px}}</style></head>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>body{{font-family:'Plus Jakarta Sans',sans-serif;background:#FAF8F5;color:#1C1917;display:flex;justify-content:center;padding-top:80px}}
+.card{{background:#FFFFFF;border:1px solid #E7E5E4;padding:32px 40px;border-radius:10px;max-width:560px}}
+h1{{font-family:'Playfair Display',serif;margin-top:0;color:#B91C1C}}a{{color:#1B4332;font-weight:600}}code{{background:#FAF8F5;border:1px solid #E7E5E4;padding:2px 6px;border-radius:4px}}</style></head>
 <body><div class="card"><h1>{code} — Server Error</h1>
 <p><b>Reason:</b> {reason}</p><p><b>Type:</b> <code>{error_type}</code></p>
 <p><a href="/">&larr; Back to home</a></p></div></body></html>"""

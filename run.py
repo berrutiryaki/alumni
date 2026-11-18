@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flasgger import Swagger
 from dotenv import load_dotenv
 
@@ -110,46 +110,36 @@ app.register_blueprint(api_applications_bp)    # /api/applications — JSON
 
 @app.route("/")
 def index():
-    return """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Alumni Platform</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; background-color: #f8f9fa; color: #333; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); max-width: 600px; }
-        h1 { margin-top: 0; color: #212529; }
-        ul { line-height: 2; font-size: 16px; }
-        a { color: #0d6efd; text-decoration: none; font-weight: 500; }
-        a:hover { text-decoration: underline; }
-        .badge { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>Alumni Platform</h1>
-        <p>Alumni Tracking & Networking Portal <span class="badge">Database Connected</span></p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
-        <h3>Web CRUD Interfaces</h3>
-        <ul>
-            <li><a href="/users">Users & Alumni Management (HTML)</a></li>
-            <li><a href="/announcements">Announcements & Events Management (HTML)</a></li>
-            <li><a href="/job-postings">Job Postings & Opportunities (HTML)</a></li>
-            <li><a href="/applications">Job Applications Management (HTML)</a></li>
-        </ul>
-        <h3>REST API & Documentation</h3>
-        <ul>
-            <li><a href="/api/users">API Users (JSON)</a></li>
-            <li><a href="/api/announcements">API Announcements (JSON)</a></li>
-            <li><a href="/api/job-postings">API Job Postings (JSON)</a></li>
-            <li><a href="/api/applications">API Applications (JSON)</a></li>
-            <li><a href="/api/health">API Health Check (JSON)</a></li>
-            <li><a href="/api/swagger">Interactive Swagger / OpenAPI Docs</a></li>
-        </ul>
-    </div>
-</body>
-</html>
-""", 200, {"Content-Type": "text/html"}
+    stats = {
+        "users_count": User.query.count(),
+        "alumni_count": User.query.filter_by(status="alumni").count(),
+        "student_count": User.query.filter_by(status="student").count(),
+        "jobs_count": JobPosting.query.count(),
+        "active_jobs_count": JobPosting.query.filter_by(is_active=True).count(),
+        "applications_count": Application.query.count(),
+        "pending_apps_count": Application.query.filter_by(status="pending").count(),
+        "accepted_apps_count": Application.query.filter_by(status="accepted").count(),
+        "announcements_count": Announcement.query.count(),
+        "active_announcements_count": Announcement.query.filter_by(is_active=True).count(),
+    }
+    recent_jobs = (
+        JobPosting.query.filter_by(is_active=True)
+        .order_by(JobPosting.id.desc())
+        .limit(4)
+        .all()
+    )
+    recent_announcements = (
+        Announcement.query.filter_by(is_active=True)
+        .order_by(Announcement.id.desc())
+        .limit(4)
+        .all()
+    )
+    return render_template(
+        "index.html",
+        stats=stats,
+        recent_jobs=recent_jobs,
+        recent_announcements=recent_announcements,
+    )
 
 
 @app.route("/about")
