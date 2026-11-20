@@ -1,6 +1,7 @@
 import os
 from flask import Flask, jsonify, render_template
 from flasgger import Swagger
+from sqlalchemy import func
 from dotenv import load_dotenv
 
 from app.database import db, migrate
@@ -134,11 +135,22 @@ def index():
         .limit(4)
         .all()
     )
+    latest_app = Application.query.order_by(Application.id.desc()).first()
+    dept_rows = (
+        db.session.query(User.department, func.count(User.id).label("n"))
+        .filter(User.department.isnot(None), User.department != "")
+        .group_by(User.department)
+        .order_by(func.count(User.id).desc())
+        .limit(6)
+        .all()
+    )
     return render_template(
         "index.html",
         stats=stats,
         recent_jobs=recent_jobs,
         recent_announcements=recent_announcements,
+        latest_application=latest_app.to_dict() if latest_app else None,
+        departments=[row[0] for row in dept_rows],
     )
 
 

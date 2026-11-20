@@ -1,0 +1,16 @@
+<header class="nav-wrap">
+    <nav class="nav-pill">
+        <a href="/" class="brand">alumni <span class="brand-tag">Hiring</span></a>
+        <div class="nav-links">
+            <a href="/" {% if active == 'home' %}class="active"{% endif %}>Home</a>
+            <a href="/users" {% if active == 'users' %}class="active"{% endif %}>Users</a>
+            <a href="/announcements" {% if active == 'announcements' %}class="active"{% endif %}>Announcements</a>
+            <a href="/job-postings" {% if active == 'jobs' %}class="active"{% endif %}>Job Postings</a>
+            <a href="/applications" {% if active == 'applications' %}class="active"{% endif %}>Applications</a>
+        </div>
+        <div class="nav-actions">
+            <a href="/api/swagger" target="_blank" class="btn btn-ghost btn-sm">Swagger API</a>
+            <a href="/job-postings/new" class="btn btn-sprout btn-sm">Post a job</a>
+        </div>
+    </nav>
+</header>

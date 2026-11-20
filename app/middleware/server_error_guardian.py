@@ -54,14 +54,22 @@ def init_server_error_guardian(app: Flask) -> None:
             }), code
 
         html = f"""<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><title>{code} Server Error</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
-<style>body{{font-family:'Plus Jakarta Sans',sans-serif;background:#FAF8F5;color:#1C1917;display:flex;justify-content:center;padding-top:80px}}
-.card{{background:#FFFFFF;border:1px solid #E7E5E4;padding:32px 40px;border-radius:10px;max-width:560px}}
-h1{{font-family:'Playfair Display',serif;margin-top:0;color:#B91C1C}}a{{color:#1B4332;font-weight:600}}code{{background:#FAF8F5;border:1px solid #E7E5E4;padding:2px 6px;border-radius:4px}}</style></head>
-<body><div class="card"><h1>{code} — Server Error</h1>
-<p><b>Reason:</b> {reason}</p><p><b>Type:</b> <code>{error_type}</code></p>
-<p><a href="/">&larr; Back to home</a></p></div></body></html>"""
+<html lang="en"><head><meta charset="UTF-8"><title>{code} Server Error — Alumni Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/theme.css">
+</head>
+<body>
+<section class="band-dark hero" style="min-height:85vh;display:flex;align-items:center;">
+<div class="orb orb-a"></div>
+<div class="container">
+<span class="announce-pill"><span><b>{code} Guardian</b> &middot; {error_type}</span></span>
+<h1 class="display-md" style="margin-top:24px;">Server <span class="accent">error</span>.</h1>
+<div class="card-light" style="max-width:560px;margin:28px auto 0;text-align:left;">
+<p style="font-weight:600;margin-bottom:8px;">Reason</p>
+<p style="color:#57534E;">{reason}</p>
+</div>
+<div style="margin-top:28px;"><a href="/" class="btn btn-sprout btn-lg">Back to home</a></div>
+</div></section></body></html>"""
         return html, code, {"Content-Type": "text/html; charset=utf-8"}
 
     # Any 5xx raised via abort(5xx) or returned by Flask itself.

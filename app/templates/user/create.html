@@ -3,167 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create User — Alumni Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-primary: #1B4332;
-            --color-primary-hover: #143325;
-            --color-accent: #C2410C;
-            --color-bg: #FAF8F5;
-            --color-surface: #FFFFFF;
-            --color-text: #1C1917;
-            --color-muted: #57534E;
-            --color-border: #E7E5E4;
-            --color-error: #B91C1C;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-        }
-        h1, h2, h3, .brand {
-            font-family: 'Playfair Display', Georgia, serif;
-            color: var(--color-text);
-        }
-        .navbar {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0 36px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 68px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 8px; }
-        .navbar .brand {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-right: 28px;
-            text-decoration: none;
-        }
-        .navbar a.nav-link {
-            color: var(--color-muted);
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
-        .navbar a.nav-link.active { color: var(--color-primary); background-color: #E8F0EC; font-weight: 600; }
-
-        .container {
-            max-width: 620px;
-            margin: 40px auto;
-            padding: 34px 36px;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 10px;
-        }
-        h2 { margin-top: 0; font-size: 26px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--color-text); }
-        input[type="text"], input[type="email"], input[type="number"], select {
-            width: 100%;
-            padding: 11px 13px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            background-color: var(--color-surface);
-            color: var(--color-text);
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(27,67,50,0.12);
-        }
-        button {
-            padding: 11px 22px;
-            background-color: var(--color-primary);
-            color: var(--color-surface);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-        }
-        button:hover { background-color: var(--color-primary-hover); }
-        .back-link { margin-top: 20px; display: inline-block; color: var(--color-accent); text-decoration: none; font-size: 14px; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; }
-        .error-box {
-            background-color: #FEF2F2;
-            color: var(--color-error);
-            border: 1px solid #FECACA;
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-    </style>
+    <title>New Member — Alumni Platform</title>
+    {% include 'partials/head.html' %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="brand">Alumni Platform</a>
-            <a href="/" class="nav-link">Home</a>
-            <a href="/users" class="nav-link active">Users</a>
-            <a href="/announcements" class="nav-link">Announcements</a>
-            <a href="/job-postings" class="nav-link">Job Postings</a>
-            <a href="/applications" class="nav-link">Applications</a>
-            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
+    {% set active = 'users' %}
+    {% include 'partials/nav.html' %}
+
+    <section class="band-dark page-hero" style="padding-bottom: 40px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/users">Users</a>
+                <span>&rsaquo;</span>
+                <span>New member</span>
+            </div>
+            <h1 class="display-md">Add a new <span class="accent">member</span>.</h1>
+            <p class="lead" style="margin-top: 12px;">Register a graduate or student profile in the university directory.</p>
         </div>
-    </nav>
+    </section>
 
-    <div class="container">
-        <h2>Add New Member</h2>
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="form-shell">
+                {% if error %}
+                <div class="error-banner">{{ error }}</div>
+                {% endif %}
 
-        {% if error %}
-        <div class="error-box">{{ error }}</div>
-        {% endif %}
+                <form action="/users" method="POST">
+                    <div class="field">
+                        <label for="name">Full Name <span class="req">*</span></label>
+                        <input type="text" id="name" name="name" class="input-pill" required placeholder="e.g. John Doe">
+                    </div>
 
-        <form action="/users" method="POST">
-            <div class="form-group">
-                <label for="name">Full Name *</label>
-                <input type="text" id="name" name="name" required placeholder="e.g. John Doe">
+                    <div class="field">
+                        <label for="email">Email Address <span class="req">*</span> <span class="hint">(must be unique)</span></label>
+                        <input type="email" id="email" name="email" class="input-pill" required placeholder="e.g. john@example.com">
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="field">
+                            <label for="status">Member Status <span class="req">*</span></label>
+                            <select id="status" name="status" class="select-pill" onchange="toggleGradYear()" required>
+                                <option value="student" selected>Student</option>
+                                <option value="alumni">Alumni</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="department">Academic Department <span class="hint">(optional)</span></label>
+                            <input type="text" id="department" name="department" class="input-pill" placeholder="e.g. Computer Engineering">
+                        </div>
+                    </div>
+
+                    <div class="field" id="grad_year_group" style="display: none;">
+                        <label for="graduation_year">Graduation Year <span class="hint">(for alumni)</span></label>
+                        <input type="number" id="graduation_year" name="graduation_year" class="input-pill" min="1900" max="2100" placeholder="e.g. 2024">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-sprout btn-lg">Save member</button>
+                        <a href="/users" class="btn btn-outline btn-lg">Cancel</a>
+                    </div>
+                </form>
             </div>
+        </div>
+    </section>
 
-            <div class="form-group">
-                <label for="email">Email Address * (must be unique)</label>
-                <input type="email" id="email" name="email" required placeholder="e.g. john@example.com">
-            </div>
-
-            <div class="form-group">
-                <label for="status">Status *</label>
-                <select id="status" name="status" onchange="toggleGradYear()" required>
-                    <option value="student" selected>Student</option>
-                    <option value="alumni">Alumni</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="department">Department</label>
-                <input type="text" id="department" name="department" placeholder="e.g. Computer Engineering">
-            </div>
-
-            <div class="form-group" id="grad_year_group" style="display: none;">
-                <label for="graduation_year">Graduation Year</label>
-                <input type="number" id="graduation_year" name="graduation_year" min="1900" max="2100" placeholder="e.g. 2024">
-            </div>
-
-            <button type="submit">Save to Database</button>
-        </form>
-
-        <a href="/users" class="back-link">← Back to Users Registry</a>
-    </div>
+    {% include 'partials/footer.html' %}
 
     <script>
         function toggleGradYear() {

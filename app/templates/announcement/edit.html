@@ -3,162 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Announcement — Alumni Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-primary: #1B4332;
-            --color-primary-hover: #143325;
-            --color-accent: #C2410C;
-            --color-bg: #FAF8F5;
-            --color-surface: #FFFFFF;
-            --color-text: #1C1917;
-            --color-muted: #57534E;
-            --color-border: #E7E5E4;
-            --color-error: #B91C1C;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-        }
-        h1, h2, h3, .brand {
-            font-family: 'Playfair Display', Georgia, serif;
-            color: var(--color-text);
-        }
-        .navbar {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0 36px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 68px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 8px; }
-        .navbar .brand {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-right: 28px;
-            text-decoration: none;
-        }
-        .navbar a.nav-link {
-            color: var(--color-muted);
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
-        .navbar a.nav-link.active { color: var(--color-primary); background-color: #E8F0EC; font-weight: 600; }
-
-        .container {
-            max-width: 650px;
-            margin: 40px auto;
-            padding: 34px 36px;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 10px;
-        }
-        h2 { margin-top: 0; font-size: 26px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--color-text); }
-        input[type="text"], textarea, select {
-            width: 100%;
-            padding: 11px 13px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            background-color: var(--color-surface);
-            color: var(--color-text);
-        }
-        textarea { height: 140px; resize: vertical; line-height: 1.6; }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(27,67,50,0.12);
-        }
-        button {
-            padding: 11px 22px;
-            background-color: var(--color-primary);
-            color: var(--color-surface);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-        }
-        button:hover { background-color: var(--color-primary-hover); }
-        .back-link { margin-top: 20px; display: inline-block; color: var(--color-accent); text-decoration: none; font-size: 14px; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; }
-        .error-box {
-            background-color: #FEF2F2;
-            color: var(--color-error);
-            border: 1px solid #FECACA;
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-    </style>
+    <title>Edit Announcement #{{ announcement.id }} — Alumni Platform</title>
+    {% include 'partials/head.html' %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="brand">Alumni Platform</a>
-            <a href="/" class="nav-link">Home</a>
-            <a href="/users" class="nav-link">Users</a>
-            <a href="/announcements" class="nav-link active">Announcements</a>
-            <a href="/job-postings" class="nav-link">Job Postings</a>
-            <a href="/applications" class="nav-link">Applications</a>
-            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
+    {% set active = 'announcements' %}
+    {% include 'partials/nav.html' %}
+
+    <section class="band-dark page-hero" style="padding-bottom: 40px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/announcements">Announcements</a>
+                <span>&rsaquo;</span>
+                <span>Edit #{{ announcement.id }}</span>
+            </div>
+            <h1 class="display-md">Edit <span class="accent">announcement</span>.</h1>
+            <p class="lead" style="margin-top: 12px;">{{ announcement.title }}</p>
         </div>
-    </nav>
+    </section>
 
-    <div class="container">
-        <h2>Edit Announcement #{{ announcement.id }}</h2>
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="form-shell">
+                {% if error %}
+                <div class="error-banner">{{ error }}</div>
+                {% endif %}
 
-        {% if error %}
-        <div class="error-box">{{ error }}</div>
-        {% endif %}
+                <form action="/announcements/{{ announcement.id }}/edit" method="POST">
+                    <div class="field">
+                        <label for="title">Headline / Title <span class="req">*</span></label>
+                        <input type="text" id="title" name="title" class="input-pill" value="{{ announcement.title }}" required>
+                    </div>
 
-        <form action="/announcements/{{ announcement.id }}/edit" method="POST">
-            <div class="form-group">
-                <label for="title">Title *</label>
-                <input type="text" id="title" name="title" value="{{ announcement.title }}" required>
+                    <div class="field">
+                        <label for="content">Announcement Content <span class="req">*</span></label>
+                        <textarea id="content" name="content" class="textarea-pill" required>{{ announcement.content }}</textarea>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="field">
+                            <label for="author">Author / Organization <span class="hint">(optional)</span></label>
+                            <input type="text" id="author" name="author" class="input-pill" value="{{ announcement.author or '' }}">
+                        </div>
+
+                        <div class="field">
+                            <label for="is_active">Visibility Status</label>
+                            <select id="is_active" name="is_active" class="select-pill">
+                                <option value="true" {% if announcement.is_active %}selected{% endif %}>Active — Visible on feed</option>
+                                <option value="false" {% if not announcement.is_active %}selected{% endif %}>Inactive — Archived</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-sprout btn-lg">Save changes</button>
+                        <a href="/announcements" class="btn btn-outline btn-lg">Cancel</a>
+                    </div>
+                </form>
             </div>
+        </div>
+    </section>
 
-            <div class="form-group">
-                <label for="content">Content *</label>
-                <textarea id="content" name="content" required>{{ announcement.content }}</textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="author">Author / Organization</label>
-                <input type="text" id="author" name="author" value="{{ announcement.author or '' }}">
-            </div>
-
-            <div class="form-group">
-                <label for="is_active">Status</label>
-                <select id="is_active" name="is_active">
-                    <option value="true" {% if announcement.is_active %}selected{% endif %}>Active</option>
-                    <option value="false" {% if not announcement.is_active %}selected{% endif %}>Inactive</option>
-                </select>
-            </div>
-
-            <button type="submit">Update in Database</button>
-        </form>
-
-        <a href="/announcements" class="back-link">← Back to Announcements</a>
-    </div>
+    {% include 'partials/footer.html' %}
 </body>
 </html>

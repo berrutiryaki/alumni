@@ -4,225 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Application — Alumni Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-primary: #1B4332;
-            --color-primary-hover: #143325;
-            --color-accent: #C2410C;
-            --color-bg: #FAF8F5;
-            --color-surface: #FFFFFF;
-            --color-text: #1C1917;
-            --color-muted: #57534E;
-            --color-border: #E7E5E4;
-            --color-error: #B91C1C;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-        }
-        h1, h2, h3, .brand, .form-title {
-            font-family: 'Playfair Display', Georgia, serif;
-            color: var(--color-text);
-        }
-        .navbar {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0 36px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 68px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 8px; }
-        .navbar .brand {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-right: 28px;
-            text-decoration: none;
-        }
-        .navbar a.nav-link {
-            color: var(--color-muted);
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
-        .navbar a.nav-link.active { color: var(--color-primary); background-color: #E8F0EC; font-weight: 600; }
-
-        .page-wrapper { max-width: 720px; margin: 36px auto 60px; padding: 0 24px; }
-        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-muted); margin-bottom: 18px; }
-        .breadcrumb a { color: var(--color-accent); text-decoration: none; font-weight: 600; }
-        .breadcrumb a:hover { text-decoration: underline; }
-
-        .form-card {
-            background: var(--color-surface);
-            border-radius: 10px;
-            border: 1px solid var(--color-border);
-            overflow: hidden;
-        }
-        .form-card-header { padding: 24px 28px 20px; border-bottom: 1px solid var(--color-border); }
-        .form-title { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
-        .form-subtitle { font-size: 13px; color: var(--color-muted); margin: 0; }
-
-        .form-body { padding: 28px; }
-        .form-section { margin-bottom: 24px; }
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--color-accent);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 14px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .form-group { margin-bottom: 14px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--color-text); }
-        .label-hint { font-weight: 400; color: var(--color-muted); font-size: 12px; }
-        .required { color: var(--color-error); margin-left: 2px; }
-
-        input[type="text"], input[type="url"], textarea, select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            color: var(--color-text);
-            background: var(--color-surface);
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(27,67,50,0.12);
-        }
-        textarea { height: 140px; resize: vertical; line-height: 1.6; }
-
-        .form-footer {
-            padding: 20px 28px;
-            background: var(--color-bg);
-            border-top: 1px solid var(--color-border);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .btn-submit {
-            padding: 11px 22px;
-            background: var(--color-primary);
-            color: var(--color-surface);
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .btn-submit:hover { background: var(--color-primary-hover); }
-        .btn-cancel {
-            padding: 11px 18px;
-            background: var(--color-surface);
-            color: var(--color-muted);
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-        }
-        .btn-cancel:hover { color: var(--color-text); border-color: var(--color-text); }
-
-        .error-box {
-            background: #FEF2F2;
-            color: var(--color-error);
-            border: 1px solid #FECACA;
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-    </style>
+    {% include 'partials/head.html' %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="brand">Alumni Platform</a>
-            <a href="/" class="nav-link">Home</a>
-            <a href="/users" class="nav-link">Users</a>
-            <a href="/announcements" class="nav-link">Announcements</a>
-            <a href="/job-postings" class="nav-link">Job Postings</a>
-            <a href="/applications" class="nav-link active">Applications</a>
-            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
-        </div>
-    </nav>
+    {% set active = 'applications' %}
+    {% include 'partials/nav.html' %}
 
-    <div class="page-wrapper">
-        <div class="breadcrumb">
-            <a href="/applications">Applications</a>
-            <span>›</span>
-            <span>Submit Application</span>
-        </div>
-
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-title">Submit Job Application</div>
-                <div class="form-subtitle">Connect a candidate with a job opportunity.</div>
+    <section class="band-dark page-hero" style="padding-bottom: 40px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/applications">Applications</a>
+                <span>&rsaquo;</span>
+                <span>Submit application</span>
             </div>
+            <h1 class="display-md">Submit an <span class="accent">application</span>.</h1>
+            <p class="lead" style="margin-top: 12px;">Link a candidate profile to an open job posting.</p>
+        </div>
+    </section>
 
-            <form action="/applications" method="POST">
-                <div class="form-body">
-                    {% if error %}
-                    <div class="error-box">{{ error }}</div>
-                    {% endif %}
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="form-shell">
+                {% if error %}
+                <div class="error-banner">{{ error }}</div>
+                {% endif %}
 
-                    <div class="form-section">
-                        <div class="section-title">Candidate & Position</div>
-                        <div class="form-group">
-                            <label for="user_id">Applicant <span class="required">*</span></label>
-                            <select id="user_id" name="user_id" required>
-                                <option value="">— Select Candidate —</option>
-                                {% for u in users %}
-                                <option value="{{ u.id }}">{{ u.name }} · {{ u.email }} [{{ u.status }}]</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="job_posting_id">Target Position <span class="required">*</span></label>
-                            <select id="job_posting_id" name="job_posting_id" required>
-                                <option value="">— Select Job Posting —</option>
-                                {% for j in job_postings %}
-                                <option value="{{ j.id }}">{{ j.title }} — {{ j.company }} ({{ j.employment_type }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                <form action="/applications" method="POST">
+                    <div class="field">
+                        <label for="user_id">Applicant (User) <span class="req">*</span></label>
+                        <select id="user_id" name="user_id" class="select-pill" required>
+                            <option value="">— Select Candidate —</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.name }} &middot; {{ u.email }} ({{ u.status }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
-                    <div class="form-section">
-                        <div class="section-title">Application Materials</div>
-                        <div class="form-group">
-                            <label for="resume_url">Resume / CV Link <span class="label-hint">(optional)</span></label>
-                            <input type="url" id="resume_url" name="resume_url" placeholder="https://linkedin.com/in/... or drive link">
-                        </div>
-                        <div class="form-group">
-                            <label for="cover_letter">Cover Letter <span class="label-hint">(optional)</span></label>
-                            <textarea id="cover_letter" name="cover_letter" placeholder="Why is this candidate a great fit?"></textarea>
-                        </div>
+                    <div class="field">
+                        <label for="job_posting_id">Target Job Position <span class="req">*</span></label>
+                        <select id="job_posting_id" name="job_posting_id" class="select-pill" required>
+                            <option value="">— Select Job Posting —</option>
+                            {% for j in job_postings %}
+                            <option value="{{ j.id }}">{{ j.title }} — {{ j.company }} ({{ j.employment_type }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
-                    <div class="form-section">
-                        <div class="section-title">Initial Status</div>
-                        <div class="form-group">
-                            <label for="status">Application Status</label>
-                            <select id="status" name="status">
+                    <div class="form-grid-2">
+                        <div class="field">
+                            <label for="resume_url">Resume / CV Link <span class="hint">(optional)</span></label>
+                            <input type="url" id="resume_url" name="resume_url" class="input-pill" placeholder="https://linkedin.com/in/...">
+                        </div>
+
+                        <div class="field">
+                            <label for="status">Initial Status</label>
+                            <select id="status" name="status" class="select-pill">
                                 <option value="pending" selected>Pending</option>
                                 <option value="reviewed">Reviewed</option>
                                 <option value="accepted">Accepted</option>
@@ -230,15 +67,22 @@
                             </select>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-footer">
-                    <button type="submit" class="btn-submit">Submit Application</button>
-                    <a href="/applications" class="btn-cancel">← Cancel</a>
-                </div>
-            </form>
+                    <div class="field">
+                        <label for="cover_letter">Cover Letter / Note <span class="hint">(optional)</span></label>
+                        <textarea id="cover_letter" name="cover_letter" class="textarea-pill" placeholder="Why is this candidate a strong match for this role?"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-sprout btn-lg">Submit application</button>
+                        <a href="/applications" class="btn btn-outline btn-lg">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
 
     <script>
         const params = new URLSearchParams(window.location.search);

@@ -4,182 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 Page Not Found — Alumni Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-primary: #1B4332;
-            --color-primary-hover: #143325;
-            --color-accent: #C2410C;
-            --color-bg: #FAF8F5;
-            --color-surface: #FFFFFF;
-            --color-text: #1C1917;
-            --color-muted: #57534E;
-            --color-border: #E7E5E4;
-            --color-error: #B91C1C;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        h1, h2, h3, .brand, .error-badge {
-            font-family: 'Playfair Display', Georgia, serif;
-        }
-        .navbar {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0 36px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 68px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 8px; }
-        .navbar .brand {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-right: 28px;
-            text-decoration: none;
-        }
-        .navbar a.nav-link {
-            color: var(--color-muted);
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
-
-        .error-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-        .error-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            padding: 44px 40px;
-            max-width: 580px;
-            width: 100%;
-            text-align: center;
-        }
-        .error-badge {
-            display: inline-block;
-            font-size: 46px;
-            font-weight: 700;
-            color: var(--color-error);
-            background: #FEF2F2;
-            border: 1px solid #FECACA;
-            border-radius: 10px;
-            padding: 8px 24px;
-            margin-bottom: 16px;
-        }
-        h1 { margin: 0 0 10px; font-size: 28px; color: var(--color-text); }
-        .subtitle { margin: 0 0 22px; color: var(--color-muted); font-size: 15px; }
-        .reason-box {
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
-            border-left: 4px solid var(--color-error);
-            border-radius: 6px;
-            padding: 14px 16px;
-            text-align: left;
-            font-size: 14px;
-            color: var(--color-text);
-            margin-bottom: 20px;
-            word-break: break-word;
-        }
-        .path-chip {
-            display: inline-block;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            color: var(--color-accent);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 13px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-top: 6px;
-        }
-        .suggestions {
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            padding: 12px 16px;
-            font-size: 14px;
-            margin-bottom: 24px;
-            text-align: left;
-        }
-        .suggestions a { color: var(--color-accent); font-weight: 600; text-decoration: none; margin-right: 8px; }
-        .suggestions a:hover { text-decoration: underline; }
-        .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .btn {
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .btn-primary { background: var(--color-primary); color: var(--color-surface); }
-        .btn-primary:hover { background: var(--color-primary-hover); }
-        .btn-secondary { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); }
-        .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    </style>
+    {% include 'partials/head.html' %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="brand">Alumni Platform</a>
-            <a href="/" class="nav-link">Home</a>
-            <a href="/users" class="nav-link">Users</a>
-            <a href="/announcements" class="nav-link">Announcements</a>
-            <a href="/job-postings" class="nav-link">Job Postings</a>
-            <a href="/applications" class="nav-link">Applications</a>
-            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
-        </div>
-    </nav>
+    {% set active = '' %}
+    {% include 'partials/nav.html' %}
 
-    <div class="error-wrapper">
-        <div class="error-card">
-            <div class="error-badge">404</div>
-            <h1>Page Not Found</h1>
-            <p class="subtitle">The page or resource you requested could not be found.</p>
+    <section class="band-dark hero" style="min-height: 78vh; display: flex; align-items: center;">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="container">
+            <span class="announce-pill">
+                <span><b>404 Guardian</b> &middot; Invalid request intercepted</span>
+            </span>
 
-            <div class="reason-box">
-                <div><strong>Reason:</strong> {{ reason }}</div>
+            <h1 class="display" style="margin-top: 28px;">
+                Lost in the <span class="accent">woods</span>.
+            </h1>
+
+            <p class="lead" style="max-width: 600px; margin: 22px auto 0;">
+                {{ reason }}
+            </p>
+
+            <div class="card-light" style="max-width: 580px; margin: 36px auto 0; text-align: left;">
                 {% if requested_path %}
-                <div><strong>Requested URL:</strong> <span class="path-chip">{{ requested_path }}</span></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-lichen-sage);">Requested URL</span>
+                    <span class="badge">{{ requested_path }}</span>
+                </div>
+                {% endif %}
+
+                {% if suggestions %}
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-soft-mist);">
+                    <div style="font-size: 13px; color: var(--color-lichen-sage); margin-bottom: 10px;">Did you mean one of these routes?</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        {% for s in suggestions %}
+                        <a href="{{ s }}" class="btn btn-outline btn-sm">{{ s }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
                 {% endif %}
             </div>
 
-            {% if suggestions %}
-            <div class="suggestions">
-                <strong>Did you mean:</strong>
-                {% for s in suggestions %}
-                    <a href="{{ s }}">{{ s }}</a>{% if not loop.last %}, {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="actions">
-                <a href="/" class="btn btn-primary">Back to Home</a>
-                <a href="/users" class="btn btn-secondary">Users</a>
-                <a href="/announcements" class="btn btn-secondary">Announcements</a>
-                <a href="/job-postings" class="btn btn-secondary">Job Postings</a>
-                <a href="/applications" class="btn btn-secondary">Applications</a>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
+                <a href="/" class="btn btn-sprout btn-lg">Back to home</a>
+                <a href="/job-postings" class="btn btn-ghost btn-lg">Explore jobs</a>
             </div>
         </div>
-    </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
 </body>
 </html>

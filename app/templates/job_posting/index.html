@@ -4,337 +4,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Postings — Alumni Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-primary: #1B4332;
-            --color-primary-hover: #143325;
-            --color-accent: #C2410C;
-            --color-bg: #FAF8F5;
-            --color-surface: #FFFFFF;
-            --color-text: #1C1917;
-            --color-muted: #57534E;
-            --color-border: #E7E5E4;
-            --color-error: #B91C1C;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-        }
-        h1, h2, h3, .brand, .job-title {
-            font-family: 'Playfair Display', Georgia, serif;
-            color: var(--color-text);
-        }
-        .navbar {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0 36px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 68px;
-        }
-        .nav-left { display: flex; align-items: center; gap: 8px; }
-        .navbar .brand {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--color-primary);
-            margin-right: 28px;
-            text-decoration: none;
-        }
-        .navbar a.nav-link {
-            color: var(--color-muted);
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .navbar a.nav-link:hover { color: var(--color-primary); background-color: var(--color-bg); }
-        .navbar a.nav-link.active { color: var(--color-primary); background-color: #E8F0EC; font-weight: 600; }
-        .db-badge {
-            background-color: #E8F0EC;
-            color: var(--color-primary);
-            border: 1px solid #C5D9CE;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .db-dot { width: 8px; height: 8px; background-color: var(--color-primary); border-radius: 50%; }
-
-        .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 36px 24px 60px; }
-
-        .page-header {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 10px;
-            padding: 26px 30px;
-            margin-bottom: 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .page-header-left h1 { margin: 0 0 4px; font-size: 28px; }
-        .page-header-left p { margin: 0; font-size: 14px; color: var(--color-muted); }
-        .stats-row { display: flex; gap: 20px; margin-top: 10px; }
-        .stat { font-size: 13px; color: var(--color-muted); }
-        .stat-num { font-weight: 700; color: var(--color-primary); font-size: 15px; }
-
-        .btn {
-            padding: 10px 18px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: inherit;
-        }
-        .btn-primary { background-color: var(--color-primary); color: var(--color-surface); }
-        .btn-primary:hover { background-color: var(--color-primary-hover); }
-
-        .filter-bar { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; align-items: center; }
-        .filter-btn {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid var(--color-border);
-            background: var(--color-surface);
-            color: var(--color-muted);
-            text-decoration: none;
-        }
-        .filter-btn:hover, .filter-btn.active {
-            border-color: var(--color-primary);
-            background: var(--color-primary);
-            color: var(--color-surface);
-        }
-        .filter-label { font-size: 13px; color: var(--color-muted); font-weight: 600; margin-right: 4px; }
-
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 18px; }
-        @media (max-width: 700px) { .cards-grid { grid-template-columns: 1fr; } }
-
-        .job-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 10px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-        }
-        .job-card.inactive { opacity: 0.72; }
-
-        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .company-logo {
-            width: 42px;
-            height: 42px;
-            border-radius: 8px;
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--color-primary);
-        }
-        .card-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge-type { background: var(--color-bg); color: var(--color-text); border: 1px solid var(--color-border); }
-        .badge-active { background: #E8F0EC; color: var(--color-primary); }
-        .badge-inactive { background: #FEF2F2; color: var(--color-error); }
-
-        .job-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; line-height: 1.3; }
-        .company-name { font-size: 14px; color: var(--color-accent); font-weight: 600; margin: 0 0 10px; }
-        .card-meta-row { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--color-muted); margin-bottom: 12px; }
-
-        .description {
-            font-size: 14px;
-            color: var(--color-text);
-            line-height: 1.6;
-            flex: 1;
-            margin-bottom: 14px;
-        }
-        .expires-bar { font-size: 12px; color: var(--color-muted); margin-bottom: 14px; }
-
-        .card-footer {
-            display: flex;
-            gap: 8px;
-            padding-top: 14px;
-            border-top: 1px solid var(--color-border);
-            margin-top: auto;
-        }
-        .btn-apply {
-            flex: 1;
-            padding: 9px 14px;
-            background: var(--color-primary);
-            color: var(--color-surface);
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-        }
-        .btn-apply:hover { background: var(--color-primary-hover); }
-        .btn-edit {
-            padding: 9px 14px;
-            background: var(--color-surface);
-            color: var(--color-text);
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .btn-edit:hover { border-color: var(--color-primary); color: var(--color-primary); }
-        .btn-del {
-            padding: 9px 12px;
-            background: #FEF2F2;
-            color: var(--color-error);
-            border: 1px solid #FECACA;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .del-form { margin: 0; }
-        .empty-state {
-            text-align: center;
-            padding: 56px 24px;
-            background: var(--color-surface);
-            border-radius: 10px;
-            border: 1px solid var(--color-border);
-        }
-    </style>
+    {% include 'partials/head.html' %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="brand">Alumni Platform</a>
-            <a href="/" class="nav-link">Home</a>
-            <a href="/users" class="nav-link">Users</a>
-            <a href="/announcements" class="nav-link">Announcements</a>
-            <a href="/job-postings" class="nav-link active">Job Postings</a>
-            <a href="/applications" class="nav-link">Applications</a>
-            <a href="/api/swagger" target="_blank" class="nav-link">Swagger API</a>
-        </div>
-        <div class="db-badge">
-            <span class="db-dot"></span> Database Connected
-        </div>
-    </nav>
+    {% set active = 'jobs' %}
+    {% include 'partials/nav.html' %}
 
-    <div class="page-wrapper">
-        <div class="page-header">
-            <div class="page-header-left">
-                <h1>Job Postings & Opportunities</h1>
-                <p>Browse open positions and connect alumni with career opportunities.</p>
-                <div class="stats-row">
-                    <div class="stat"><span class="stat-num">{{ job_postings|length }}</span> Total Postings</div>
-                    <div class="stat"><span class="stat-num">{{ job_postings|selectattr('is_active')|list|length }}</span> Active</div>
-                </div>
-            </div>
-            <a href="/job-postings/new" class="btn btn-primary">+ New Job Posting</a>
-        </div>
+    {% set active_count = job_postings | selectattr('is_active') | list | length %}
+    {% set closed_count = (job_postings | length) - active_count %}
 
-        <div class="filter-bar">
-            <span class="filter-label">Filter:</span>
-            <a href="#" class="filter-btn active" onclick="filterCards('all', this); return false;">All</a>
-            <a href="#" class="filter-btn" onclick="filterCards('full-time', this); return false;">Full-time</a>
-            <a href="#" class="filter-btn" onclick="filterCards('part-time', this); return false;">Part-time</a>
-            <a href="#" class="filter-btn" onclick="filterCards('internship', this); return false;">Internship</a>
-            <a href="#" class="filter-btn" onclick="filterCards('contract', this); return false;">Contract</a>
-            <a href="#" class="filter-btn" onclick="filterCards('remote', this); return false;">Remote</a>
-        </div>
-
-        {% if job_postings %}
-        <div class="cards-grid" id="cardsGrid">
-            {% for jp in job_postings %}
-            <div class="job-card {% if not jp.is_active %}inactive{% endif %}" data-type="{{ jp.employment_type }}">
-                <div class="card-top">
-                    <div class="company-logo">{{ jp.company[0] if jp.company else '?' }}</div>
-                    <div class="card-badges">
-                        <span class="badge badge-type">{{ jp.employment_type }}</span>
-                        {% if jp.is_active %}
-                            <span class="badge badge-active">Active</span>
-                        {% else %}
-                            <span class="badge badge-inactive">Closed</span>
-                        {% endif %}
+    <!-- Dark Forest Hero Header -->
+    <section class="band-dark page-hero">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="page-hero-row">
+                <div>
+                    <p class="eyebrow">Career board</p>
+                    <h1 class="display-md" style="margin-top: 10px;">
+                        Open roles &amp; <span class="accent">careers</span>.
+                    </h1>
+                    <p class="lead" style="margin-top: 16px; max-width: 580px;">
+                        Full-time positions, internships and remote opportunities shared across the alumni network.
+                    </p>
+                    <div class="hero-kpis">
+                        <span class="badge">{{ job_postings|length }} total roles</span>
+                        <span class="badge badge-dark">{{ active_count }} active openings</span>
+                        <span class="badge badge-dark">{{ closed_count }} closed</span>
                     </div>
                 </div>
-
-                <div class="job-title">{{ jp.title }}</div>
-                <div class="company-name">{{ jp.company }}</div>
-
-                <div class="card-meta-row">
-                    {% if jp.city or jp.location %}<span>📍 {{ jp.city or jp.location }}</span>{% endif %}
-                    {% if jp.salary_range %}<span>💰 {{ jp.salary_range }}</span>{% endif %}
-                    {% if jp.posted_by %}<span>👤 {{ jp.posted_by }}</span>{% endif %}
-                </div>
-
-                {% if jp.description %}
-                <div class="description">{{ jp.description }}</div>
-                {% endif %}
-
-                {% if jp.expires_at %}
-                <div class="expires-bar">Expires: {{ jp.expires_at }}</div>
-                {% endif %}
-
-                <div class="card-footer">
-                    {% if jp.is_active %}
-                    <a href="/applications/new?job_posting_id={{ jp.id }}" class="btn-apply">Apply Now</a>
-                    {% endif %}
-                    <a href="/job-postings/{{ jp.id }}/edit" class="btn-edit">Edit</a>
-                    <form class="del-form" action="/job-postings/{{ jp.id }}/delete" method="POST" onsubmit="return confirm('Delete this job posting?');">
-                        <button type="submit" class="btn-del">Delete</button>
-                    </form>
+                <div>
+                    <a href="/job-postings/new" class="btn btn-sprout btn-lg">+ Post a job</a>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <div class="empty-state">
-            <h3>No job postings yet</h3>
-            <p>Start by creating the first job opportunity for alumni.</p>
-            <a href="/job-postings/new" class="btn btn-primary">+ Create First Posting</a>
+    </section>
+
+    <!-- Light Job Cards Section -->
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="toolbar">
+                <div class="filter-pills">
+                    <button type="button" class="filter-pill active" onclick="filterJobs('all', this)">All ({{ job_postings|length }})</button>
+                    <button type="button" class="filter-pill" onclick="filterJobs('full-time', this)">Full-time</button>
+                    <button type="button" class="filter-pill" onclick="filterJobs('part-time', this)">Part-time</button>
+                    <button type="button" class="filter-pill" onclick="filterJobs('internship', this)">Internship</button>
+                    <button type="button" class="filter-pill" onclick="filterJobs('contract', this)">Contract</button>
+                    <button type="button" class="filter-pill" onclick="filterJobs('remote', this)">Remote</button>
+                </div>
+                <input
+                    type="search"
+                    id="jobSearch"
+                    class="search-input"
+                    placeholder="Search title, company or city..."
+                    oninput="applyJobFilter()"
+                >
+            </div>
+
+            {% if job_postings %}
+            <div class="grid-2" id="jobsGrid">
+                {% for jp in job_postings %}
+                <article
+                    class="card-light job-card"
+                    data-type="{{ jp.employment_type | lower | replace(' ', '') | replace('-', '') }}"
+                    data-search="{{ (jp.title ~ ' ' ~ jp.company ~ ' ' ~ (jp.city or jp.location or '') ~ ' ' ~ (jp.description or '')) | lower }}"
+                    style="display: flex; flex-direction: column; justify-content: space-between; {% if not jp.is_active %}opacity: 0.72;{% endif %}"
+                >
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span class="avatar">{{ (jp.company or 'J')[0] | upper }}</span>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 14px; color: var(--color-deep-verdant);">{{ jp.company }}</div>
+                                    <div style="font-size: 12px; color: var(--color-lichen-sage);">Role #{{ jp.id }}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                <span class="badge">{{ jp.employment_type }}</span>
+                                {% if jp.is_active %}
+                                <span class="badge badge-neutral">Active</span>
+                                {% else %}
+                                <span class="badge badge-muted">Closed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <h2 class="news-title" style="font-size: 22px; margin-top: 18px;">{{ jp.title }}</h2>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                            {% if jp.city or jp.location %}
+                            <span class="badge badge-neutral">{{ jp.city or jp.location }}</span>
+                            {% endif %}
+                            {% if jp.salary_range %}
+                            <span class="badge">{{ jp.salary_range }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if jp.description %}
+                        <p style="color: var(--color-onyx-olive); opacity: 0.85; margin-top: 14px; font-size: 14px; line-height: 1.6;">
+                            {{ jp.description }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--color-soft-mist); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <span class="news-meta" style="margin-top: 0;">
+                            {% if jp.posted_by %}{{ jp.posted_by }}{% else %}Posted {{ jp.created_at }}{% endif %}
+                            {% if jp.expires_at %} &middot; Exp. {{ jp.expires_at }}{% endif %}
+                        </span>
+                        <div class="row-actions">
+                            {% if jp.is_active %}
+                            <a href="/applications/new?job_posting_id={{ jp.id }}" class="btn btn-sprout btn-sm">Apply now</a>
+                            {% endif %}
+                            <a href="/job-postings/{{ jp.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                            <form action="/job-postings/{{ jp.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this job posting?');">
+                                <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-light center" style="padding: 56px 24px;">
+                <h3 style="font-size: 20px; font-weight: 600;">No job postings yet</h3>
+                <p style="color: var(--color-lichen-sage); margin-top: 8px;">Publish the first career opportunity for graduates and students.</p>
+                <div style="margin-top: 20px;">
+                    <a href="/job-postings/new" class="btn btn-sprout">+ Post a job</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
 
     <script>
-        function filterCards(type, btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        let currentJobType = 'all';
+        function filterJobs(type, btn) {
+            currentJobType = type.toLowerCase().replace(/[- ]/g, '');
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            applyJobFilter();
+        }
+        function applyJobFilter() {
+            const q = (document.getElementById('jobSearch').value || '').toLowerCase().trim();
             document.querySelectorAll('.job-card').forEach(card => {
-                if (type === 'all') {
-                    card.style.display = '';
-                } else {
-                    const cardType = (card.dataset.type || '').toLowerCase().replace(/[- ]/g, '');
-                    const filterType = type.toLowerCase().replace(/[- ]/g, '');
-                    card.style.display = cardType.includes(filterType) ? '' : 'none';
-                }
+                const cardType = card.dataset.type || '';
+                const typeMatch = (currentJobType === 'all' || cardType.includes(currentJobType));
+                const textMatch = (!q || (card.dataset.search || '').includes(q));
+                card.style.display = (typeMatch && textMatch) ? 'flex' : 'none';
             });
         }
     </script>
