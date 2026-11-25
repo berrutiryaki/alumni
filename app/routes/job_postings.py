@@ -9,7 +9,7 @@ RBAC (ddd.md):
 
 from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.job_posting_controller import JobPostingController
-from app.middleware.auth_guardian import require_roles
+from app.middleware.auth_middleware import get_current_user, require_roles
 
 job_postings_bp = Blueprint("job_postings", __name__, url_prefix="/job-postings")
 
@@ -32,6 +32,10 @@ def new():
 @require_roles("alumni", "academician", "admin")
 def create():
     data = request.form.to_dict()
+    if not (data.get("posted_by") or "").strip():
+        user = get_current_user()
+        if user is not None:
+            data["posted_by"] = user.email or user.name
     result = JobPostingController.create(data)
     if not result["success"]:
         return render_template("job_posting/create.html", error=result["error"]), 400

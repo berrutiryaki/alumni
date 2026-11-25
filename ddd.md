@@ -542,9 +542,12 @@ flowchart TD
 
 ### Business Rules
 
-- `user_id` and `job_posting_id` are required on both `POST` (create) and `PUT` (full update).
-- Both `user_id` and `job_posting_id` must refer to existing records in the database.
-- `status` defaults to `"pending"` if not provided; valid values: `pending`, `reviewed`, `accepted`, `rejected`.
+- On the web submission form (`GET/POST /applications`), `user_id` is **never** read from the form — it is bound server-side to `current_user.id`.
+- `job_posting_id` must be supplied via URL query/path parameter (`/applications/new?job_posting_id=<id>` or `/applications/new/<id>`); missing or invalid job IDs redirect to `/job-postings`.
+- Every newly created application is automatically assigned `status = "pending"` server-side (valid review statuses: `pending`, `reviewed`, `accepted`, `rejected`).
+- Duplicate applications by the same user for the same job posting are rejected with `409 Conflict`.
+- **Privacy Filtering (`GET /applications`):** Unauthenticated visitors redirect to `/login`; `admin` sees all applications; job posting owners (`job_posting.posted_by` matching `current_user.name` or `current_user.email`) see applications submitted to their postings; applicants (`student` / `alumni`) see only their own submitted applications (`application.user_id == current_user.id`).
+- **Status Update Authorization:** Updating status (`POST /applications/<id>/status`), editing, or deleting an application is restricted strictly to `admin` and the owner of that job posting; unauthorized requests return `403 Forbidden`.
 - `applied_at` is set once at creation time and never modified.
 - `id` is never accepted from the client; it is always assigned server-side.
 
@@ -556,12 +559,13 @@ flowchart TD
 
 | Operation | Method | URL | Controller Method | View Template |
 |---|---|---|---|---|
-| List all | `GET` | `/applications/` | `ApplicationController.index()` | `application/index.html` |
-| Show create form | `GET` | `/applications/new` | — | `application/create.html` |
-| Create | `POST` | `/applications/` | `ApplicationController.create(data)` | Redirects to list on success |
-| Show edit form | `GET` | `/applications/<id>/edit` | `ApplicationController.show(id)` | `application/edit.html` |
-| Update | `POST` | `/applications/<id>/edit` | `ApplicationController.update(id, data)` | Redirects to list on success |
-| Delete | `POST` | `/applications/<id>/delete` | `ApplicationController.delete(id)` | Redirects to list on success |
+| List (privacy-filtered) | `GET` | `/applications/` | `ApplicationController.index_for_user(user)` | `application/index.html` *(guest → `/login`)* |
+| Show create form | `GET` | `/applications/new?job_posting_id=<id>` | — | `application/create.html` *(redirects to `/job-postings` if invalid)* |
+| Create (auto `user_id` & `pending`) | `POST` | `/applications/` | `ApplicationController.create(data, current_user)` | Redirects to `/applications` on success; `409` on duplicate |
+| Update status (admin / job owner) | `POST` | `/applications/<id>/status` | `ApplicationController.update_status(id, status, user)` | `403` if unauthorized; redirects to `/applications` |
+| Show edit form (admin / job owner) | `GET` | `/applications/<id>/edit` | `ApplicationController.show(id)` | `application/edit.html` *(`403` if unauthorized)* |
+| Update (admin / job owner) | `POST` | `/applications/<id>/edit` | `ApplicationController.update(id, data, user)` | `403` if unauthorized; redirects to `/applications` |
+| Delete (admin / job owner) | `POST` | `/applications/<id>/delete` | `ApplicationController.delete(id, user)` | `403` if unauthorized; redirects to `/applications` |
 
 #### REST API (JSON)
 
@@ -580,6 +584,7 @@ flowchart TD
 |---|---|
 | `400 Bad Request` | Missing `user_id` or `job_posting_id` |
 | `404 Not Found` | No application found with the given `id`, or referenced `user`/`job_posting` not found |
+| `409 Conflict` | Duplicate application for the same `(user_id, job_posting_id)` pair |
 
 ---
 

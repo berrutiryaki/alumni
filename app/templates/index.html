@@ -73,7 +73,7 @@
                     {% if latest_application %}
                     <div class="mock-row">
                         <span class="avatar">{{ (latest_application.user_name or 'U')[0] | upper }}</span>
-                        <span class="badge {% if latest_application.status in ['accepted', 'reviewed'] %}{% elif latest_application.status == 'rejected' %}badge-muted{% else %}badge-neutral{% endif %}">{{ latest_application.status | capitalize }}</span>
+                        <span class="badge {% if latest_application.status == 'accepted' %}badge-status-accepted{% elif latest_application.status == 'reviewed' %}badge-status-reviewed{% elif latest_application.status == 'rejected' %}badge-status-rejected{% else %}badge-status-pending{% endif %}">{{ latest_application.status | capitalize }}</span>
                     </div>
                     <div class="mock-title">{{ latest_application.user_name or 'A candidate' }}</div>
                     <div class="mock-sub">applied for {{ latest_application.job_title }} at {{ latest_application.company }}</div>
@@ -232,7 +232,7 @@
                 </div>
                 <div class="card-dark module">
                     <h3>Applications</h3>
-                    <p>The action table linking applicants to postings, with status tracking.</p>
+                    <p>Submit job applications and track review progress in one place.</p>
                     <div class="module-links"><a href="/applications">Open</a>{% if can_apply_jobs %}<a href="/applications/new">New</a>{% endif %}<a href="/api/applications">API</a></div>
                 </div>
             </div>

@@ -78,7 +78,7 @@
                             </div>
 
                             <div class="field">
-                                <label for="role_display">Role <span class="hint">(read-only)</span></label>
+                                <label for="role_display">Role</label>
                                 <input type="text" id="role_display" class="input-pill input-readonly" value="{{ u_role | capitalize }}" readonly disabled aria-readonly="true">
                             </div>
                         </div>
@@ -95,7 +95,7 @@
                                     {% if u_role == 'alumni' %}
                                         <span class="hint">(for alumni)</span>
                                     {% else %}
-                                        <span class="hint">(editable for alumni role only)</span>
+                                        <span class="hint">(alumni only)</span>
                                     {% endif %}
                                 </label>
                                 <input

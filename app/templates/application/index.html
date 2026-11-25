@@ -12,7 +12,6 @@
 
     {% set active_role = (current_user.role or current_user.status) | lower if current_user else 'guest' %}
     {% set can_submit_app = active_role in ['student', 'alumni', 'admin'] %}
-    {% set can_manage_apps = active_role in ['alumni', 'academician', 'admin'] %}
     {% set pending_count = applications | selectattr('status', 'equalto', 'pending') | list | length %}
     {% set reviewed_count = applications | selectattr('status', 'equalto', 'reviewed') | list | length %}
     {% set accepted_count = applications | selectattr('status', 'equalto', 'accepted') | list | length %}
@@ -24,12 +23,18 @@
         <div class="container">
             <div class="page-hero-row">
                 <div>
-                    <p class="eyebrow">Action table &middot; Candidate pipeline</p>
+                    <p class="eyebrow">Candidate pipeline</p>
                     <h1 class="display-md" style="margin-top: 10px;">
                         Applications &amp; <span class="accent">matches</span>.
                     </h1>
                     <p class="lead" style="margin-top: 16px; max-width: 580px;">
-                        Connecting alumni and student candidates directly with open career positions.
+                        {% if active_role == 'admin' %}
+                            Reviewing all job applications across the network.
+                        {% elif active_role == 'academician' %}
+                            Track applications submitted to job postings you published.
+                        {% else %}
+                            Track your submitted applications and candidates who applied to your job postings.
+                        {% endif %}
                     </p>
                     <div class="hero-kpis">
                         <span class="badge">{{ applications|length }} total</span>
@@ -37,14 +42,13 @@
                         <span class="badge badge-dark">{{ reviewed_count }} reviewed</span>
                         <span class="badge badge-dark">{{ accepted_count }} accepted</span>
                         <span class="badge badge-dark">{{ rejected_count }} rejected</span>
-                        <span class="badge badge-dark">Role: {{ active_role | capitalize }}</span>
                     </div>
                 </div>
                 <div>
                     {% if can_submit_app %}
-                    <a href="/applications/new" class="btn btn-sprout btn-lg">+ Submit application</a>
+                    <a href="/job-postings" class="btn btn-sprout btn-lg">Browse open jobs</a>
                     {% elif active_role == 'academician' %}
-                    <span class="announce-pill"><span><b>Academician View</b> &middot; Review candidate applications</span></span>
+                    <a href="/job-postings/new" class="btn btn-sprout btn-lg">+ Post a job</a>
                     {% else %}
                     <a href="/login" class="btn btn-ghost btn-lg">Log in to apply</a>
                     {% endif %}
@@ -56,6 +60,18 @@
     <!-- Light Applications Section -->
     <section class="band band-light" style="padding-top: 56px;">
         <div class="container">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                <div class="flash-stack" role="status" aria-live="polite" style="max-width: 100%;">
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'error' %}error-banner{% else %}success-banner{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
             <div class="toolbar">
                 <div class="filter-pills">
                     <button type="button" class="filter-pill active" onclick="filterApps('all', this)">All ({{ applications|length }})</button>
@@ -90,17 +106,24 @@
                                     <div style="font-weight: 700; font-size: 17px; color: var(--color-onyx-olive);">
                                         {{ a.user_name or ('User #' ~ a.user_id) }}
                                     </div>
-                                    <div style="font-size: 12px; color: var(--color-lichen-sage);">Application #{{ a.id }}</div>
+                                    <div style="font-size: 12px; color: var(--color-lichen-sage);">
+                                        Application #{{ a.id }}
+                                        {% if a.is_job_owner and not a.is_own_application %}
+                                            &middot; Your posting
+                                        {% elif a.is_own_application %}
+                                            &middot; Your application
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                             {% if a.status == 'accepted' %}
-                            <span class="badge">Accepted</span>
+                            <span class="badge badge-status-accepted">Accepted</span>
                             {% elif a.status == 'reviewed' %}
-                            <span class="badge badge-neutral">Reviewed</span>
+                            <span class="badge badge-status-reviewed">Reviewed</span>
                             {% elif a.status == 'rejected' %}
-                            <span class="badge badge-muted">Rejected</span>
+                            <span class="badge badge-status-rejected">Rejected</span>
                             {% else %}
-                            <span class="badge">Pending</span>
+                            <span class="badge badge-status-pending">Pending</span>
                             {% endif %}
                         </div>
 
@@ -123,29 +146,50 @@
                         {% endif %}
                     </div>
 
-                    <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--color-soft-mist); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <span class="news-meta" style="margin-top: 0;">Applied {{ a.applied_at }}</span>
-                        <div class="row-actions">
-                            {% if a.resume_url %}
-                            <a href="{{ a.resume_url }}" target="_blank" class="btn btn-sprout btn-sm">View CV</a>
-                            {% endif %}
-                            {% if can_manage_apps %}
-                            <a href="/applications/{{ a.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
-                            <form action="/applications/{{ a.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this application?');">
-                                <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
-                            </form>
-                            {% endif %}
+                    <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--color-soft-mist); display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <span class="news-meta" style="margin-top: 0;">Applied {{ a.applied_at }}</span>
+                            <div class="row-actions">
+                                {% if a.resume_url %}
+                                <a href="{{ a.resume_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sprout btn-sm">View CV</a>
+                                {% endif %}
+                                {% if a.can_manage %}
+                                <a href="/applications/{{ a.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                                <form action="/applications/{{ a.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this application?');">
+                                    <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
+                                </form>
+                                {% endif %}
+                            </div>
                         </div>
+
+                        {% if a.can_manage %}
+                        <form action="/applications/{{ a.id }}/status" method="POST" class="status-inline-form" style="padding-top: 10px; border-top: 1px dashed var(--color-soft-mist);">
+                            <label for="status-{{ a.id }}" style="font-size: 12px; font-weight: 600; color: var(--color-lichen-sage); text-transform: uppercase; letter-spacing: 0.05em;">Status:</label>
+                            <select id="status-{{ a.id }}" name="status" class="status-select-sm">
+                                <option value="pending" {% if a.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="reviewed" {% if a.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                                <option value="accepted" {% if a.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                                <option value="rejected" {% if a.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                            <button type="submit" class="btn btn-sprout btn-sm">Update status</button>
+                        </form>
+                        {% endif %}
                     </div>
                 </article>
                 {% endfor %}
             </div>
             {% else %}
             <div class="card-light center" style="padding: 56px 24px;">
-                <h3 style="font-size: 20px; font-weight: 600;">No applications submitted yet</h3>
-                <p style="color: var(--color-lichen-sage); margin-top: 8px;">Submit the first candidate application for an open role.</p>
+                <h3 style="font-size: 20px; font-weight: 600;">No applications to display</h3>
+                <p style="color: var(--color-lichen-sage); margin-top: 8px;">
+                    {% if can_submit_app %}
+                        Browse open roles on the career board and click "Apply now" to submit an application.
+                    {% else %}
+                        Applications submitted to job postings you publish will appear here.
+                    {% endif %}
+                </p>
                 <div style="margin-top: 20px;">
-                    <a href="/applications/new" class="btn btn-sprout">+ Submit application</a>
+                    <a href="/job-postings" class="btn btn-sprout">Browse open jobs</a>
                 </div>
             </div>
             {% endif %}

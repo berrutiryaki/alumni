@@ -55,12 +55,19 @@ class ApiApplicationController:
             if not job:
                 return jsonify({"status": "error", "message": f"Job posting {job_posting_id} not found"}), 404
 
+            existing = Application.find_duplicate(int(user_id), int(job_posting_id))
+            if existing is not None:
+                return jsonify({
+                    "status": "error",
+                    "message": f"User {user_id} has already applied to job posting {job_posting_id}"
+                }), 409
+
             app_rec = Application.create({
                 "user_id": int(user_id),
                 "job_posting_id": int(job_posting_id),
                 "resume_url": (data.get("resume_url") or "").strip() or None,
                 "cover_letter": (data.get("cover_letter") or "").strip() or None,
-                "status": (data.get("status") or "").strip() or "pending",
+                "status": "pending",
             })
             return jsonify({"status": "success", "application": app_rec.to_dict()}), 201
         except ValueError:

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Application #{{ application.id }} — Alumni Platform</title>
+    <title>Review Application #{{ application.id }} — Alumni Platform</title>
     {% include 'partials/head.html' %}
 </head>
 <body>
@@ -16,10 +16,10 @@
             <div class="breadcrumb-bar">
                 <a href="/applications">Applications</a>
                 <span>&rsaquo;</span>
-                <span>Edit #{{ application.id }}</span>
+                <span>Review #{{ application.id }}</span>
             </div>
-            <h1 class="display-md">Edit <span class="accent">application</span> #{{ application.id }}.</h1>
-            <p class="lead" style="margin-top: 12px;">Update candidate assignment, CV link or review status.</p>
+            <h1 class="display-md">Review <span class="accent">application</span> #{{ application.id }}.</h1>
+            <p class="lead" style="margin-top: 12px;">Update review status, CV link, or application notes.</p>
         </div>
     </section>
 
@@ -30,35 +30,26 @@
                 <div class="error-banner">{{ error }}</div>
                 {% endif %}
 
+                <!-- Read-Only Target Job & Applicant Summary -->
+                <div class="form-grid-2">
+                    <div class="readonly-info-card">
+                        <div class="readonly-info-kicker">Applicant</div>
+                        <div class="readonly-info-title">{{ application.user_name or ('User #' ~ application.user_id) }}</div>
+                        {% if application.user_email %}
+                        <div style="font-size: 13px; color: var(--color-lichen-sage); margin-top: 2px;">{{ application.user_email }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="readonly-info-card">
+                        <div class="readonly-info-kicker">Target Job Position</div>
+                        <div class="readonly-info-title">{{ application.job_title or ('Job #' ~ application.job_posting_id) }}</div>
+                        {% if application.company %}
+                        <div class="readonly-info-sub">{{ application.company }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <form action="/applications/{{ application.id }}/edit" method="POST">
-                    <div class="field">
-                        <label for="user_id">Applicant (User) <span class="req">*</span></label>
-                        <select id="user_id" name="user_id" class="select-pill" required>
-                            {% for u in users %}
-                            <option value="{{ u.id }}" {% if application.user_id == u.id %}selected{% endif %}>
-                                {{ u.name }} &middot; {{ u.email }} ({{ u.status }})
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="job_posting_id">Target Job Position <span class="req">*</span></label>
-                        <select id="job_posting_id" name="job_posting_id" class="select-pill" required>
-                            {% for j in job_postings %}
-                            <option value="{{ j.id }}" {% if application.job_posting_id == j.id %}selected{% endif %}>
-                                {{ j.title }} — {{ j.company }} ({{ j.employment_type }})
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
                     <div class="form-grid-2">
-                        <div class="field">
-                            <label for="resume_url">Resume / CV Link <span class="hint">(optional)</span></label>
-                            <input type="url" id="resume_url" name="resume_url" class="input-pill" value="{{ application.resume_url or '' }}" placeholder="https://...">
-                        </div>
-
                         <div class="field">
                             <label for="status">Application Status</label>
                             <select id="status" name="status" class="select-pill">
@@ -67,6 +58,11 @@
                                 <option value="accepted" {% if application.status == 'accepted' %}selected{% endif %}>Accepted</option>
                                 <option value="rejected" {% if application.status == 'rejected' %}selected{% endif %}>Rejected</option>
                             </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="resume_url">Resume / CV Link <span class="hint">(optional)</span></label>
+                            <input type="url" id="resume_url" name="resume_url" class="input-pill" value="{{ application.resume_url or '' }}" placeholder="https://...">
                         </div>
                     </div>
 

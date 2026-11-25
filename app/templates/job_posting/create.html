@@ -68,8 +68,8 @@
                         </div>
 
                         <div class="field">
-                            <label for="posted_by">Posted By <span class="hint">(optional)</span></label>
-                            <input type="text" id="posted_by" name="posted_by" class="input-pill" placeholder="e.g. talent@company.com">
+                            <label for="posted_by">Posted By <span class="hint">(defaults to your email)</span></label>
+                            <input type="text" id="posted_by" name="posted_by" class="input-pill" value="{{ current_user.email if current_user else '' }}" placeholder="e.g. talent@company.com">
                         </div>
                     </div>
 

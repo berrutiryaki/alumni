@@ -32,14 +32,11 @@
                         <span class="badge">{{ announcements|length }} total posts</span>
                         <span class="badge badge-dark">{{ active_count }} active</span>
                         <span class="badge badge-dark">{{ inactive_count }} archived</span>
-                        <span class="badge badge-dark">Role: {{ active_role | capitalize }}</span>
                     </div>
                 </div>
                 <div>
                     {% if can_manage_announcements %}
                     <a href="/announcements/new" class="btn btn-sprout btn-lg">+ New announcement</a>
-                    {% else %}
-                    <span class="announce-pill"><span><b>{{ active_role | capitalize }} View</b> &middot; Read-only campus bulletin</span></span>
                     {% endif %}
                 </div>
             </div>

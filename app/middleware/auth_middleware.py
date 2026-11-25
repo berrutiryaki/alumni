@@ -210,18 +210,18 @@ def _check_central_rbac(path: str, method: str, role: str):
             )
 
     elif clean_path.startswith("/applications"):
-        if clean_path in ("/applications", "/applications/new"):
+        if clean_path == "/applications" or clean_path == "/applications/new" or clean_path.startswith("/applications/new/"):
             if role not in ("student", "alumni", "admin"):
                 abort(
                     403,
                     description=f"Your current role is '{role.capitalize()}'. Only Students, Alumni, and Admin can submit job applications.",
                 )
         else:
-            # /applications/<id>/edit or /delete
+            # /applications/<id>/status, /edit, or /delete (exact job-owner vs admin check also runs in route)
             if role not in ("alumni", "academician", "admin"):
                 abort(
                     403,
-                    description=f"Your current role is '{role.capitalize()}'. Reviewing, editing, or deleting applications is restricted to Alumni, Academician, and Admin.",
+                    description=f"Your current role is '{role.capitalize()}'. Only an administrator or the job posting owner can manage this application.",
                 )
 
     return None

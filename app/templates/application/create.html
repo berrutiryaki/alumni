@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Application — Alumni Platform</title>
+    <title>Apply for {{ job.title }} — Alumni Platform</title>
     {% include 'partials/head.html' %}
 </head>
 <body>
     {% set active = 'applications' %}
     {% include 'partials/nav.html' %}
 
+    {% set u_role = (current_user.role or current_user.status or 'student') | lower %}
+
     <section class="band-dark page-hero" style="padding-bottom: 40px;">
         <div class="orb orb-a"></div>
         <div class="container">
             <div class="breadcrumb-bar">
-                <a href="/applications">Applications</a>
+                <a href="/job-postings">Job Postings</a>
                 <span>&rsaquo;</span>
-                <span>Submit application</span>
+                <span>Apply to #{{ job.id }}</span>
             </div>
-            <h1 class="display-md">Submit an <span class="accent">application</span>.</h1>
-            <p class="lead" style="margin-top: 12px;">Link a candidate profile to an open job posting.</p>
+            <h1 class="display-md">Submit your <span class="accent">application</span>.</h1>
+            <p class="lead" style="margin-top: 12px;">
+                Review the selected position and your profile details below before submitting.
+            </p>
         </div>
     </section>
 
@@ -30,52 +34,73 @@
                 <div class="error-banner">{{ error }}</div>
                 {% endif %}
 
+                <!-- Fixed Selected Job Position Summary (Read-Only) -->
+                <div class="readonly-info-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                        <div>
+                            <div class="readonly-info-kicker">Target Job Position</div>
+                            <div class="readonly-info-title">{{ job.title }}</div>
+                            <div class="readonly-info-sub">
+                                {{ job.company }}{% if job.city %} &middot; {{ job.city }}{% endif %}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <span class="badge">{{ job.employment_type }}</span>
+                            {% if job.salary_range %}
+                            <span class="badge badge-neutral">{{ job.salary_range }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Authenticated Applicant Info Box (Read-Only) -->
+                <div class="readonly-info-card" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="avatar">{{ (current_user.name or 'U')[0] | upper }}</span>
+                            <div>
+                                <div class="readonly-info-kicker">Applicant</div>
+                                <div class="readonly-info-title" style="margin-top: 2px;">{{ current_user.name }}</div>
+                                <div style="font-size: 13px; color: var(--color-lichen-sage);">{{ current_user.email }}</div>
+                            </div>
+                        </div>
+                        <span class="badge">{{ u_role | capitalize }}</span>
+                    </div>
+                </div>
+
                 <form action="/applications" method="POST">
-                    <div class="field">
-                        <label for="user_id">Applicant (User) <span class="req">*</span></label>
-                        <select id="user_id" name="user_id" class="select-pill" required>
-                            <option value="">— Select Candidate —</option>
-                            {% for u in users %}
-                            <option value="{{ u.id }}" {% if current_user and current_user.id == u.id %}selected{% endif %}>{{ u.name }} &middot; {{ u.email }} ({{ u.role or u.status }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <input type="hidden" name="job_posting_id" value="{{ job.id }}">
 
                     <div class="field">
-                        <label for="job_posting_id">Target Job Position <span class="req">*</span></label>
-                        <select id="job_posting_id" name="job_posting_id" class="select-pill" required>
-                            <option value="">— Select Job Posting —</option>
-                            {% for j in job_postings %}
-                            <option value="{{ j.id }}">{{ j.title }} — {{ j.company }} ({{ j.employment_type }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div class="field">
-                            <label for="resume_url">Resume / CV Link <span class="hint">(optional)</span></label>
-                            <input type="url" id="resume_url" name="resume_url" class="input-pill" placeholder="https://linkedin.com/in/...">
-                        </div>
-
-                        <div class="field">
-                            <label for="status">Initial Status</label>
-                            <select id="status" name="status" class="select-pill">
-                                <option value="pending" selected>Pending</option>
-                                <option value="reviewed">Reviewed</option>
-                                <option value="accepted">Accepted</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
-                        </div>
+                        <label for="resume_url">Resume / CV Link <span class="hint">(optional)</span></label>
+                        <input
+                            type="url"
+                            id="resume_url"
+                            name="resume_url"
+                            class="input-pill"
+                            value="{{ form_data.get('resume_url', '') if form_data else '' }}"
+                            placeholder="https://linkedin.com/in/... or CV URL"
+                        >
                     </div>
 
                     <div class="field">
                         <label for="cover_letter">Cover Letter / Note <span class="hint">(optional)</span></label>
-                        <textarea id="cover_letter" name="cover_letter" class="textarea-pill" placeholder="Why is this candidate a strong match for this role?"></textarea>
+                        <textarea
+                            id="cover_letter"
+                            name="cover_letter"
+                            class="textarea-pill"
+                            placeholder="Share why you are a strong match for this role..."
+                        >{{ form_data.get('cover_letter', '') if form_data else '' }}</textarea>
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-sprout btn-lg">Submit application</button>
-                        <a href="/applications" class="btn btn-outline btn-lg">Cancel</a>
+                        <button type="submit" class="btn btn-sprout btn-lg" {% if already_applied %}disabled style="opacity: 0.6; cursor: not-allowed;"{% endif %}>
+                            Submit application
+                        </button>
+                        <a href="/job-postings" class="btn btn-outline btn-lg">Back to jobs</a>
+                        {% if already_applied %}
+                        <a href="/applications" class="btn btn-outline btn-lg">View my applications</a>
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -83,14 +108,5 @@
     </section>
 
     {% include 'partials/footer.html' %}
-
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const preJobId = params.get('job_posting_id');
-        if (preJobId) {
-            const sel = document.getElementById('job_posting_id');
-            if (sel) sel.value = preJobId;
-        }
-    </script>
 </body>
 </html>

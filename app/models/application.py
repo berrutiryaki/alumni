@@ -47,9 +47,15 @@ class Application(db.Model):
             "status": self.status,
             "applied_at": self.applied_at,
             "user_name": self.user.name if self.user else None,
+            "user_email": self.user.email if self.user else None,
             "job_title": self.job_posting.title if self.job_posting else None,
             "company": self.job_posting.company if self.job_posting else None,
+            "posted_by": self.job_posting.posted_by if self.job_posting else None,
         }
+
+    @classmethod
+    def find_duplicate(cls, user_id: int, job_posting_id: int) -> "Application | None":
+        return cls.query.filter_by(user_id=int(user_id), job_posting_id=int(job_posting_id)).first()
 
     # ------------------------------------------------------------------
     # CRUD helpers for seamless controller/route integration

@@ -33,15 +33,12 @@
                         <span class="badge">{{ job_postings|length }} total roles</span>
                         <span class="badge badge-dark">{{ active_count }} active openings</span>
                         <span class="badge badge-dark">{{ closed_count }} closed</span>
-                        <span class="badge badge-dark">Role: {{ active_role | capitalize }}</span>
                     </div>
                 </div>
                 <div>
                     {% if can_manage_jobs %}
                     <a href="/job-postings/new" class="btn btn-sprout btn-lg">+ Post a job</a>
-                    {% elif active_role == 'student' %}
-                    <span class="announce-pill"><span><b>Student Role</b> &middot; Can apply to open positions</span></span>
-                    {% else %}
+                    {% elif active_role == 'guest' %}
                     <a href="/login" class="btn btn-ghost btn-lg">Log in to post or apply</a>
                     {% endif %}
                 </div>
@@ -52,6 +49,18 @@
     <!-- Light Job Cards Section -->
     <section class="band band-light" style="padding-top: 56px;">
         <div class="container">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                <div class="flash-stack" role="status" aria-live="polite" style="max-width: 100%;">
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'error' %}error-banner{% else %}success-banner{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
             <div class="toolbar">
                 <div class="filter-pills">
                     <button type="button" class="filter-pill active" onclick="filterJobs('all', this)">All ({{ job_postings|length }})</button>
