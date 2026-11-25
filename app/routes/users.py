@@ -10,15 +10,16 @@ RBAC (ddd.md):
 
 from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.user_controller import UserController
-from app.middleware.auth_guardian import get_current_user, require_roles
+from app.middleware.auth_guardian import get_current_user, login_required, require_roles
 
 users_bp = Blueprint("users", __name__, url_prefix="/users")
 
 
 @users_bp.route("/", methods=["GET"], strict_slashes=False)
 @users_bp.route("", methods=["GET"])
+@login_required
 def index():
-    """List all users (HTML)."""
+    """List all users (HTML) — requires authenticated user."""
     result = UserController.index()
     return render_template("user/index.html", users=result["users"])
 
@@ -45,8 +46,9 @@ def create():
 
 
 @users_bp.route("/<int:user_id>", methods=["GET"])
+@login_required
 def show(user_id):
-    """Show the profile page for a single user."""
+    """Show the profile page for a single user — requires authenticated user."""
     result = UserController.show(user_id)
     if not result["success"]:
         abort(404, description=result["error"])
@@ -57,8 +59,7 @@ def _ensure_self_or_admin(target_user_id: int):
     current = get_current_user()
     if current is None:
         return redirect(url_for("auth.login_form"))
-    role = (current.role or current.status or "student").lower()
-    if role != "admin" and current.id != target_user_id:
+    if not current.is_admin and current.id != target_user_id:
         abort(
             403,
             description="You can only edit your own profile. Editing other members' profiles requires the Admin role.",
@@ -85,6 +86,11 @@ def update(user_id):
     if guard is not None:
         return guard
     data = request.form.to_dict()
+    current = get_current_user()
+    # Prevent non-admin users from escalating their own role
+    if current is not None and not current.is_admin:
+        data["role"] = current.role
+        data["status"] = current.role
     result = UserController.update(user_id, data)
 
     if not result["success"]:

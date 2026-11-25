@@ -20,6 +20,10 @@ class User(db.Model):
     status = db.Column(db.String(20), nullable=False, default="student")  # kept in sync with role
     department = db.Column(db.String(120), nullable=True)
     graduation_year = db.Column(db.Integer, nullable=True)
+    company = db.Column(db.String(120), nullable=True)
+    job_title = db.Column(db.String(120), nullable=True)
+    location = db.Column(db.String(120), nullable=True)
+    linkedin_url = db.Column(db.String(255), nullable=True)
 
     # ------------------------------------------------------------------
     # Relationships
@@ -29,7 +33,9 @@ class User(db.Model):
 
     def __init__(self, name: str, email: str, status: str = None, role: str = None,
                  department: str = None, graduation_year: int = None,
-                 password: str = None, password_hash: str = None):
+                 password: str = None, password_hash: str = None,
+                 company: str = None, job_title: str = None,
+                 location: str = None, linkedin_url: str = None):
         resolved_role = (role or status or "student").strip().lower()
         if resolved_role not in VALID_ROLES:
             resolved_role = "student"
@@ -40,6 +46,10 @@ class User(db.Model):
         self.status = resolved_role
         self.department = department
         self.graduation_year = self._normalize_grad_year(graduation_year, resolved_role)
+        self.company = company
+        self.job_title = job_title
+        self.location = location
+        self.linkedin_url = linkedin_url
 
         if password:
             self.set_password(password)
@@ -67,6 +77,10 @@ class User(db.Model):
             return False
         return check_password_hash(self.password_hash, password)
 
+    @property
+    def is_admin(self) -> bool:
+        return (self.role or "").strip().lower() == "admin"
+
     # ------------------------------------------------------------------
     # Serialization
     # ------------------------------------------------------------------
@@ -80,6 +94,10 @@ class User(db.Model):
             "status": self.role or self.status,
             "department": self.department,
             "graduation_year": self.graduation_year,
+            "company": self.company,
+            "job_title": self.job_title,
+            "location": self.location,
+            "linkedin_url": self.linkedin_url,
         }
 
     # ------------------------------------------------------------------
@@ -159,6 +177,14 @@ class User(db.Model):
             user.department = data["department"]
         if "graduation_year" in data:
             user.graduation_year = cls._normalize_grad_year(data["graduation_year"], user.role)
+        if "company" in data:
+            user.company = data["company"]
+        if "job_title" in data:
+            user.job_title = data["job_title"]
+        if "location" in data:
+            user.location = data["location"]
+        if "linkedin_url" in data:
+            user.linkedin_url = data["linkedin_url"]
         if data.get("password"):
             user.set_password(data["password"])
         try:

@@ -22,13 +22,14 @@ def register_form():
 
 @auth_bp.route("/register", methods=["POST"])
 def register_submit():
-    """Process the registration form submission, auto-login, and redirect to homepage."""
+    """Process the registration form submission, clear old session, auto-login, and redirect to homepage."""
     data = request.form.to_dict()
     result = UserController.register(data)
 
     if not result["success"]:
         return render_template("register.html", error=result["error"], form_data=data), 400
 
+    session.clear()
     session["user_id"] = result["user"]["id"]
     return redirect(url_for("index"))
 
@@ -41,13 +42,14 @@ def login_form():
 
 @auth_bp.route("/login", methods=["POST"])
 def login_submit():
-    """Authenticate user credentials, start session, and redirect to homepage."""
+    """Authenticate user credentials, clear old session, start fresh session, and redirect to homepage."""
     data = request.form.to_dict()
     result = UserController.login(data)
 
     if not result["success"]:
         return render_template("login.html", error=result["error"], form_data=data), 401
 
+    session.clear()
     session["user_id"] = result["user"]["id"]
     return redirect(url_for("index"))
 

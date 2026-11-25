@@ -29,6 +29,12 @@ Universities lose contact with graduates the moment they leave campus. Alumni so
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/` | `GET` | Root portal & quick navigation |
+| `/register` | `GET, POST` | Account registration (hashed password via `werkzeug.security`, auto-login) |
+| `/login` | `GET, POST` | Session-based user login |
+| `/logout` | `POST` | Clears session and logs out |
+| `/settings` | `GET, POST` | Self-service profile, career, email, and password settings (authenticated only) |
+| `/settings/delete` | `POST` | Permanently deletes the authenticated user's own account |
+| `/admin` | `GET, POST` | Admin Panel — full CRUD & role management (`admin` only) |
 | `/users` | `GET, POST` | Users & Alumni web CRUD interface (HTML) |
 | `/announcements` | `GET, POST` | Announcements web CRUD interface (HTML) |
 | `/job-postings` | `GET, POST` | Job Postings web CRUD interface (HTML) |
@@ -43,17 +49,49 @@ Universities lose contact with graduates the moment they leave campus. Alumni so
 
 ### Roadmap
 
-**Profile Management** — Full CRUD for alumni profiles: academic history, graduation year, department, employer, location, and privacy controls.
-
 **Alumni Search & Filtering** — Query the alumni directory by graduation year, department, industry, company, location, or skill. Supports both user-facing discovery and institutional reporting.
-
-**Career Board** — Job and internship listings posted by alumni-owned companies and institutional partners.
 
 **Mentorship Network** — Structured mentor-mentee matching with scheduling, goal tracking, and session logging.
 
 **Event Management** — End-to-end event lifecycle: creation, RSVP, attendance tracking, and post-event analytics.
 
-**Authentication & Authorization** — JWT-based auth with role-based access control (Alumni, Student, Faculty, Admin).
+**JWT / Token API Auth** — Token-based authentication for external API clients alongside the live session-based web RBAC.
+
+---
+
+## Authentication & Authorization
+
+The platform implements session-based authentication and strict Role-Based Access Control (**RBAC**) powered by `app/middleware/auth_middleware.py` and `werkzeug.security`.
+
+### Password & Session Security
+- **Password Hashing:** Plain-text passwords are never stored. Registration and password updates hash credentials using `werkzeug.security.generate_password_hash` and verify them via `check_password_hash`.
+- **Session Hygiene:** `session.clear()` is executed before setting `session['user_id']` on login and registration, and on logout (`POST /logout`) and account deletion (`POST /settings/delete`).
+- **Template Context:** `@app.context_processor` injects `current_user`, `current_role`, and `is_admin` strictly from `session.get('user_id')` (never falling back to a default user).
+
+### Roles & Permissions
+
+Five actors are defined in [ddd.md](ddd.md) (`guest` for unauthenticated visitors, plus four stored `users.role` values):
+
+| Capability | `guest` | `student` | `alumni` | `academician` | `admin` |
+|---|:---:|:---:|:---:|:---:|:---:|
+| View home, public announcements & job postings | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Register / Log in / Manage own `/settings` | ❌ *(Register/Login)* | ✅ | ✅ | ✅ | ✅ |
+| View Users directory & Applications | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Submit Job Applications (`/applications/new`) | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Publish & Manage Job Postings (`/job-postings/new`) | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Publish & Manage Announcements (`/announcements/new`) | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Access Admin Panel & Manage User Roles (`/admin`) | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+### Auth Middleware & Route Guards (`app/middleware/auth_middleware.py`)
+- **Central `before_request` Gatekeeper:** Loads `g.current_user` once per request and enforces role rules centrally on protected web routes.
+  - Unauthenticated (`guest`) requests to protected pages redirect (`302`) to `/login?next=<path>`.
+  - Authenticated requests lacking the required role return `403 Forbidden` (or structured JSON `401`/`403` on `/api/*` endpoints).
+- **Reusable Decorators:**
+  - `@login_required` — Requires an active logged-in session.
+  - `@roles_required(*roles)` — Restricts a route to explicitly listed lowercase roles.
+  - `@admin_required` — Shorthand for `@roles_required("admin")`.
+- **Dynamic Role-Based Navigation:** `app/templates/partials/nav.html` renders navigation items and dropdown actions strictly according to `current_user.role`, displaying the active role badge in the top-right header.
+- **Self-Service Account Settings (`/settings`):** Logged-in users can update personal & career fields (`name`, `department`, `graduation_year` for alumni, `company`, `job_title`, `location`, `linkedin_url`), change their email (uniqueness validated) and password (current password verified), or permanently delete their account (`POST /settings/delete`). The user's `role` is strictly read-only on `/settings` and can only be modified by an `admin`.
 
 ---
 
@@ -133,8 +171,9 @@ alumni/
 ├── app/                          # Application package
 │   ├── database.py               # SQLAlchemy and Migrate instances
 │   │
-│   ├── middleware/               # Request logging & error guardian middlewares
+│   ├── middleware/               # Auth RBAC, request logging & error guardian middlewares
 │   │   ├── __init__.py
+│   │   ├── auth_middleware.py    # Session loader, central RBAC gatekeeper & role decorators
 │   │   ├── logger.py             # Terminal request logger (time, method, route, status, duration)
 │   │   ├── not_found_guardian.py # 404 Guardian (JSON reason for API, redirect to /404 for web)
 │   │   ├── server_error_guardian.py # 5xx Guardian (catches 5xx & unhandled exceptions with reason)
@@ -158,6 +197,9 @@ alumni/
 │   │   └── api_application_controller.py
 │   │
 │   ├── routes/                   # Route Blueprints
+│   │   ├── auth.py               # Auth routes (/register, /login, /logout)
+│   │   ├── settings.py           # Self-service account settings (/settings, /settings/delete)
+│   │   ├── admin.py              # Admin panel & full data/role management (/admin)
 │   │   ├── users.py              # HTML routes (/users)
 │   │   ├── api_users.py          # REST API routes (/api/users + nested routes)
 │   │   ├── announcements.py      # HTML routes (/announcements)
@@ -168,8 +210,14 @@ alumni/
 │   │   └── api_applications.py   # REST API routes (/api/applications)
 │   │
 │   ├── templates/                # Jinja2 HTML views
+│   │   ├── base.html             # Shared layout template
 │   │   ├── index.html            # Homepage (live stats, latest jobs & announcements)
+│   │   ├── login.html            # User login page
+│   │   ├── register.html         # User registration page
+│   │   ├── settings.html         # Account settings & Danger Zone page
 │   │   ├── 404.html              # Generic 404 Not Found page
+│   │   ├── admin/                # Admin Panel views
+│   │   ├── partials/             # Shared head, role-based nav & footer
 │   │   ├── user/
 │   │   ├── announcement/
 │   │   ├── job_posting/

@@ -10,7 +10,7 @@ RBAC (ddd.md):
 
 from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.application_controller import ApplicationController
-from app.middleware.auth_guardian import require_roles
+from app.middleware.auth_guardian import login_required, require_roles
 from app.models.user import User
 from app.models.job_posting import JobPosting
 
@@ -19,6 +19,7 @@ applications_bp = Blueprint("applications", __name__, url_prefix="/applications"
 
 @applications_bp.route("/", methods=["GET"], strict_slashes=False)
 @applications_bp.route("", methods=["GET"])
+@login_required
 def index():
     result = ApplicationController.index()
     return render_template("application/index.html", applications=result["applications"])

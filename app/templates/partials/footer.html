@@ -1,3 +1,4 @@
+{% set f_role = ((current_user.role or current_user.status) | lower) if current_user else 'guest' %}
 <footer class="footer">
     <div class="container">
         <div class="footer-grid">
@@ -9,17 +10,35 @@
             </div>
             <div>
                 <h4>Platform</h4>
-                <a href="/users">Users</a>
+                <a href="/">Home</a>
                 <a href="/announcements">Announcements</a>
                 <a href="/job-postings">Job Postings</a>
+                {% if current_user %}
+                <a href="/users">Users</a>
                 <a href="/applications">Applications</a>
+                {% endif %}
+                {% if f_role == 'admin' %}
+                <a href="/admin">Admin Panel</a>
+                {% endif %}
             </div>
             <div>
-                <h4>Create</h4>
-                <a href="/users/new">New user</a>
-                <a href="/announcements/new">New announcement</a>
-                <a href="/job-postings/new">New job posting</a>
+                <h4>Actions</h4>
+                {% if not current_user %}
+                <a href="/login">Log in</a>
+                <a href="/register">Join network</a>
+                {% else %}
+                <a href="/users/{{ current_user.id }}">My profile</a>
+                {% if f_role in ['student', 'alumni', 'admin'] %}
                 <a href="/applications/new">New application</a>
+                {% endif %}
+                {% if f_role in ['alumni', 'academician', 'admin'] %}
+                <a href="/job-postings/new">New job posting</a>
+                <a href="/announcements/new">New announcement</a>
+                {% endif %}
+                {% if f_role == 'admin' %}
+                <a href="/users/new">New user</a>
+                {% endif %}
+                {% endif %}
             </div>
             <div>
                 <h4>Developers</h4>

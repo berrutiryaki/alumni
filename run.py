@@ -8,13 +8,15 @@ from app.database import db, migrate
 from app.middleware.logger import init_logger
 from app.middleware.not_found_guardian import init_not_found_guardian
 from app.middleware.server_error_guardian import init_server_error_guardian
-from app.middleware.auth_guardian import init_forbidden_guardian
+from app.middleware.auth_middleware import init_auth_middleware
 from app.models.user import User
 from app.models.announcement import Announcement
 from app.models.job_posting import JobPosting
 from app.models.application import Application
 from app.routes.users import users_bp
 from app.routes.auth import auth_bp
+from app.routes.settings import settings_bp
+from app.routes.admin import admin_bp
 from app.routes.api_users import api_users_bp
 from app.routes.announcements import announcements_bp
 from app.routes.api_announcements import api_announcements_bp
@@ -27,14 +29,6 @@ load_dotenv()
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app', 'templates'))
 app.secret_key = os.environ.get("SECRET_KEY", "alumni-platform-dev-secret-key-2026")
-
-
-@app.context_processor
-def inject_current_user():
-    """Inject active session user (current_user) into all Jinja2 templates."""
-    user_id = session.get("user_id")
-    current_user = User.get_by_id(user_id) if user_id else None
-    return {"current_user": current_user}
 
 # ------------------------------------------------------------------
 # Database Configuration & Migration
@@ -61,8 +55,8 @@ init_logger(app)
 # 404 guardian middleware (returns 404 errors with a reason)
 init_not_found_guardian(app)
 
-# 403 RBAC guardian middleware (returns 403 role permission errors)
-init_forbidden_guardian(app)
+# Auth & RBAC middleware (before_request identity resolution, route protection & 401/403 handlers)
+init_auth_middleware(app)
 
 # 5xx guardian middleware (returns server errors with a reason)
 init_server_error_guardian(app)
@@ -109,7 +103,9 @@ Swagger(app, config=swagger_config, template=swagger_template)
 # Blueprints
 # ------------------------------------------------------------------
 
-app.register_blueprint(auth_bp)                # /register         — HTML
+app.register_blueprint(auth_bp)                # /register, /login — HTML
+app.register_blueprint(settings_bp)            # /settings         — HTML (Account Settings)
+app.register_blueprint(admin_bp)               # /admin            — HTML (Admin Panel)
 app.register_blueprint(users_bp)               # /users            — HTML
 app.register_blueprint(api_users_bp)           # /api/users        — JSON
 app.register_blueprint(announcements_bp)       # /announcements    — HTML

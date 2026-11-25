@@ -2,15 +2,34 @@
     <nav class="nav-pill">
         <a href="/" class="brand">alumni <span class="brand-tag">Hiring</span></a>
         <div class="nav-links">
+            <!-- Public links (visible to guests and all authenticated roles) -->
             <a href="/" {% if active == 'home' %}class="active"{% endif %}>Home</a>
-            <a href="/users" {% if active == 'users' %}class="active"{% endif %}>Users</a>
             <a href="/announcements" {% if active == 'announcements' %}class="active"{% endif %}>Announcements</a>
             <a href="/job-postings" {% if active == 'jobs' %}class="active"{% endif %}>Job Postings</a>
+
+            <!-- Explicit role-based navigation items (no loose else blocks) -->
+            {% if current_user and current_user.role in ['student', 'alumni', 'academician', 'admin'] %}
+            <a href="/users" {% if active == 'users' %}class="active"{% endif %}>Users</a>
             <a href="/applications" {% if active == 'applications' %}class="active"{% endif %}>Applications</a>
+            {% endif %}
+
+            {% if current_user and current_user.role == 'student' %}
+            <a href="/applications/new">+ Apply</a>
+            {% elif current_user and current_user.role == 'alumni' %}
+            <a href="/job-postings/new">+ Post Job</a>
+            {% elif current_user and current_user.role == 'academician' %}
+            <a href="/announcements/new">+ Announcement</a>
+            {% elif current_user and current_user.role == 'admin' %}
+            <a href="/job-postings/new">+ Post Job</a>
+            <a href="/admin" {% if active == 'admin' %}class="active"{% endif %}>Admin Panel</a>
+            {% endif %}
         </div>
+
         <div class="nav-actions">
             <a href="/api/swagger" target="_blank" class="btn btn-ghost btn-sm">Swagger API</a>
+
             {% if current_user %}
+            <span class="nav-role-badge" title="Active Role">{{ current_user.role }}</span>
             <div class="user-dropdown" id="userDropdown">
                 <button
                     type="button"
@@ -22,10 +41,25 @@
                 </button>
                 <div class="user-dropdown-menu" onclick="event.stopPropagation();">
                     <div class="user-dropdown-header">
-                        <div class="user-dropdown-role">{{ (current_user.role or current_user.status) | capitalize }}</div>
+                        <div class="user-dropdown-role">{{ current_user.role }}</div>
                         <div class="user-dropdown-email">{{ current_user.email }}</div>
                     </div>
-                    <a href="/users/{{ current_user.id }}" class="user-dropdown-item">Profilim</a>
+
+                    {% if current_user.role == 'admin' %}
+                    <a href="/admin" class="user-dropdown-item">Admin Panel</a>
+                    {% endif %}
+
+                    {% if current_user.role in ['alumni', 'academician', 'admin'] %}
+                    <a href="/job-postings/new" class="user-dropdown-item">+ Post a Job</a>
+                    <a href="/announcements/new" class="user-dropdown-item">+ New Announcement</a>
+                    {% endif %}
+
+                    {% if current_user.role in ['student', 'alumni', 'admin'] %}
+                    <a href="/applications/new" class="user-dropdown-item">+ Submit Application</a>
+                    {% endif %}
+
+                    <a href="/users/{{ current_user.id }}" class="user-dropdown-item">My Profile</a>
+                    <a href="/settings" class="user-dropdown-item">Settings</a>
                     <form action="/logout" method="POST" style="margin: 0;">
                         <button type="submit" class="user-dropdown-item logout-btn">Log out</button>
                     </form>
@@ -37,7 +71,9 @@
                     if (dd) dd.classList.remove('open');
                 });
             </script>
-            {% else %}
+            {% endif %}
+
+            {% if not current_user %}
             <a href="/login" class="btn btn-sprout btn-sm">Log in</a>
             {% endif %}
         </div>

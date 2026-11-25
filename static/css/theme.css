@@ -124,7 +124,21 @@ h1, h2, h3, h4, p { margin: 0; }
 .nav-links a.active { color: var(--color-pure-white); background: var(--color-moss-shadow); }
 .nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; position: relative; }
 
-/* ---------- User Account Dropdown ---------- */
+/* ---------- User Account Dropdown & Role Badge ---------- */
+.nav-role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--color-moss-shadow);
+    color: var(--color-electric-sprout);
+    border: 1px solid rgba(244, 151, 174, 0.35);
+    white-space: nowrap;
+}
 .user-dropdown { position: relative; display: inline-block; }
 .user-dropdown-menu {
     display: none;
@@ -517,6 +531,75 @@ h1, h2, h3, h4, p { margin: 0; }
     margin-bottom: 22px;
     font-size: 14px;
     font-weight: 500;
+}
+.success-banner {
+    background: #ECFDF3;
+    color: #1B4332;
+    border: 1px solid #B7E4C7;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.flash-stack {
+    max-width: 720px;
+    margin: 0 auto 24px;
+}
+.input-readonly {
+    background: var(--color-soft-mist);
+    color: var(--color-onyx-olive);
+    opacity: 0.78;
+    cursor: not-allowed;
+}
+.settings-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+.settings-stack .form-shell {
+    max-width: 100%;
+    margin: 0;
+}
+.settings-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--color-soft-mist);
+}
+.settings-card-kicker {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-lichen-sage);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.settings-card-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-top: 4px;
+    color: var(--color-onyx-olive);
+}
+.settings-card-sub {
+    font-size: 14px;
+    color: var(--color-lichen-sage);
+    margin-top: 4px;
+}
+.danger-shell {
+    background: #FFF7F9;
+    border: 1px solid #C85A78;
+}
+.danger-shell .settings-card-kicker { color: #9F1239; }
+.danger-shell .settings-card-title { color: #9F1239; }
+.danger-shell .settings-card-sub { color: #7A2841; }
+.danger-divider {
+    border-bottom-color: #F5D6DF;
 }
 .breadcrumb-bar {
     display: inline-flex;

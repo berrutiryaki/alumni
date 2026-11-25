@@ -37,7 +37,7 @@
                 <form action="/register" method="POST">
                     <div class="form-grid-2">
                         <div class="field">
-                            <label for="name">Full Name (Ad Soyad) <span class="req">*</span></label>
+                            <label for="name">Full Name <span class="req">*</span></label>
                             <input
                                 type="text"
                                 id="name"
@@ -50,7 +50,7 @@
                         </div>
 
                         <div class="field">
-                            <label for="email">Email Address (E-posta) <span class="req">*</span></label>
+                            <label for="email">Email Address <span class="req">*</span></label>
                             <input
                                 type="email"
                                 id="email"
@@ -65,7 +65,7 @@
 
                     <div class="form-grid-2">
                         <div class="field">
-                            <label for="password">Password (Şifre) <span class="req">*</span> <span class="hint">(min 6 chars)</span></label>
+                            <label for="password">Password <span class="req">*</span> <span class="hint">(min 6 chars)</span></label>
                             <input
                                 type="password"
                                 id="password"
@@ -78,7 +78,7 @@
                         </div>
 
                         <div class="field">
-                            <label for="confirm_password">Confirm Password (Şifre Tekrar) <span class="req">*</span></label>
+                            <label for="confirm_password">Confirm Password <span class="req">*</span></label>
                             <input
                                 type="password"
                                 id="confirm_password"
@@ -93,17 +93,17 @@
 
                     <div class="form-grid-2">
                         <div class="field">
-                            <label for="role">System Role (Rol) <span class="req">*</span></label>
+                            <label for="role">System Role <span class="req">*</span></label>
                             <select id="role" name="role" class="select-pill" onchange="handleRoleChange()" required>
-                                <option value="student" {% if selected_role == 'student' %}selected{% endif %}>Student (Öğrenci)</option>
-                                <option value="alumni" {% if selected_role == 'alumni' %}selected{% endif %}>Alumni (Mezun)</option>
-                                <option value="academician" {% if selected_role == 'academician' %}selected{% endif %}>Academician (Akademisyen)</option>
-                                <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Admin (Sistem Yöneticisi)</option>
+                                <option value="student" {% if selected_role == 'student' %}selected{% endif %}>Student</option>
+                                <option value="alumni" {% if selected_role == 'alumni' %}selected{% endif %}>Alumni</option>
+                                <option value="academician" {% if selected_role == 'academician' %}selected{% endif %}>Academician</option>
+                                <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Admin</option>
                             </select>
                         </div>
 
                         <div class="field">
-                            <label for="department">Department (Bölüm) <span class="hint">(optional)</span></label>
+                            <label for="department">Department <span class="hint">(optional)</span></label>
                             <input
                                 type="text"
                                 id="department"
@@ -116,7 +116,7 @@
                     </div>
 
                     <div class="field" id="grad_year_group" style="{% if selected_role != 'alumni' %}display: none;{% endif %}">
-                        <label for="graduation_year">Graduation Year (Mezuniyet Yılı) <span class="hint">(for alumni)</span></label>
+                        <label for="graduation_year">Graduation Year <span class="hint">(for alumni)</span></label>
                         <input
                             type="number"
                             id="graduation_year"
@@ -142,7 +142,7 @@
                 </form>
 
                 <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-soft-mist); text-align: center; font-size: 14px; color: var(--color-onyx-olive);">
-                    Zaten hesabın var mı?
+                    Already have an account?
                     <a href="/login" style="color: var(--color-deep-verdant); font-weight: 700; margin-left: 4px; text-decoration: underline;">Log in</a>
                 </div>
             </div>
@@ -154,19 +154,19 @@
     <script>
         const roleDescriptions = {
             student: {
-                title: "Student (Öğrenci) Privileges:",
+                title: "Student Privileges:",
                 desc: "Can apply to open job & internship postings and apply to mentorship programs as a mentee."
             },
             alumni: {
-                title: "Alumni (Mezun) Privileges:",
+                title: "Alumni Privileges:",
                 desc: "Can apply to jobs, publish job/internship postings, open mentorship programs as a mentor, and share announcements."
             },
             academician: {
-                title: "Academician (Akademisyen) Privileges:",
+                title: "Academician Privileges:",
                 desc: "Can publish academic/scholarship announcements, post research & assistantship roles, and open academic mentorship."
             },
             admin: {
-                title: "Admin (Yönetici) Privileges:",
+                title: "Admin Privileges:",
                 desc: "Full CRUD and moderation access across users, roles, announcements, job postings, and applications."
             }
         };

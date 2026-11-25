@@ -26,13 +26,17 @@ This section provides a bird's-eye view of all tables in the Alumni Platform, th
 │     status           String(20)      │             │     employment_type  String(50)  │
 │     department       String(120)     │             │     salary_range     String(100) │
 │     graduation_year  Integer         │             │     posted_by        String(100) │
-└──────────────────────────────────────┘             │     is_active        Boolean     │
-         │ N (user_id)           │ N (user_id)       │     created_at       String(30)  │
-         ▼                       ▼                   │     expires_at       String(50)  │
-┌──────────────────┐    ┌──────────────────────────────────┐ └──────────────────────────────────┘
-│  announcements   │    │          applications            │                   │ 1
+│     company          String(120)     │             │     is_active        Boolean     │
+│     job_title        String(120)     │             │     created_at       String(30)  │
+│     location         String(120)     │             │     expires_at       String(50)  │
+│     linkedin_url     String(255)     │             └──────────────────────────────────┘
+└──────────────────────────────────────┘                                       │ 1
+         │ N (user_id)           │ N (user_id)                                 │ N (job_posting_id)
+         ▼                       ▼                                             │
+┌──────────────────┐    ┌──────────────────────────────────┐                   │
+│  announcements   │    │          applications            │                   │
 ├──────────────────┤    │          (Action Table)          │                   │
-│ PK id  Integer   │    ├──────────────────────────────────┤                   │ N (job_posting_id)
+│ PK id  Integer   │    ├──────────────────────────────────┤                   │
 │ FK user_id (opt) │    │ PK id              Integer       │◀──────────────────┘
 │    title         │    │ FK user_id (req)   Integer (FK)  │
 │    content       │    │ FK job_posting_id  Integer (FK)  │
@@ -58,6 +62,10 @@ erDiagram
         string status
         string department
         int graduation_year
+        string company
+        string job_title
+        string location
+        string linkedin_url
     }
 
     announcements {
@@ -111,7 +119,7 @@ erDiagram
 
 | Tablo Adı | Model Sınıfı | Dosya | Primary Key | Foreign Keys | Toplam Alan | Açıklama |
 |---|---|---|---|---|---|---|
-| `users` | `User` | `app/models/user.py` | `id` | — | 6 | Kullanıcı profilleri ve sistem rolleri (`student`, `alumni`, `academician`, `admin`) |
+| `users` | `User` | `app/models/user.py` | `id` | — | 12 | Kullanıcı profilleri, kariyer bilgileri ve sistem rolleri (`student`, `alumni`, `academician`, `admin`) |
 | `announcements` | `Announcement` | `app/models/announcement.py` | `id` | `user_id → users.id` | 7 | Etkinlik ve genel duyurular |
 | `job_postings` | `JobPosting` | `app/models/job_posting.py` | `id` | — | 10 | İş ve staj fırsat ilanları (bağımsız) |
 | `applications` | `Application` | `app/models/application.py` | `id` | `user_id → users.id`<br>`job_posting_id → job_postings.id` | 7 | Eylem tablosu: Kullanıcıların iş ilanlarına başvuruları |
@@ -136,6 +144,10 @@ erDiagram
 | `status` | `str` | `status` | Yes | `"student"` | Legacy alias synchronized with `role` (`student`, `alumni`, `academician`, `admin`) |
 | `department` | `str` | `department` | No | `None` | Academic department (e.g. Computer Engineering) |
 | `graduation_year` | `int` | `graduation_year` | No | `None` | Stored when `role = alumni`; automatically `None` for `student`, `academician`, and `admin` |
+| `company` | `str` | `company` | No | `None` | Current employer / organization (editable via `/settings`) |
+| `job_title` | `str` | `job_title` | No | `None` | Current position / job title (editable via `/settings`) |
+| `location` | `str` | `location` | No | `None` | City / country location (editable via `/settings`) |
+| `linkedin_url` | `str` | `linkedin_url` | No | `None` | LinkedIn profile URL (editable via `/settings`) |
 
 ### System Roles & Actor Definitions
 
@@ -207,6 +219,9 @@ flowchart TD
 | Show login form | `GET` | `/login` | — | `login.html` |
 | Authenticate user | `POST` | `/login` | `UserController.login(data)` | Sets `session['user_id']`, redirects to `/` |
 | Log out user | `POST` | `/logout` | — | Clears `session`, redirects to `/` |
+| View account settings | `GET` | `/settings` | — | `settings.html` *(authenticated only; guest → `/login`)* |
+| Update profile / security | `POST` | `/settings` | `UserController.update_profile_settings` / `update_security_settings` | Updates profile/career or email/password (`role` read-only), flashes result, redirects to `/settings` |
+| Delete own account | `POST` | `/settings/delete` | `UserController.delete_own_account(id)` | Deletes user & applications, calls `session.clear()`, redirects to `/` |
 | List all users | `GET` | `/users/` | `UserController.index()` | `user/index.html` |
 | View user profile | `GET` | `/users/<id>` | `UserController.show(id)` | `user/show.html` |
 | Show create form | `GET` | `/users/new` | — | `user/create.html` |
@@ -625,12 +640,22 @@ Catches `500–504` HTTP errors and any unhandled runtime exceptions:
 | Web / HTML routes | Renders an HTML error page displaying `code`, `reason`, and `error_type` | `500 Internal Server Error` (`text/html`) |
 
 ### 4. Error File Logger (`app/middleware/error_log.py`)
-Appends all `404` and `5xx` errors (including full stack traces for `5xx`) to `logs/error.logs`:
+Appends all `401`, `403`, `404`, and `5xx` errors (including full stack traces for `5xx`) to `logs/error.logs`:
 
 ```text
 2026-11-11 10:38:48 | 404 | GET    | /api/job-postingz | No route matches '/api/job-postingz'. The URL does not exist on this server.
 2026-11-11 10:38:48 | 500 | GET    | /api/debug/500 | RuntimeError: Intentional test error triggered from /debug/500
 ```
+
+### 5. Auth & RBAC Middleware (`app/middleware/auth_middleware.py`)
+Runs before and after every request (`@app.before_request`, `@app.after_request`, `@app.context_processor`) to manage identity resolution, session/header authentication, and central role-based access control:
+
+- **Identity Resolution:** Checks `session['user_id']` (browser sessions) or `X-User-Id` / `Authorization: Bearer <id>` headers (REST API) and populates `g.current_user` and `g.current_role` (`guest`, `student`, `alumni`, `academician`, `admin`).
+- **Central Gatekeeper:**
+  - Unauthenticated (`guest`) requests to protected web routes are logged (`401`) and redirected (`302`) to `/login?next=<requested_path>`.
+  - Authenticated requests whose role is not permitted by the Role Permission Matrix receive a `403 Forbidden` response (HTML `templates/403.html` for web routes, structured JSON for `/api/*` routes) and are logged to `logs/error.logs`.
+- **Response Headers:** Appends `X-Auth-Role` (and `X-Auth-User` when logged in) to every HTTP response.
+- **Route Decorators:** Exports `@login_required` and `@require_roles(*allowed_roles)`.
 
 ---
 

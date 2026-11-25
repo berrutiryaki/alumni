@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings — Alumni Platform</title>
+    {% include 'partials/head.html' %}
+</head>
+<body>
+    {% set active = 'settings' %}
+    {% include 'partials/nav.html' %}
+
+    {% set u_role = (current_user.role or current_user.status or 'student') | lower %}
+
+    <section class="band-dark page-hero" style="padding-bottom: 44px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/">Home</a>
+                <span>&rsaquo;</span>
+                <a href="/users/{{ current_user.id }}">My Profile</a>
+                <span>&rsaquo;</span>
+                <span>Settings</span>
+            </div>
+            <div class="page-hero-row">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <span class="avatar" style="width: 64px; height: 64px; font-size: 26px;">
+                        {{ (current_user.name or 'U')[0] | upper }}
+                    </span>
+                    <div>
+                        <h1 class="display-md">Account <span class="accent">Settings</span>.</h1>
+                        <p class="lead" style="margin-top: 6px;">
+                            {{ current_user.name }} &middot; {{ current_user.email }}
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <span class="nav-role-badge">{{ u_role | upper }}</span>
+                    <a href="/users/{{ current_user.id }}" class="btn btn-ghost">View profile</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                <div class="flash-stack" role="status" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'error' %}error-banner{% else %}success-banner{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="settings-stack">
+                <!-- 1. Profile & Career Information -->
+                <div class="form-shell">
+                    <div class="settings-card-head">
+                        <div>
+                            <div class="settings-card-kicker">Profile &amp; Career</div>
+                            <h2 class="settings-card-title">Profile &amp; Career Information</h2>
+                            <p class="settings-card-sub">Update your personal and career details. Your account role can only be changed by an administrator.</p>
+                        </div>
+                        <span class="badge">{{ u_role | capitalize }}</span>
+                    </div>
+
+                    <form action="/settings" method="POST">
+                        <input type="hidden" name="form_type" value="profile">
+
+                        <div class="form-grid-2">
+                            <div class="field">
+                                <label for="name">Full Name <span class="req">*</span></label>
+                                <input type="text" id="name" name="name" class="input-pill" value="{{ current_user.name or '' }}" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="role_display">Role <span class="hint">(read-only)</span></label>
+                                <input type="text" id="role_display" class="input-pill input-readonly" value="{{ u_role | capitalize }}" readonly disabled aria-readonly="true">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field">
+                                <label for="department">Department <span class="hint">(optional)</span></label>
+                                <input type="text" id="department" name="department" class="input-pill" value="{{ current_user.department or '' }}" placeholder="e.g. Computer Engineering">
+                            </div>
+
+                            <div class="field">
+                                <label for="graduation_year">
+                                    Graduation Year
+                                    {% if u_role == 'alumni' %}
+                                        <span class="hint">(for alumni)</span>
+                                    {% else %}
+                                        <span class="hint">(editable for alumni role only)</span>
+                                    {% endif %}
+                                </label>
+                                <input
+                                    type="number"
+                                    id="graduation_year"
+                                    name="graduation_year"
+                                    class="input-pill {% if u_role != 'alumni' %}input-readonly{% endif %}"
+                                    value="{{ current_user.graduation_year or '' }}"
+                                    min="1900"
+                                    max="2100"
+                                    placeholder="e.g. 2023"
+                                    {% if u_role != 'alumni' %}disabled readonly{% endif %}
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field">
+                                <label for="company">Company / Organization <span class="hint">(optional)</span></label>
+                                <input type="text" id="company" name="company" class="input-pill" value="{{ current_user.company or '' }}" placeholder="e.g. Acme Tech">
+                            </div>
+
+                            <div class="field">
+                                <label for="job_title">Job Title / Position <span class="hint">(optional)</span></label>
+                                <input type="text" id="job_title" name="job_title" class="input-pill" value="{{ current_user.job_title or '' }}" placeholder="e.g. Software Engineer">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field">
+                                <label for="location">Location <span class="hint">(optional)</span></label>
+                                <input type="text" id="location" name="location" class="input-pill" value="{{ current_user.location or '' }}" placeholder="e.g. Istanbul, Turkey">
+                            </div>
+
+                            <div class="field">
+                                <label for="linkedin_url">LinkedIn URL <span class="hint">(optional)</span></label>
+                                <input type="url" id="linkedin_url" name="linkedin_url" class="input-pill" value="{{ current_user.linkedin_url or '' }}" placeholder="https://linkedin.com/in/username">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-sprout btn-lg">Save profile</button>
+                            <a href="/users/{{ current_user.id }}" class="btn btn-outline btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. Email & Password -->
+                <div class="form-shell">
+                    <div class="settings-card-head">
+                        <div>
+                            <div class="settings-card-kicker">Account Security</div>
+                            <h2 class="settings-card-title">Email &amp; Password</h2>
+                            <p class="settings-card-sub">Update your email address or verify your current password to set a new one.</p>
+                        </div>
+                    </div>
+
+                    <form action="/settings" method="POST">
+                        <input type="hidden" name="form_type" value="security">
+
+                        <div class="field">
+                            <label for="email">Email Address <span class="req">*</span></label>
+                            <input type="email" id="email" name="email" class="input-pill" value="{{ current_user.email or '' }}" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="current_password">Current Password <span class="hint">(required to change password)</span></label>
+                            <input type="password" id="current_password" name="current_password" class="input-pill" autocomplete="current-password" placeholder="Enter your current password">
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field">
+                                <label for="new_password">New Password <span class="hint">(min 6 chars)</span></label>
+                                <input type="password" id="new_password" name="new_password" class="input-pill" autocomplete="new-password" minlength="6" placeholder="New password">
+                            </div>
+
+                            <div class="field">
+                                <label for="confirm_password">Confirm New Password</label>
+                                <input type="password" id="confirm_password" name="confirm_password" class="input-pill" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-sprout btn-lg">Update security settings</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 3. Danger Zone (Delete Account) -->
+                <div class="form-shell danger-shell">
+                    <div class="settings-card-head danger-divider">
+                        <div>
+                            <div class="settings-card-kicker">Danger Zone</div>
+                            <h2 class="settings-card-title">Delete Account</h2>
+                            <p class="settings-card-sub">
+                                Deleting your account permanently removes your profile and associated job applications, and logs you out immediately. This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form action="/settings/delete" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');">
+                        <button type="submit" class="btn btn-danger-pill btn-lg">Delete my account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>

@@ -19,6 +19,18 @@
         <div class="orb orb-a"></div>
         <div class="orb orb-b"></div>
         <div class="container">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                <div class="flash-stack" role="status" aria-live="polite" style="text-align: left;">
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'error' %}error-banner{% else %}success-banner{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
             <a href="/job-postings" class="announce-pill">
                 <span><b>{{ stats.active_jobs_count }} open positions</b> from the alumni network right now</span>
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>

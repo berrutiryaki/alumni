@@ -6,7 +6,10 @@ Delegates all data operations to the SQLAlchemy User model.
 """
 
 from werkzeug.security import generate_password_hash
+from app.database import db
 from app.models.user import User, VALID_ROLES
+from app.models.application import Application
+from app.models.announcement import Announcement
 
 
 class UserController:
@@ -54,7 +57,7 @@ class UserController:
         email = (data.get("email") or "").strip().lower()
         password = data.get("password") or ""
         confirm_password = data.get("confirm_password") or ""
-        role = (data.get("role") or data.get("status") or "").strip().lower()
+        role = (data.get("role") or "").strip().lower()
         department = (data.get("department") or "").strip() or None
         graduation_year_raw = (str(data.get("graduation_year") or "")).strip()
 
@@ -251,6 +254,138 @@ class UserController:
             return {"success": True, "user": user.to_dict(), "error": None}
         except Exception as e:
             return {"success": False, "user": None, "error": f"Database error: {str(e)}"}
+
+    # ------------------------------------------------------------------
+    # SETTINGS — self-service profile, email/password, and account delete
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def update_profile_settings(user_id: int, data: dict) -> dict:
+        """
+        Update personal & career fields for the authenticated user.
+        Role is strictly read-only and cannot be modified here.
+        """
+        user = User.get_by_id(user_id)
+        if user is None:
+            return {"success": False, "error": "User not found."}
+
+        name = (data.get("name") or "").strip()
+        if not name:
+            return {"success": False, "error": "Full Name cannot be empty."}
+
+        department = (data.get("department") or "").strip() or None
+        company = (data.get("company") or "").strip() or None
+        job_title = (data.get("job_title") or "").strip() or None
+        location = (data.get("location") or "").strip() or None
+        linkedin_url = (data.get("linkedin_url") or "").strip() or None
+        grad_raw = (str(data.get("graduation_year") or "")).strip()
+
+        graduation_year = None
+        if (user.role or "").strip().lower() == "alumni" and grad_raw:
+            try:
+                graduation_year = int(grad_raw)
+                if graduation_year < 1900 or graduation_year > 2100:
+                    raise ValueError()
+            except ValueError:
+                return {"success": False, "error": "Graduation year must be a valid year between 1900 and 2100."}
+
+        try:
+            User.partial_update(user_id, {
+                "name": name,
+                "department": department,
+                "graduation_year": graduation_year,
+                "company": company,
+                "job_title": job_title,
+                "location": location,
+                "linkedin_url": linkedin_url,
+            })
+            return {"success": True, "message": "Your profile and career information have been updated."}
+        except Exception as e:
+            return {"success": False, "error": f"Database error: {str(e)}"}
+
+    @staticmethod
+    def update_security_settings(user_id: int, data: dict) -> dict:
+        """
+        Update email (with uniqueness validation) and/or password
+        (verifying current_password with check_password_hash and hashing new_password).
+        """
+        user = User.get_by_id(user_id)
+        if user is None:
+            return {"success": False, "error": "User not found."}
+
+        new_email = (data.get("email") or "").strip().lower()
+        current_password = data.get("current_password") or ""
+        new_password = data.get("new_password") or ""
+        confirm_password = data.get("confirm_password") or ""
+
+        if not new_email:
+            return {"success": False, "error": "Email address cannot be empty."}
+
+        changes = {}
+        messages = []
+
+        # 1. Email uniqueness check
+        if new_email != (user.email or "").strip().lower():
+            existing = User.query.filter(User.email == new_email, User.id != user_id).first()
+            if existing:
+                return {
+                    "success": False,
+                    "error": f"Email address '{new_email}' is already registered to another user.",
+                }
+            changes["email"] = new_email
+            messages.append("Email address updated")
+
+        # 2. Optional password change
+        if current_password or new_password or confirm_password:
+            if not current_password or not new_password or not confirm_password:
+                return {
+                    "success": False,
+                    "error": "Please fill in current password, new password, and confirm password to change your password.",
+                }
+            if not user.check_password(current_password):
+                return {
+                    "success": False,
+                    "error": "Current password is incorrect. Please try again.",
+                }
+            if len(new_password) < 6:
+                return {
+                    "success": False,
+                    "error": "New password must be at least 6 characters long.",
+                }
+            if new_password != confirm_password:
+                return {
+                    "success": False,
+                    "error": "New password and confirmation do not match.",
+                }
+            changes["password"] = new_password
+            messages.append("Password updated successfully")
+
+        if not changes:
+            return {"success": True, "message": "No changes were made."}
+
+        try:
+            User.partial_update(user_id, changes)
+            return {"success": True, "message": " · ".join(messages) + "."}
+        except Exception as e:
+            return {"success": False, "error": f"Database error: {str(e)}"}
+
+    @staticmethod
+    def delete_own_account(user_id: int) -> dict:
+        """
+        Permanently delete the authenticated user's account and clean up related foreign keys.
+        """
+        user = User.get_by_id(user_id)
+        if user is None:
+            return {"success": False, "error": "User not found."}
+        try:
+            Application.query.filter_by(user_id=user_id).delete()
+            Announcement.query.filter_by(user_id=user_id).update({"user_id": None})
+            db.session.delete(user)
+            db.session.commit()
+            return {"success": True, "message": "Your account has been permanently deleted."}
+        except Exception as e:
+            db.session.rollback()
+            return {"success": False, "error": f"Failed to delete account: {str(e)}"}
 
     # ------------------------------------------------------------------
     # DELETE

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Alumni Platform</title>
+    {% include 'partials/head.html' %}
+</head>
+<body>
+    {% set active = 'admin' %}
+    {% include 'partials/nav.html' %}
+
+    <!-- Dark Forest Hero Header -->
+    <section class="band-dark page-hero" style="padding-bottom: 48px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="page-hero-row">
+                <div>
+                    <p class="eyebrow">System administration &middot; Full CRUD &amp; RBAC</p>
+                    <h1 class="display-md" style="margin-top: 10px;">
+                        Control <span class="accent">panel</span>.
+                    </h1>
+                    <p class="lead" style="margin-top: 14px; max-width: 600px;">
+                        Signed in as <b>{{ current_user.name }}</b> ({{ current_user.email }}) with full <b>Admin</b> privileges.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="/users/new" class="btn btn-sprout">+ New user</a>
+                    <a href="/job-postings/new" class="btn btn-ghost">+ Post job</a>
+                    <a href="/announcements/new" class="btn btn-ghost">+ Announcement</a>
+                </div>
+            </div>
+
+            <!-- 4 KPI Cards inside Admin Hero -->
+            <div class="grid-4" style="margin-top: 32px;">
+                <div class="card-dark" style="padding: 20px 22px;">
+                    <div style="font-size: 12px; color: var(--color-lichen-sage); text-transform: uppercase;">Users ({{ stats.users_total }})</div>
+                    <div style="font-size: 32px; font-weight: 700; margin: 6px 0 10px;">{{ stats.users_total }}</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge">{{ stats.admins }} admin</span>
+                        <span class="badge badge-dark">{{ stats.academicians }} acad.</span>
+                        <span class="badge badge-dark">{{ stats.alumni }} alumni</span>
+                        <span class="badge badge-dark">{{ stats.students }} student</span>
+                    </div>
+                </div>
+
+                <div class="card-dark" style="padding: 20px 22px;">
+                    <div style="font-size: 12px; color: var(--color-lichen-sage); text-transform: uppercase;">Job Postings</div>
+                    <div style="font-size: 32px; font-weight: 700; margin: 6px 0 10px;">{{ stats.jobs_total }}</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge">{{ stats.jobs_active }} active</span>
+                        <span class="badge badge-dark">{{ stats.jobs_total - stats.jobs_active }} closed</span>
+                    </div>
+                </div>
+
+                <div class="card-dark" style="padding: 20px 22px;">
+                    <div style="font-size: 12px; color: var(--color-lichen-sage); text-transform: uppercase;">Applications</div>
+                    <div style="font-size: 32px; font-weight: 700; margin: 6px 0 10px;">{{ stats.apps_total }}</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge">{{ stats.apps_pending }} pending</span>
+                        <span class="badge badge-dark">{{ stats.apps_accepted }} accepted</span>
+                        <span class="badge badge-dark">{{ stats.apps_rejected }} rejected</span>
+                    </div>
+                </div>
+
+                <div class="card-dark" style="padding: 20px 22px;">
+                    <div style="font-size: 12px; color: var(--color-lichen-sage); text-transform: uppercase;">Announcements</div>
+                    <div style="font-size: 32px; font-weight: 700; margin: 6px 0 10px;">{{ stats.ann_total }}</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge">{{ stats.ann_active }} active</span>
+                        <span class="badge badge-dark">{{ stats.ann_total - stats.ann_active }} archived</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Light Admin Manipulation Workspace -->
+    <section class="band band-light" style="padding-top: 48px;">
+        <div class="container">
+            {% if notice %}
+            <div style="background: var(--color-sprout-wash); color: #7A2841; border: 1px solid var(--color-mist-green); border-radius: 16px; padding: 14px 20px; margin-bottom: 24px; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+                <span>✓ {{ notice }}</span>
+                <a href="/admin?tab={{ active_tab }}" style="font-size: 12px; color: #7A2841; text-decoration: underline;">Dismiss</a>
+            </div>
+            {% endif %}
+
+            <!-- Section Tabs -->
+            <div class="toolbar">
+                <div class="filter-pills">
+                    <button type="button" class="filter-pill {% if active_tab == 'users' %}active{% endif %}" onclick="switchTab('users', this)">
+                        Users &amp; Roles ({{ stats.users_total }})
+                    </button>
+                    <button type="button" class="filter-pill {% if active_tab == 'jobs' %}active{% endif %}" onclick="switchTab('jobs', this)">
+                        Job Postings ({{ stats.jobs_total }})
+                    </button>
+                    <button type="button" class="filter-pill {% if active_tab == 'applications' %}active{% endif %}" onclick="switchTab('applications', this)">
+                        Applications ({{ stats.apps_total }})
+                    </button>
+                    <button type="button" class="filter-pill {% if active_tab == 'announcements' %}active{% endif %}" onclick="switchTab('announcements', this)">
+                        Announcements ({{ stats.ann_total }})
+                    </button>
+                    <button type="button" class="filter-pill {% if active_tab == 'logs' %}active{% endif %}" onclick="switchTab('logs', this)">
+                        Error Logs ({{ recent_logs|length }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: USERS & ROLES -->
+            <div id="tab-users" class="admin-tab" style="{% if active_tab != 'users' %}display: none;{% endif %}">
+                <div class="dir-card">
+                    <table class="dir-table">
+                        <thead>
+                            <tr>
+                                <th>ID / Member</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Current Role</th>
+                                <th>Assign New Role</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            {% set u_role = u.role or u.status %}
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <span class="avatar">{{ (u.name or 'U')[0] | upper }}</span>
+                                        <div>
+                                            <div class="user-name">{{ u.name }}</div>
+                                            <div class="user-id">#{{ u.id }} {% if u.graduation_year %}&middot; '{{ u.graduation_year }}{% endif %}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ u.email }}</td>
+                                <td>{{ u.department or '—' }}</td>
+                                <td><span class="badge">{{ u_role | capitalize }}</span></td>
+                                <td>
+                                    <form action="/admin/users/{{ u.id }}/role" method="POST" style="display: flex; gap: 6px; align-items: center; margin: 0;">
+                                        <select name="role" class="select-pill" style="padding: 6px 12px; width: auto; font-size: 13px;">
+                                            <option value="student" {% if u_role == 'student' %}selected{% endif %}>student</option>
+                                            <option value="alumni" {% if u_role == 'alumni' %}selected{% endif %}>alumni</option>
+                                            <option value="academician" {% if u_role == 'academician' %}selected{% endif %}>academician</option>
+                                            <option value="admin" {% if u_role == 'admin' %}selected{% endif %}>admin</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sprout btn-sm">Update</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="row-actions" style="justify-content: flex-end;">
+                                        <a href="/users/{{ u.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                                        <form action="/admin/users/{{ u.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete user {{ u.name }}?');">
+                                            <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: JOB POSTINGS -->
+            <div id="tab-jobs" class="admin-tab" style="{% if active_tab != 'jobs' %}display: none;{% endif %}">
+                <div class="dir-card">
+                    <table class="dir-table">
+                        <thead>
+                            <tr>
+                                <th>ID / Title</th>
+                                <th>Company &amp; City</th>
+                                <th>Type &amp; Salary</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for jp in job_postings %}
+                            <tr>
+                                <td>
+                                    <div class="user-name">{{ jp.title }}</div>
+                                    <div class="user-id">#{{ jp.id }} &middot; {{ jp.created_at }}</div>
+                                </td>
+                                <td>
+                                    <b>{{ jp.company }}</b>
+                                    {% if jp.city %}<div class="user-id">{{ jp.city }}</div>{% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-neutral">{{ jp.employment_type }}</span>
+                                    <div class="user-id" style="margin-top: 4px;">{{ jp.salary_range }}</div>
+                                </td>
+                                <td>
+                                    {% if jp.is_active %}
+                                    <span class="badge">Active</span>
+                                    {% else %}
+                                    <span class="badge badge-muted">Closed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="row-actions" style="justify-content: flex-end;">
+                                        <form action="/admin/job-postings/{{ jp.id }}/toggle" method="POST" style="margin: 0;">
+                                            <button type="submit" class="btn btn-sprout btn-sm">
+                                                {% if jp.is_active %}Close role{% else %}Activate{% endif %}
+                                            </button>
+                                        </form>
+                                        <a href="/job-postings/{{ jp.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                                        <form action="/admin/job-postings/{{ jp.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete job posting #{{ jp.id }}?');">
+                                            <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: APPLICATIONS -->
+            <div id="tab-applications" class="admin-tab" style="{% if active_tab != 'applications' %}display: none;{% endif %}">
+                <div class="dir-card">
+                    <table class="dir-table">
+                        <thead>
+                            <tr>
+                                <th>ID / Candidate</th>
+                                <th>Target Position</th>
+                                <th>Applied At</th>
+                                <th>Moderate Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in applications %}
+                            <tr>
+                                <td>
+                                    <div class="user-name">{{ a.user_name or ('User #' ~ a.user_id) }}</div>
+                                    <div class="user-id">Application #{{ a.id }}</div>
+                                </td>
+                                <td>
+                                    <b>{{ a.job_title or ('Job #' ~ a.job_posting_id) }}</b>
+                                    {% if a.company %}<div class="user-id">{{ a.company }}</div>{% endif %}
+                                </td>
+                                <td>{{ a.applied_at }}</td>
+                                <td>
+                                    <form action="/admin/applications/{{ a.id }}/status" method="POST" style="display: flex; gap: 6px; align-items: center; margin: 0;">
+                                        <select name="status" class="select-pill" style="padding: 6px 12px; width: auto; font-size: 13px;">
+                                            <option value="pending" {% if a.status == 'pending' %}selected{% endif %}>pending</option>
+                                            <option value="reviewed" {% if a.status == 'reviewed' %}selected{% endif %}>reviewed</option>
+                                            <option value="accepted" {% if a.status == 'accepted' %}selected{% endif %}>accepted</option>
+                                            <option value="rejected" {% if a.status == 'rejected' %}selected{% endif %}>rejected</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sprout btn-sm">Save</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="row-actions" style="justify-content: flex-end;">
+                                        <a href="/applications/{{ a.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                                        <form action="/admin/applications/{{ a.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete application #{{ a.id }}?');">
+                                            <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: ANNOUNCEMENTS -->
+            <div id="tab-announcements" class="admin-tab" style="{% if active_tab != 'announcements' %}display: none;{% endif %}">
+                <div class="dir-card">
+                    <table class="dir-table">
+                        <thead>
+                            <tr>
+                                <th>ID / Headline</th>
+                                <th>Author</th>
+                                <th>Created At</th>
+                                <th>Visibility</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ann in announcements %}
+                            <tr>
+                                <td>
+                                    <div class="user-name">{{ ann.title }}</div>
+                                    <div class="user-id">Post #{{ ann.id }}</div>
+                                </td>
+                                <td>{{ ann.author or '—' }}</td>
+                                <td>{{ ann.created_at }}</td>
+                                <td>
+                                    {% if ann.is_active %}
+                                    <span class="badge">Active</span>
+                                    {% else %}
+                                    <span class="badge badge-muted">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="row-actions" style="justify-content: flex-end;">
+                                        <form action="/admin/announcements/{{ ann.id }}/toggle" method="POST" style="margin: 0;">
+                                            <button type="submit" class="btn btn-sprout btn-sm">
+                                                {% if ann.is_active %}Archive{% else %}Activate{% endif %}
+                                            </button>
+                                        </form>
+                                        <a href="/announcements/{{ ann.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                                        <form action="/admin/announcements/{{ ann.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete announcement #{{ ann.id }}?');">
+                                            <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 5: ERROR LOGS -->
+            <div id="tab-logs" class="admin-tab" style="{% if active_tab != 'logs' %}display: none;{% endif %}">
+                <div class="card-light">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Recent Guardian Logs (<code>logs/error.logs</code>)</h3>
+                    {% if recent_logs %}
+                    <pre style="background: var(--color-forest-depths); color: var(--color-pale-fern); padding: 18px 20px; border-radius: 14px; overflow-x: auto; font-size: 12px; line-height: 1.6; margin: 0;">{% for line in recent_logs %}{{ line }}
+{% endfor %}</pre>
+                    {% else %}
+                    <p style="color: var(--color-lichen-sage);">No error entries recorded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+
+    <script>
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.admin-tab').forEach(el => el.style.display = 'none');
+            const target = document.getElementById('tab-' + tabName);
+            if (target) target.style.display = 'block';
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>
