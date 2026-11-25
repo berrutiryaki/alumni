@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.name }} — Profile — Alumni Platform</title>
+    {% include 'partials/head.html' %}
+</head>
+<body>
+    {% set active = 'users' %}
+    {% include 'partials/nav.html' %}
+
+    {% set u_role = user.role or user.status %}
+
+    <section class="band-dark page-hero" style="padding-bottom: 44px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/users">Users</a>
+                <span>&rsaquo;</span>
+                <span>Profile #{{ user.id }}</span>
+            </div>
+            <div class="page-hero-row">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <span class="avatar" style="width: 64px; height: 64px; font-size: 26px;">
+                        {{ (user.name or 'U')[0] | upper }}
+                    </span>
+                    <div>
+                        <h1 class="display-md">{{ user.name }}</h1>
+                        <p class="lead" style="margin-top: 6px;">{{ user.email }}</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="/users/{{ user.id }}/edit" class="btn btn-sprout">Edit profile</a>
+                    <a href="/users" class="btn btn-ghost">Back to directory</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="form-shell">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--color-soft-mist);">
+                    <div>
+                        <div style="font-size: 12px; color: var(--color-lichen-sage); text-transform: uppercase; letter-spacing: 0.06em;">Member details</div>
+                        <h2 style="font-size: 22px; font-weight: 700; margin-top: 4px;">Account Overview</h2>
+                    </div>
+                    <span class="badge">{{ u_role | capitalize }}</span>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: 22px;">
+                    <div>
+                        <div style="font-size: 12px; color: var(--color-lichen-sage);">Full Name</div>
+                        <div style="font-weight: 600; font-size: 16px; margin-top: 4px;">{{ user.name }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: var(--color-lichen-sage);">Email Address</div>
+                        <div style="font-weight: 600; font-size: 16px; margin-top: 4px;">{{ user.email }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: var(--color-lichen-sage);">Department</div>
+                        <div style="font-weight: 600; font-size: 16px; margin-top: 4px;">{{ user.department or '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: var(--color-lichen-sage);">Graduation Year</div>
+                        <div style="font-weight: 600; font-size: 16px; margin-top: 4px;">{{ user.graduation_year or '—' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>

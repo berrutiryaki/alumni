@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — Alumni Platform</title>
+    {% include 'partials/head.html' %}
+</head>
+<body>
+    {% set active = 'register' %}
+    {% include 'partials/nav.html' %}
+
+    <section class="band-dark page-hero" style="padding-bottom: 44px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/">Home</a>
+                <span>&rsaquo;</span>
+                <span>Create account</span>
+            </div>
+            <h1 class="display-md">Join the <span class="accent">community</span>.</h1>
+            <p class="lead" style="margin-top: 12px; max-width: 600px;">
+                Register your profile as a student, graduate, academician or administrator.
+            </p>
+        </div>
+    </section>
+
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="form-shell">
+                {% if error %}
+                <div class="error-banner">{{ error }}</div>
+                {% endif %}
+
+                {% set selected_role = (form_data.get('role') if form_data else '') or 'student' %}
+
+                <form action="/register" method="POST">
+                    <div class="form-grid-2">
+                        <div class="field">
+                            <label for="name">Full Name (Ad Soyad) <span class="req">*</span></label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                class="input-pill"
+                                required
+                                value="{{ form_data.get('name', '') if form_data else '' }}"
+                                placeholder="e.g. Berru Tiryaki"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="email">Email Address (E-posta) <span class="req">*</span></label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="input-pill"
+                                required
+                                value="{{ form_data.get('email', '') if form_data else '' }}"
+                                placeholder="e.g. berru@university.edu"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="field">
+                            <label for="password">Password (Şifre) <span class="req">*</span> <span class="hint">(min 6 chars)</span></label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="input-pill"
+                                minlength="6"
+                                required
+                                placeholder="••••••••"
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="confirm_password">Confirm Password (Şifre Tekrar) <span class="req">*</span></label>
+                            <input
+                                type="password"
+                                id="confirm_password"
+                                name="confirm_password"
+                                class="input-pill"
+                                minlength="6"
+                                required
+                                placeholder="••••••••"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="field">
+                            <label for="role">System Role (Rol) <span class="req">*</span></label>
+                            <select id="role" name="role" class="select-pill" onchange="handleRoleChange()" required>
+                                <option value="student" {% if selected_role == 'student' %}selected{% endif %}>Student (Öğrenci)</option>
+                                <option value="alumni" {% if selected_role == 'alumni' %}selected{% endif %}>Alumni (Mezun)</option>
+                                <option value="academician" {% if selected_role == 'academician' %}selected{% endif %}>Academician (Akademisyen)</option>
+                                <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Admin (Sistem Yöneticisi)</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="department">Department (Bölüm) <span class="hint">(optional)</span></label>
+                            <input
+                                type="text"
+                                id="department"
+                                name="department"
+                                class="input-pill"
+                                value="{{ form_data.get('department', '') if form_data else '' }}"
+                                placeholder="e.g. Computer Engineering"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="field" id="grad_year_group" style="{% if selected_role != 'alumni' %}display: none;{% endif %}">
+                        <label for="graduation_year">Graduation Year (Mezuniyet Yılı) <span class="hint">(for alumni)</span></label>
+                        <input
+                            type="number"
+                            id="graduation_year"
+                            name="graduation_year"
+                            class="input-pill"
+                            min="1900"
+                            max="2100"
+                            value="{{ form_data.get('graduation_year', '') if form_data else '' }}"
+                            placeholder="e.g. 2024"
+                        >
+                    </div>
+
+                    <!-- Role Capability Preview Box per ddd.md -->
+                    <div id="roleCapabilityBox" style="margin-top: 8px; padding: 14px 18px; background: var(--color-pure-white); border: 1px solid var(--color-soft-mist); border-radius: 16px; font-size: 13px; color: var(--color-onyx-olive);">
+                        <strong style="color: var(--color-deep-verdant);" id="roleCapTitle">Student Privileges:</strong>
+                        <span id="roleCapDesc">Can apply to job &amp; internship postings and apply to mentorship programs as a mentee.</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-sprout btn-lg">Create account</button>
+                        <a href="/users" class="btn btn-outline btn-lg">View directory</a>
+                    </div>
+                </form>
+
+                <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-soft-mist); text-align: center; font-size: 14px; color: var(--color-onyx-olive);">
+                    Zaten hesabın var mı?
+                    <a href="/login" style="color: var(--color-deep-verdant); font-weight: 700; margin-left: 4px; text-decoration: underline;">Log in</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+
+    <script>
+        const roleDescriptions = {
+            student: {
+                title: "Student (Öğrenci) Privileges:",
+                desc: "Can apply to open job & internship postings and apply to mentorship programs as a mentee."
+            },
+            alumni: {
+                title: "Alumni (Mezun) Privileges:",
+                desc: "Can apply to jobs, publish job/internship postings, open mentorship programs as a mentor, and share announcements."
+            },
+            academician: {
+                title: "Academician (Akademisyen) Privileges:",
+                desc: "Can publish academic/scholarship announcements, post research & assistantship roles, and open academic mentorship."
+            },
+            admin: {
+                title: "Admin (Yönetici) Privileges:",
+                desc: "Full CRUD and moderation access across users, roles, announcements, job postings, and applications."
+            }
+        };
+
+        function handleRoleChange() {
+            const role = document.getElementById('role').value;
+            const gradGroup = document.getElementById('grad_year_group');
+            if (role === 'alumni') {
+                gradGroup.style.display = 'block';
+            } else {
+                gradGroup.style.display = 'none';
+                document.getElementById('graduation_year').value = '';
+            }
+
+            const info = roleDescriptions[role] || roleDescriptions.student;
+            document.getElementById('roleCapTitle').textContent = info.title;
+            document.getElementById('roleCapDesc').textContent = info.desc;
+        }
+        handleRoleChange();
+    </script>
+</body>
+</html>

@@ -10,8 +10,11 @@
     {% set active = 'users' %}
     {% include 'partials/nav.html' %}
 
-    {% set alumni_count = users | selectattr('status', 'equalto', 'alumni') | list | length %}
-    {% set student_count = users | selectattr('status', 'equalto', 'student') | list | length %}
+    {% set active_role = (current_user.role or current_user.status) | lower if current_user else 'guest' %}
+    {% set alumni_count = users | selectattr('role', 'equalto', 'alumni') | list | length %}
+    {% set student_count = users | selectattr('role', 'equalto', 'student') | list | length %}
+    {% set academician_count = users | selectattr('role', 'equalto', 'academician') | list | length %}
+    {% set admin_count = users | selectattr('role', 'equalto', 'admin') | list | length %}
 
     <!-- Dark Forest Hero Header -->
     <section class="band-dark page-hero">
@@ -24,16 +27,22 @@
                         People of the <span class="accent">network</span>.
                     </h1>
                     <p class="lead" style="margin-top: 16px; max-width: 580px;">
-                        Graduates and current students across every academic department.
+                        Graduates, students, academicians and administrators across every department.
                     </p>
                     <div class="hero-kpis">
                         <span class="badge">{{ users|length }} total members</span>
                         <span class="badge badge-dark">{{ alumni_count }} alumni</span>
                         <span class="badge badge-dark">{{ student_count }} students</span>
+                        <span class="badge badge-dark">{{ academician_count }} academicians</span>
+                        <span class="badge badge-dark">{{ admin_count }} admins</span>
                     </div>
                 </div>
-                <div>
-                    <a href="/users/new" class="btn btn-sprout btn-lg">+ Add member</a>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    {% if active_role == 'admin' %}
+                    <a href="/users/new" class="btn btn-sprout btn-lg">+ Quick add</a>
+                    {% elif not current_user %}
+                    <a href="/register" class="btn btn-sprout btn-lg">Register account</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -47,6 +56,8 @@
                     <button type="button" class="filter-pill active" onclick="filterUsers('all', this)">All ({{ users|length }})</button>
                     <button type="button" class="filter-pill" onclick="filterUsers('alumni', this)">Alumni ({{ alumni_count }})</button>
                     <button type="button" class="filter-pill" onclick="filterUsers('student', this)">Students ({{ student_count }})</button>
+                    <button type="button" class="filter-pill" onclick="filterUsers('academician', this)">Academicians ({{ academician_count }})</button>
+                    <button type="button" class="filter-pill" onclick="filterUsers('admin', this)">Admins ({{ admin_count }})</button>
                 </div>
                 <input
                     type="search"
@@ -71,7 +82,8 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                        <tr class="user-row" data-status="{{ user.status }}" data-search="{{ (user.name ~ ' ' ~ user.email ~ ' ' ~ (user.department or '')) | lower }}">
+                        {% set u_role = user.role or user.status %}
+                        <tr class="user-row" data-status="{{ u_role }}" data-search="{{ (user.name ~ ' ' ~ user.email ~ ' ' ~ u_role ~ ' ' ~ (user.department or '')) | lower }}">
                             <td>
                                 <div class="user-cell">
                                     <span class="avatar">{{ (user.name or 'U')[0] | upper }}</span>
@@ -83,8 +95,12 @@
                             </td>
                             <td>{{ user.email }}</td>
                             <td>
-                                {% if user.status == 'alumni' %}
+                                {% if u_role == 'alumni' %}
                                 <span class="badge">Alumni</span>
+                                {% elif u_role == 'academician' %}
+                                <span class="badge">Academician</span>
+                                {% elif u_role == 'admin' %}
+                                <span class="badge badge-muted">Admin</span>
                                 {% else %}
                                 <span class="badge badge-neutral">Student</span>
                                 {% endif %}
@@ -93,16 +109,25 @@
                             <td>
                                 {% if user.graduation_year %}
                                 <span class="serif" style="font-size: 16px;">Class of {{ user.graduation_year }}</span>
+                                {% elif u_role == 'academician' %}
+                                <span style="color: var(--color-lichen-sage);">Faculty member</span>
+                                {% elif u_role == 'admin' %}
+                                <span style="color: var(--color-lichen-sage);">System admin</span>
                                 {% else %}
                                 <span style="color: var(--color-lichen-sage);">Active student</span>
                                 {% endif %}
                             </td>
                             <td>
                                 <div class="row-actions" style="justify-content: flex-end;">
+                                    <a href="/users/{{ user.id }}" class="btn btn-outline btn-sm">Profile</a>
+                                    {% if active_role == 'admin' or (current_user and current_user.id == user.id) %}
                                     <a href="/users/{{ user.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                                    {% endif %}
+                                    {% if active_role == 'admin' %}
                                     <form action="/users/{{ user.id }}/delete" method="POST" style="margin:0;" onsubmit="return confirm('Delete this member from the database?');">
                                         <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
                                     </form>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

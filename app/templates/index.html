@@ -9,6 +9,10 @@
 <body>
     {% set active = 'home' %}
     {% include 'partials/nav.html' %}
+    {% set active_role = (current_user.role or current_user.status) | lower if current_user else 'guest' %}
+    {% set can_manage_jobs = active_role in ['alumni', 'academician', 'admin'] %}
+    {% set can_manage_announcements = active_role in ['alumni', 'academician', 'admin'] %}
+    {% set can_apply_jobs = active_role in ['student', 'alumni', 'admin'] %}
 
     <!-- Hero -->
     <section class="band-dark hero">
@@ -137,7 +141,9 @@
                 </p>
                 <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top: 28px;">
                     <a href="/job-postings" class="btn btn-sprout">Browse all jobs</a>
+                    {% if can_manage_jobs %}
                     <a href="/job-postings/new" class="btn btn-ghost">Post a job</a>
+                    {% endif %}
                 </div>
             </div>
             <div class="job-list">
@@ -151,7 +157,11 @@
                             {% if jp.salary_range %}<span class="badge badge-dark">{{ jp.salary_range }}</span>{% endif %}
                         </div>
                     </div>
+                    {% if can_apply_jobs %}
                     <a href="/applications/new?job_posting_id={{ jp.id }}" class="btn btn-ghost btn-sm">Apply</a>
+                    {% elif active_role == 'guest' %}
+                    <a href="/login" class="btn btn-ghost btn-sm">Log in to apply</a>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="card-dark"><p class="lead">No active job postings yet. <a href="/job-postings/new">Post the first one.</a></p></div>
@@ -196,22 +206,22 @@
                 <div class="card-dark module">
                     <h3>Users</h3>
                     <p>Graduate and student profiles with department and graduation year.</p>
-                    <div class="module-links"><a href="/users">Open</a><a href="/users/new">New</a><a href="/api/users">API</a></div>
+                    <div class="module-links"><a href="/users">Open</a>{% if active_role == 'admin' %}<a href="/users/new">New</a>{% endif %}<a href="/api/users">API</a></div>
                 </div>
                 <div class="card-dark module">
                     <h3>Announcements</h3>
                     <p>Events, reunions and scholarship calls for the community.</p>
-                    <div class="module-links"><a href="/announcements">Open</a><a href="/announcements/new">New</a><a href="/api/announcements">API</a></div>
+                    <div class="module-links"><a href="/announcements">Open</a>{% if can_manage_announcements %}<a href="/announcements/new">New</a>{% endif %}<a href="/api/announcements">API</a></div>
                 </div>
                 <div class="card-dark module">
                     <h3>Job postings</h3>
                     <p>Opportunities with city, employment type and salary range.</p>
-                    <div class="module-links"><a href="/job-postings">Open</a><a href="/job-postings/new">New</a><a href="/api/job-postings">API</a></div>
+                    <div class="module-links"><a href="/job-postings">Open</a>{% if can_manage_jobs %}<a href="/job-postings/new">New</a>{% endif %}<a href="/api/job-postings">API</a></div>
                 </div>
                 <div class="card-dark module">
                     <h3>Applications</h3>
                     <p>The action table linking applicants to postings, with status tracking.</p>
-                    <div class="module-links"><a href="/applications">Open</a><a href="/applications/new">New</a><a href="/api/applications">API</a></div>
+                    <div class="module-links"><a href="/applications">Open</a>{% if can_apply_jobs %}<a href="/applications/new">New</a>{% endif %}<a href="/api/applications">API</a></div>
                 </div>
             </div>
         </div>

@@ -10,6 +10,8 @@
     {% set active = 'announcements' %}
     {% include 'partials/nav.html' %}
 
+    {% set active_role = (current_user.role or current_user.status) | lower if current_user else 'guest' %}
+    {% set can_manage_announcements = active_role in ['alumni', 'academician', 'admin'] %}
     {% set active_count = announcements | selectattr('is_active') | list | length %}
     {% set inactive_count = (announcements | length) - active_count %}
 
@@ -30,10 +32,15 @@
                         <span class="badge">{{ announcements|length }} total posts</span>
                         <span class="badge badge-dark">{{ active_count }} active</span>
                         <span class="badge badge-dark">{{ inactive_count }} archived</span>
+                        <span class="badge badge-dark">Role: {{ active_role | capitalize }}</span>
                     </div>
                 </div>
                 <div>
+                    {% if can_manage_announcements %}
                     <a href="/announcements/new" class="btn btn-sprout btn-lg">+ New announcement</a>
+                    {% else %}
+                    <span class="announce-pill"><span><b>{{ active_role | capitalize }} View</b> &middot; Read-only campus bulletin</span></span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -86,12 +93,14 @@
                         <span class="news-meta" style="margin-top: 0;">
                             {% if a.author %}{{ a.author }} &middot; {% endif %}{{ a.created_at }}
                         </span>
+                        {% if can_manage_announcements %}
                         <div class="row-actions">
                             <a href="/announcements/{{ a.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
                             <form action="/announcements/{{ a.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this announcement from the database?');">
                                 <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
                             </form>
                         </div>
+                        {% endif %}
                     </div>
                 </article>
                 {% endfor %}

@@ -42,11 +42,14 @@
                     </div>
 
                     <div class="form-grid-2">
+                        {% set u_role = user.role or user.status %}
                         <div class="field">
-                            <label for="status">Member Status <span class="req">*</span></label>
-                            <select id="status" name="status" class="select-pill" onchange="toggleGradYear()" required>
-                                <option value="student" {% if user.status == 'student' %}selected{% endif %}>Student</option>
-                                <option value="alumni" {% if user.status == 'alumni' %}selected{% endif %}>Alumni</option>
+                            <label for="status">Member Role <span class="req">*</span></label>
+                            <select id="status" name="role" class="select-pill" onchange="toggleGradYear()" required>
+                                <option value="student" {% if u_role == 'student' %}selected{% endif %}>Student</option>
+                                <option value="alumni" {% if u_role == 'alumni' %}selected{% endif %}>Alumni</option>
+                                <option value="academician" {% if u_role == 'academician' %}selected{% endif %}>Academician</option>
+                                <option value="admin" {% if u_role == 'admin' %}selected{% endif %}>Admin</option>
                             </select>
                         </div>
 

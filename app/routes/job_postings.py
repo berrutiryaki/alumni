@@ -2,10 +2,14 @@
 JobPosting web routes — HTML responses.
 Blueprint prefix: /job-postings
 Delegates to: JobPostingController
+RBAC (ddd.md):
+  - View list (GET /job-postings): All roles (including guest)
+  - Create / Edit / Delete: Restricted to alumni, academician, admin (students & guests forbidden)
 """
 
 from flask import Blueprint, abort, render_template, request, redirect, url_for
 from app.controllers.job_posting_controller import JobPostingController
+from app.middleware.auth_guardian import require_roles
 
 job_postings_bp = Blueprint("job_postings", __name__, url_prefix="/job-postings")
 
@@ -18,12 +22,14 @@ def index():
 
 
 @job_postings_bp.route("/new", methods=["GET"])
+@require_roles("alumni", "academician", "admin")
 def new():
     return render_template("job_posting/create.html", error=None)
 
 
 @job_postings_bp.route("/", methods=["POST"], strict_slashes=False)
 @job_postings_bp.route("", methods=["POST"])
+@require_roles("alumni", "academician", "admin")
 def create():
     data = request.form.to_dict()
     result = JobPostingController.create(data)
@@ -33,6 +39,7 @@ def create():
 
 
 @job_postings_bp.route("/<int:job_posting_id>/edit", methods=["GET"])
+@require_roles("alumni", "academician", "admin")
 def edit(job_posting_id):
     result = JobPostingController.show(job_posting_id)
     if not result["success"]:
@@ -41,6 +48,7 @@ def edit(job_posting_id):
 
 
 @job_postings_bp.route("/<int:job_posting_id>/edit", methods=["POST"])
+@require_roles("alumni", "academician", "admin")
 def update(job_posting_id):
     data = request.form.to_dict()
     result = JobPostingController.update(job_posting_id, data)
@@ -55,6 +63,7 @@ def update(job_posting_id):
 
 
 @job_postings_bp.route("/<int:job_posting_id>/delete", methods=["POST"])
+@require_roles("alumni", "academician", "admin")
 def delete(job_posting_id):
     result = JobPostingController.delete(job_posting_id)
     if not result["success"]:

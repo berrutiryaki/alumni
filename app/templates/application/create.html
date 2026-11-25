@@ -36,7 +36,7 @@
                         <select id="user_id" name="user_id" class="select-pill" required>
                             <option value="">— Select Candidate —</option>
                             {% for u in users %}
-                            <option value="{{ u.id }}">{{ u.name }} &middot; {{ u.email }} ({{ u.status }})</option>
+                            <option value="{{ u.id }}" {% if current_user and current_user.id == u.id %}selected{% endif %}>{{ u.name }} &middot; {{ u.email }} ({{ u.role or u.status }})</option>
                             {% endfor %}
                         </select>
                     </div>

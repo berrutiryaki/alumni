@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 Access Denied — Alumni Platform</title>
+    {% include 'partials/head.html' %}
+</head>
+<body>
+    {% set active = '' %}
+    {% include 'partials/nav.html' %}
+
+    <section class="band-dark hero" style="min-height: 78vh; display: flex; align-items: center;">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="container">
+            <span class="announce-pill">
+                <span><b>403 Role Guardian</b> &middot; Permission required</span>
+            </span>
+
+            <h1 class="display" style="margin-top: 28px;">
+                Access <span class="accent">restricted</span>.
+            </h1>
+
+            <p class="lead" style="max-width: 620px; margin: 22px auto 0;">
+                {{ reason }}
+            </p>
+
+            <div class="card-light" style="max-width: 580px; margin: 36px auto 0; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-lichen-sage);">Active Role</span>
+                    <span class="badge">{{ (user_role or 'guest') | capitalize }}</span>
+                </div>
+                {% if requested_path %}
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-soft-mist); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-lichen-sage);">Attempted Route</span>
+                    <span class="badge badge-neutral">{{ requested_path }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
+                <a href="/" class="btn btn-sprout btn-lg">Back to home</a>
+                <a href="/job-postings" class="btn btn-ghost btn-lg">View job board</a>
+            </div>
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>

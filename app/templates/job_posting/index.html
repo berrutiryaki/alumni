@@ -10,6 +10,9 @@
     {% set active = 'jobs' %}
     {% include 'partials/nav.html' %}
 
+    {% set active_role = (current_user.role or current_user.status) | lower if current_user else 'guest' %}
+    {% set can_manage_jobs = active_role in ['alumni', 'academician', 'admin'] %}
+    {% set can_apply_jobs = active_role in ['student', 'alumni', 'admin'] %}
     {% set active_count = job_postings | selectattr('is_active') | list | length %}
     {% set closed_count = (job_postings | length) - active_count %}
 
@@ -30,10 +33,17 @@
                         <span class="badge">{{ job_postings|length }} total roles</span>
                         <span class="badge badge-dark">{{ active_count }} active openings</span>
                         <span class="badge badge-dark">{{ closed_count }} closed</span>
+                        <span class="badge badge-dark">Role: {{ active_role | capitalize }}</span>
                     </div>
                 </div>
                 <div>
+                    {% if can_manage_jobs %}
                     <a href="/job-postings/new" class="btn btn-sprout btn-lg">+ Post a job</a>
+                    {% elif active_role == 'student' %}
+                    <span class="announce-pill"><span><b>Student Role</b> &middot; Can apply to open positions</span></span>
+                    {% else %}
+                    <a href="/login" class="btn btn-ghost btn-lg">Log in to post or apply</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -112,13 +122,17 @@
                             {% if jp.expires_at %} &middot; Exp. {{ jp.expires_at }}{% endif %}
                         </span>
                         <div class="row-actions">
-                            {% if jp.is_active %}
+                            {% if jp.is_active and can_apply_jobs %}
                             <a href="/applications/new?job_posting_id={{ jp.id }}" class="btn btn-sprout btn-sm">Apply now</a>
+                            {% elif jp.is_active and active_role == 'guest' %}
+                            <a href="/login" class="btn btn-sprout btn-sm">Log in to apply</a>
                             {% endif %}
+                            {% if can_manage_jobs %}
                             <a href="/job-postings/{{ jp.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
                             <form action="/job-postings/{{ jp.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this job posting?');">
                                 <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
                             </form>
+                            {% endif %}
                         </div>
                     </div>
                 </article>

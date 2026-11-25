@@ -10,6 +10,9 @@
     {% set active = 'applications' %}
     {% include 'partials/nav.html' %}
 
+    {% set active_role = (current_user.role or current_user.status) | lower if current_user else 'guest' %}
+    {% set can_submit_app = active_role in ['student', 'alumni', 'admin'] %}
+    {% set can_manage_apps = active_role in ['alumni', 'academician', 'admin'] %}
     {% set pending_count = applications | selectattr('status', 'equalto', 'pending') | list | length %}
     {% set reviewed_count = applications | selectattr('status', 'equalto', 'reviewed') | list | length %}
     {% set accepted_count = applications | selectattr('status', 'equalto', 'accepted') | list | length %}
@@ -34,10 +37,17 @@
                         <span class="badge badge-dark">{{ reviewed_count }} reviewed</span>
                         <span class="badge badge-dark">{{ accepted_count }} accepted</span>
                         <span class="badge badge-dark">{{ rejected_count }} rejected</span>
+                        <span class="badge badge-dark">Role: {{ active_role | capitalize }}</span>
                     </div>
                 </div>
                 <div>
+                    {% if can_submit_app %}
                     <a href="/applications/new" class="btn btn-sprout btn-lg">+ Submit application</a>
+                    {% elif active_role == 'academician' %}
+                    <span class="announce-pill"><span><b>Academician View</b> &middot; Review candidate applications</span></span>
+                    {% else %}
+                    <a href="/login" class="btn btn-ghost btn-lg">Log in to apply</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -119,10 +129,12 @@
                             {% if a.resume_url %}
                             <a href="{{ a.resume_url }}" target="_blank" class="btn btn-sprout btn-sm">View CV</a>
                             {% endif %}
+                            {% if can_manage_apps %}
                             <a href="/applications/{{ a.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
                             <form action="/applications/{{ a.id }}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this application?');">
                                 <button type="submit" class="btn btn-danger-pill btn-sm">Delete</button>
                             </form>
+                            {% endif %}
                         </div>
                     </div>
                 </article>

@@ -39,12 +39,15 @@ class ApiUserController:
             }), 409
 
         try:
+            role = (data.get("role") or data.get("status") or "student").strip().lower()
             user = User.create({
                 "name": name,
                 "email": email,
-                "status": data.get("status", "student"),
+                "role": role,
+                "status": role,
                 "department": data.get("department"),
                 "graduation_year": data.get("graduation_year"),
+                "password": data.get("password"),
             })
             return jsonify({
                 "status": "success",
@@ -131,12 +134,15 @@ class ApiUserController:
             }), 409
 
         try:
+            role = (data.get("role") or data.get("status") or "student").strip().lower()
             user = User.update(user_id, {
                 "name": name,
                 "email": email,
-                "status": data.get("status", "student"),
+                "role": role,
+                "status": role,
                 "department": data.get("department"),
                 "graduation_year": data.get("graduation_year"),
+                "password": data.get("password"),
             })
             if user is None:
                 return jsonify({

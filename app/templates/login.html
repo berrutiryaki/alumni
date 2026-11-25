@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In — Alumni Platform</title>
+    {% include 'partials/head.html' %}
+</head>
+<body>
+    {% set active = 'login' %}
+    {% include 'partials/nav.html' %}
+
+    <section class="band-dark page-hero" style="padding-bottom: 44px;">
+        <div class="orb orb-a"></div>
+        <div class="container">
+            <div class="breadcrumb-bar">
+                <a href="/">Home</a>
+                <span>&rsaquo;</span>
+                <span>Log in</span>
+            </div>
+            <h1 class="display-md">Welcome <span class="accent">back</span>.</h1>
+            <p class="lead" style="margin-top: 12px; max-width: 560px;">
+                Sign in with your university or alumni email address and password.
+            </p>
+        </div>
+    </section>
+
+    <section class="band band-light" style="padding-top: 56px;">
+        <div class="container">
+            <div class="form-shell" style="max-width: 540px;">
+                {% if error %}
+                <div class="error-banner">{{ error }}</div>
+                {% endif %}
+
+                <form action="/login" method="POST">
+                    <div class="field">
+                        <label for="email">Email Address (E-posta) <span class="req">*</span></label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="input-pill"
+                            required
+                            value="{{ form_data.get('email', '') if form_data else '' }}"
+                            placeholder="e.g. berru@university.edu"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Password (Şifre) <span class="req">*</span></label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="input-pill"
+                            required
+                            placeholder="••••••••"
+                        >
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-sprout btn-lg" style="width: 100%;">Log in</button>
+                    </div>
+                </form>
+
+                <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-soft-mist); text-align: center; font-size: 14px; color: var(--color-onyx-olive);">
+                    Hesabın yok mu?
+                    <a href="/register" style="color: var(--color-deep-verdant); font-weight: 700; margin-left: 4px; text-decoration: underline;">Join network</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'partials/footer.html' %}
+</body>
+</html>

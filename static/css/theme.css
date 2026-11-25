@@ -122,7 +122,68 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 .nav-links a:hover { color: var(--color-pure-white); }
 .nav-links a.active { color: var(--color-pure-white); background: var(--color-moss-shadow); }
-.nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; position: relative; }
+
+/* ---------- User Account Dropdown ---------- */
+.user-dropdown { position: relative; display: inline-block; }
+.user-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    min-width: 190px;
+    background: var(--color-bone-white);
+    border: 1px solid var(--color-onyx-olive);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    padding: 8px;
+    z-index: 200;
+}
+.user-dropdown.open .user-dropdown-menu { display: block; }
+.user-dropdown-header {
+    padding: 8px 12px 10px;
+    border-bottom: 1px solid var(--color-soft-mist);
+    margin-bottom: 6px;
+}
+.user-dropdown-role {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-deep-verdant);
+}
+.user-dropdown-email {
+    font-size: 12px;
+    color: var(--color-lichen-sage);
+    word-break: break-all;
+}
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-onyx-olive);
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.user-dropdown-item:hover {
+    background: var(--color-sprout-wash);
+    color: var(--color-deep-verdant);
+}
+.user-dropdown-item.logout-btn {
+    color: #9F1239;
+}
+.user-dropdown-item.logout-btn:hover {
+    background: #FCEEF2;
+    color: #9F1239;
+}
 
 /* ---------- Buttons ---------- */
 .btn {

@@ -21,12 +21,12 @@ This section provides a bird's-eye view of all tables in the Alumni Platform, th
 │ PK  id               Integer         │             │ PK  id               Integer     │
 │     name             String(120)     │             │     title            String(120) │
 │ UQ  email            String(120)     │             │     company          String(120) │
-│     status           String(20)      │             │     city             String(120) │
-│     department       String(120)     │             │     description      Text        │
-│     graduation_year  Integer         │             │     employment_type  String(50)  │
-└──────────────────────────────────────┘             │     salary_range     String(100) │
-         │ 1                     │ 1                 │     posted_by        String(100) │
-         │                       │                   │     is_active        Boolean     │
+│     password_hash    String(255)     │             │     city             String(120) │
+│     role             String(30)      │             │     description      Text        │
+│     status           String(20)      │             │     employment_type  String(50)  │
+│     department       String(120)     │             │     salary_range     String(100) │
+│     graduation_year  Integer         │             │     posted_by        String(100) │
+└──────────────────────────────────────┘             │     is_active        Boolean     │
          │ N (user_id)           │ N (user_id)       │     created_at       String(30)  │
          ▼                       ▼                   │     expires_at       String(50)  │
 ┌──────────────────┐    ┌──────────────────────────────────┐ └──────────────────────────────────┘
@@ -53,6 +53,8 @@ erDiagram
         int id PK
         string name
         string email UK
+        string password_hash
+        string role
         string status
         string department
         int graduation_year
@@ -109,14 +111,14 @@ erDiagram
 
 | Tablo Adı | Model Sınıfı | Dosya | Primary Key | Foreign Keys | Toplam Alan | Açıklama |
 |---|---|---|---|---|---|---|
-| `users` | `User` | `app/models/user.py` | `id` | — | 6 | Mezun ve öğrenci kullanıcı profilleri |
+| `users` | `User` | `app/models/user.py` | `id` | — | 6 | Kullanıcı profilleri ve sistem rolleri (`student`, `alumni`, `academician`, `admin`) |
 | `announcements` | `Announcement` | `app/models/announcement.py` | `id` | `user_id → users.id` | 7 | Etkinlik ve genel duyurular |
 | `job_postings` | `JobPosting` | `app/models/job_posting.py` | `id` | — | 10 | İş ve staj fırsat ilanları (bağımsız) |
 | `applications` | `Application` | `app/models/application.py` | `id` | `user_id → users.id`<br>`job_posting_id → job_postings.id` | 7 | Eylem tablosu: Kullanıcıların iş ilanlarına başvuruları |
 
 ---
 
-## User
+## User & System Roles (RBAC)
 
 **Model file:** [`app/models/user.py`](app/models/user.py)  
 **Storage:** Database via SQLAlchemy & Flask-Migrate (PostgreSQL in Docker / SQLite fallback)  
@@ -129,20 +131,66 @@ erDiagram
 | `id` | `int` | — | — | Auto-increment | Assigned by the model on create; not sent in form |
 | `name` | `str` | `name` | Yes | — | Full name of the user |
 | `email` | `str` | `email` | Yes | — | Must be unique per user |
-| `status` | `str` | `status` | Yes | `"student"` | Accepted values: `alumni`, `student` |
+| `password_hash` | `str` | `password` / `confirm_password` | Yes *(on `/register`)* | `None` | Hashed via `werkzeug.security.generate_password_hash`; plain text is never stored |
+| `role` | `str` | `role` | Yes | `"student"` | System role: `student`, `alumni`, `academician`, `admin` (visitors act as `guest`) |
+| `status` | `str` | `status` | Yes | `"student"` | Legacy alias synchronized with `role` (`student`, `alumni`, `academician`, `admin`) |
 | `department` | `str` | `department` | No | `None` | Academic department (e.g. Computer Engineering) |
-| `graduation_year` | `int` | `graduation_year` | No | `None` | Only stored when `status = alumni`; ignored for students |
+| `graduation_year` | `int` | `graduation_year` | No | `None` | Stored when `role = alumni`; automatically `None` for `student`, `academician`, and `admin` |
+
+### System Roles & Actor Definitions
+
+Platformda **5 temel kullanıcı rolü (aktör)** tanımlanmıştır. Kayıtsız ziyaretçiler `guest`, kayıtlı kullanıcılar ise `users.status` alanındaki değere göre (`student`, `alumni`, `academician`, `admin`) yetkilendirilir:
+
+| Rol | Kod Değeri (`status`) | Kimlik / Tanım | Temel Sorumluluk ve Yetkiler |
+|---|---|---|---|
+| **1. Guest (Ziyaretçi)** | `guest` *(oturumsuz)* | Sisteme giriş yapmamış veya henüz kayıt olmamış ziyaretçi | • Ana sayfayı (`/`), aktif duyuruları (`/announcements`) ve açık iş ilanlarını (`/job-postings`) salt-okunur (*read-only*) görüntüleyebilir.<br>• İş veya mentorluk başvurusu yapamaz, içerik yayınlayamaz. |
+| **2. Student (Öğrenci)** | `student` | Üniversitede öğrenimine devam eden aktif öğrenci | • **İş & Staj Başvurusu:** Açık iş ve staj ilanlarına başvuru (`Application`) yapabilir, başvuru durumunu takip edebilir.<br>• **Mentorluk Başvurusu:** Mezunların ve akademisyenlerin açtığı mentorluk programlarına *mentee* (danışan) olarak başvurabilir.<br>• **Kısıtlama:** Mentorluk programı açamaz (*mentor* olamaz), iş ilanı yayınlayamaz. |
+| **3. Alumni (Mezun)** | `alumni` | Üniversiteden mezun olmuş kullanıcı (`graduation_year` sahibi) | • **İş Başvurusu:** Tıpkı öğrenciler gibi açık iş ilanlarına başvuru (`Application`) yapabilir.<br>• **İş & Staj İlanı Açma:** Çalıştığı veya kurucusu olduğu şirket adına iş/staj ilanı (`JobPosting`) yayınlayabilir.<br>• **Mentorluk Açma:** Öğrencilere ve yeni mezunlara kariyer rehberliği için **mentorluk programı açabilir** (*mentor* olabilir) ve başvuruları kabul/reddedebilir.<br>• **Duyuru:** Mezun buluşması ve kariyer etkinlikleri için duyuru paylaşabilir. |
+| **4. Academician (Akademisyen)** | `academician` | Üniversite öğretim üyesi, araştırma görevlisi veya bölüm koordinatörü | • **Akademik Duyuru & Etkinlik:** Seminer, burs, konferans ve bölüm duyuruları (`Announcement`) yayınlayabilir.<br>• **Araştırma & Asistanlık İlanı:** Araştırma projeleri ve laboratuvar çalışmaları için ilan (`JobPosting`) açabilir.<br>• **Akademik Mentorluk:** Öğrencilere akademik/tez/kariyer mentorluğu açabilir ve gelen öğrenci başvurularını değerlendirebilir.<br>• **Kısıtlama:** Ticari iş ilanlarına aday olarak başvurmaz. |
+| **5. Admin (Yönetici)** | `admin` | Platform yöneticisi (Kariyer Merkezi / Mezunlar Ofisi / Sistem Admini) | • **Tam Sistem Yetkisi (Full CRUD):** Tüm kullanıcı profillerini, duyuruları, iş ilanlarını, iş başvurularını ve mentorluk kayıtlarını oluşturabilir, düzenleyebilir, onaylayabilir veya silebilir.<br>• **Rol & Moderasyon:** Kullanıcı rollerini (`student` → `alumni`, `academician`, `admin`) güncelleyebilir, başvuru durumlarını (`pending` → `reviewed` / `accepted` / `rejected`) yönetebilir. |
+
+### Role Permission Matrix (Yetki Matrisi)
+
+| İşlem / Modül Yetkisi | Guest (`guest`) | Student (`student`) | Alumni (`alumni`) | Academician (`academician`) | Admin (`admin`) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Ana sayfa, duyuru ve iş ilanlarını görüntüleme | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Kendi profilini oluşturma ve düzenleme | ❌ *(Kayıt olur)* | ✅ | ✅ | ✅ | ✅ |
+| **İş / Staj İlanına Başvuru Yapma (`Application`)** | ❌ | ✅ | ✅ | ❌ | ✅ |
+| **İş / Staj / Araştırma İlanı Açma (`JobPosting`)** | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Mentorluk Programı Açma (*Mentor* olma)** | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Mentorluk Programına Başvurma (*Mentee* olma)** | ❌ | ✅ | ✅ *(Yeni mezun)* | ❌ | ✅ |
+| **Duyuru ve Etkinlik Yayınlama (`Announcement`)** | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Başvuru durumlarını (`accepted` / `rejected`) güncelleme | ❌ | ❌ *(Sadece görüntüler)* | ✅ *(Kendi ilanında)* | ✅ *(Kendi ilanında)* | ✅ *(Tümünde)* |
+| Tüm kayıtlar üzerinde tam CRUD ve moderasyon | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+```mermaid
+flowchart TD
+    Guest["Guest (Ziyaretçi)"] -->|Salt-Okunur Görüntüler| Public["Duyurular & İş İlanları"]
+    Student["Student (Öğrenci)"] -->|İş/Staj Başvurusu Yapar| App["Application (İş Başvurusu)"]
+    Student -->|Mentee Olarak Başvurur| Mentorship["Mentorship (Mentorluk)"]
+    Alumni["Alumni (Mezun)"] -->|İş Başvurusu Yapar| App
+    Alumni -->|İş/Staj İlanı Açar| Job["JobPosting (İş İlanı)"]
+    Alumni -->|Mentorluk Programı Açar| Mentorship
+    Alumni -->|Etkinlik/Duyuru Paylaşır| Ann["Announcement (Duyuru)"]
+    Academician["Academician (Akademisyen)"] -->|Bölüm/Burs Duyurusu Açar| Ann
+    Academician -->|Araştırma/Staj İlanı Açar| Job
+    Academician -->|Akademik Mentorluk Açar| Mentorship
+    Admin["Admin (Sistem Yöneticisi)"] -->|Tam CRUD & Moderasyon| All["Tüm Modüller (Users, Jobs, Apps, Announcements, Mentorship)"]
+```
 
 ### Relationships
 
 | Relationship | Type | Target Model | Foreign Key | Notes |
 |---|---|---|---|---|
-| `announcements` | One-to-Many | `Announcement` | `announcements.user_id → users.id` | A user can author many announcements |
-| `applications` | One-to-Many | `Application` | `applications.user_id → users.id` | A user can submit many job applications (Action Table) |
+| `announcements` | One-to-Many | `Announcement` | `announcements.user_id → users.id` | A user (`alumni`, `academician`, `admin`) can author many announcements |
+| `applications` | One-to-Many | `Application` | `applications.user_id → users.id` | A user (`student`, `alumni`) can submit many job applications (Action Table) |
 
 ### Business Rules
 
-- `graduation_year` is automatically set to `None` if `status` is `"student"` — even if a value is submitted.
+- Accepted registered user roles (`status`) are: `student`, `alumni`, `academician`, and `admin` (unauthenticated sessions are treated as `guest`).
+- `graduation_year` is stored only when `status` is `"alumni"`; it is automatically set to `None` if `status` is `"student"`, `"academician"`, or `"admin"`.
+- Both `student` and `alumni` users can submit job applications (`Application` action table).
+- `alumni`, `academician`, and `admin` users can publish job/internship postings (`JobPosting`) and open mentorship programs; `student` users (and junior `alumni`) can apply to mentorship programs.
 - `name` and `email` are validated as required on both `POST` (create) and `PUT` (full update).
 - `id` is never accepted from the client; it is always assigned server-side.
 
@@ -154,7 +202,13 @@ erDiagram
 
 | Operation | Method | URL | Controller Method | View Template |
 |---|---|---|---|---|
+| Show registration form | `GET` | `/register` | — | `register.html` |
+| Register & auto-login | `POST` | `/register` | `UserController.register(data)` | Sets `session['user_id']`, redirects to `/` |
+| Show login form | `GET` | `/login` | — | `login.html` |
+| Authenticate user | `POST` | `/login` | `UserController.login(data)` | Sets `session['user_id']`, redirects to `/` |
+| Log out user | `POST` | `/logout` | — | Clears `session`, redirects to `/` |
 | List all users | `GET` | `/users/` | `UserController.index()` | `user/index.html` |
+| View user profile | `GET` | `/users/<id>` | `UserController.show(id)` | `user/show.html` |
 | Show create form | `GET` | `/users/new` | — | `user/create.html` |
 | Create user | `POST` | `/users/` | `UserController.create(data)` | Redirects to list on success |
 | Show edit form | `GET` | `/users/<id>/edit` | `UserController.show(id)` | `user/edit.html` |

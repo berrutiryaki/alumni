@@ -10,7 +10,36 @@
         </div>
         <div class="nav-actions">
             <a href="/api/swagger" target="_blank" class="btn btn-ghost btn-sm">Swagger API</a>
-            <a href="/job-postings/new" class="btn btn-sprout btn-sm">Post a job</a>
+            {% if current_user %}
+            <div class="user-dropdown" id="userDropdown">
+                <button
+                    type="button"
+                    class="btn btn-sprout btn-sm"
+                    onclick="document.getElementById('userDropdown').classList.toggle('open'); event.stopPropagation();"
+                >
+                    <span>{{ current_user.name }}</span>
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
+                </button>
+                <div class="user-dropdown-menu" onclick="event.stopPropagation();">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-role">{{ (current_user.role or current_user.status) | capitalize }}</div>
+                        <div class="user-dropdown-email">{{ current_user.email }}</div>
+                    </div>
+                    <a href="/users/{{ current_user.id }}" class="user-dropdown-item">Profilim</a>
+                    <form action="/logout" method="POST" style="margin: 0;">
+                        <button type="submit" class="user-dropdown-item logout-btn">Log out</button>
+                    </form>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('click', function () {
+                    const dd = document.getElementById('userDropdown');
+                    if (dd) dd.classList.remove('open');
+                });
+            </script>
+            {% else %}
+            <a href="/login" class="btn btn-sprout btn-sm">Log in</a>
+            {% endif %}
         </div>
     </nav>
 </header>
